@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Paintbrush, Wrench, Hammer, Lightbulb, Flame, Sparkles, Star, ChevronRight, Tool, Shield, Utensils, Spray, Heart } from 'lucide-react';
+import { Paintbrush, Wrench, Hammer, Lightbulb, Flame, Sparkles, Star, ChevronRight, Settings, Droplets, Shield, Utensils, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -80,7 +81,7 @@ const categories = [
   },
   {
     title: 'Mechanic',
-    icon: Tool,
+    icon: Settings,
     description: 'Expert vehicle and machinery repair services.',
     availableWorkers: 45,
     slug: 'mechanic',
@@ -101,7 +102,7 @@ const categories = [
   },
   {
     title: 'House Cleaner',
-    icon: Spray,
+    icon: Droplets,
     description: 'Professional cleaning services for homes and offices.',
     availableWorkers: 112,
     slug: 'cleaner',
