@@ -58,7 +58,7 @@ const Navbar = () => {
               <Button variant="ghost" size="sm">Login</Button>
             </Link>
             <Link to="/register">
-              <Button variant="default" size="sm">Join Now</Button>
+              <Button variant="default" size="sm">Sign Up</Button>
             </Link>
           </div>
 
@@ -111,7 +111,14 @@ const Navbar = () => {
               className="block w-full py-3 px-4 rounded-md text-center font-medium text-white bg-primary hover:bg-primary/90 transition-all"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Join Now
+              Sign Up
+            </Link>
+            <Link 
+              to="/join-as-worker" 
+              className="block w-full py-3 px-4 rounded-md text-center font-medium text-primary border border-primary bg-white dark:bg-transparent hover:bg-primary/10 transition-all"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Join as a Worker
             </Link>
           </div>
 
