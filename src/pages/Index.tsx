@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Paintbrush, Wrench, Hammer, Lightbulb, Flame, Sparkles, Star, ChevronRight } from 'lucide-react';
+import { Paintbrush, Wrench, Hammer, Lightbulb, Flame, Sparkles, Star, ChevronRight, Tool, Shield, Utensils, Spray, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -13,36 +12,36 @@ import ProfileCard from '@/components/ProfileCard';
 const featuredWorkers = [
   {
     id: '1',
-    name: 'James Wilson',
+    name: 'Rajesh Kumar',
     profession: 'Master Carpenter',
-    location: 'San Francisco, CA',
+    location: 'Bengaluru, Karnataka',
     rating: 4.9,
     experience: '15 years',
-    hourlyRate: '$45',
+    hourlyRate: '₹450',
     skills: ['Furniture', 'Cabinets', 'Remodeling'],
     isAvailable: true,
     imageUrl: '/avatar-1.jpg',
   },
   {
     id: '2',
-    name: 'Sarah Johnson',
+    name: 'Priya Sharma',
     profession: 'Electrician',
-    location: 'Seattle, WA',
+    location: 'Mysuru, Karnataka',
     rating: 4.8,
     experience: '8 years',
-    hourlyRate: '$40',
+    hourlyRate: '₹400',
     skills: ['Wiring', 'Installations', 'Repairs'],
     isAvailable: true,
     imageUrl: '/avatar-2.jpg',
   },
   {
     id: '3',
-    name: 'Michael Brown',
+    name: 'Mohammed Ali',
     profession: 'Plumber',
-    location: 'Austin, TX',
+    location: 'Mangaluru, Karnataka',
     rating: 4.7,
     experience: '12 years',
-    hourlyRate: '$38',
+    hourlyRate: '₹380',
     skills: ['Repairs', 'Installations', 'Drainage'],
     isAvailable: false,
     imageUrl: '/avatar-3.jpg',
@@ -54,30 +53,65 @@ const categories = [
   {
     title: 'Painter',
     icon: Paintbrush,
-    description: 'Interior and exterior painting specialists for homes and businesses.',
+    description: 'Expert painters for interior and exterior home decoration.',
     availableWorkers: 124,
     slug: 'painter',
   },
   {
     title: 'Carpenter',
     icon: Hammer,
-    description: 'Expert woodworkers for furniture, structures, and custom projects.',
+    description: 'Skilled woodworkers for furniture and custom projects.',
     availableWorkers: 87,
     slug: 'carpenter',
   },
   {
     title: 'Plumber',
     icon: Wrench,
-    description: 'Installation and repair of pipes, fixtures, and water systems.',
+    description: 'Professional plumbing services and repairs.',
     availableWorkers: 56,
     slug: 'plumber',
   },
   {
     title: 'Electrician',
     icon: Lightbulb,
-    description: 'Professional electrical work for residential and commercial properties.',
+    description: 'Licensed electricians for all electrical work.',
     availableWorkers: 93,
     slug: 'electrician',
+  },
+  {
+    title: 'Mechanic',
+    icon: Tool,
+    description: 'Expert vehicle and machinery repair services.',
+    availableWorkers: 45,
+    slug: 'mechanic',
+  },
+  {
+    title: 'Security Guard',
+    icon: Shield,
+    description: 'Professional security services for events and properties.',
+    availableWorkers: 78,
+    slug: 'security',
+  },
+  {
+    title: 'Chef',
+    icon: Utensils,
+    description: 'Experienced chefs for restaurants and private events.',
+    availableWorkers: 34,
+    slug: 'chef',
+  },
+  {
+    title: 'House Cleaner',
+    icon: Spray,
+    description: 'Professional cleaning services for homes and offices.',
+    availableWorkers: 112,
+    slug: 'cleaner',
+  },
+  {
+    title: 'Wedding Planner',
+    icon: Heart,
+    description: 'Expert planners for your special day.',
+    availableWorkers: 23,
+    slug: 'wedding-planner',
   },
 ];
 

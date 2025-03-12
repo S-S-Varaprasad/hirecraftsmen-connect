@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, Filter, ChevronDown, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,8 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
   const professions = [
     'Painter', 'Carpenter', 'Plumber', 'Welder', 
     'Architect', 'Electrician', 'Mason', 'Landscaper', 
-    'Roofer', 'HVAC Technician'
+    'Mechanic', 'Security Guard', 'Chef', 'House Cleaner',
+    'Wedding Planner', 'HVAC Technician'
   ];
 
   const handleSearch = () => {

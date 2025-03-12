@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
@@ -66,9 +65,9 @@ const HeroSection = () => {
             <div className="absolute -inset-2 bg-gradient-radial from-primary/10 to-transparent opacity-70 blur-3xl"></div>
             <div className="relative rounded-2xl overflow-hidden shadow-2xl animate-float">
               <img 
-                src="/hero-image.jpg" 
-                alt="Workers showcase" 
-                className="w-full h-auto"
+                src="https://images.unsplash.com/photo-1504893524553-b855bce32c67"
+                alt="Skilled workers showcase" 
+                className="w-full h-auto object-cover"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = '/placeholder.svg';
                 }} 
