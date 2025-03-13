@@ -17,7 +17,7 @@ const Contact = () => {
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white">Contact Us</h1>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-              We're here to help. Reach out with any questions about CraftConnect.
+              We're here to help. Reach out with any questions about HireEase.
             </p>
           </div>
           
@@ -66,8 +66,8 @@ const Contact = () => {
                     </div>
                     <div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white">Email</h3>
-                      <p className="text-gray-600 dark:text-gray-400">support@craftconnect.com</p>
-                      <p className="text-gray-600 dark:text-gray-400 mt-1">info@craftconnect.com</p>
+                      <p className="text-gray-600 dark:text-gray-400">support@hireease.com</p>
+                      <p className="text-gray-600 dark:text-gray-400 mt-1">info@hireease.com</p>
                     </div>
                   </div>
                   
@@ -77,8 +77,8 @@ const Contact = () => {
                     </div>
                     <div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white">Phone</h3>
-                      <p className="text-gray-600 dark:text-gray-400">+1 (800) 123-4567</p>
-                      <p className="text-gray-600 dark:text-gray-400 mt-1">Monday-Friday, 9am-5pm ET</p>
+                      <p className="text-gray-600 dark:text-gray-400">+91 80 2345 6789</p>
+                      <p className="text-gray-600 dark:text-gray-400 mt-1">Monday-Saturday, 9am-6pm IST</p>
                     </div>
                   </div>
                   
@@ -88,8 +88,8 @@ const Contact = () => {
                     </div>
                     <div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white">Office</h3>
-                      <p className="text-gray-600 dark:text-gray-400">123 Craft Avenue</p>
-                      <p className="text-gray-600 dark:text-gray-400">San Francisco, CA 94103</p>
+                      <p className="text-gray-600 dark:text-gray-400">123 Brigade Road</p>
+                      <p className="text-gray-600 dark:text-gray-400">Bengaluru, Karnataka 560001</p>
                     </div>
                   </div>
                 </div>
@@ -103,7 +103,7 @@ const Contact = () => {
                     <p className="text-gray-600 dark:text-gray-400">Simply click on "Join as a Worker" and follow the steps to create your professional profile.</p>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">How much does it cost to use CraftConnect?</h3>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">How much does it cost to use HireEase?</h3>
                     <p className="text-gray-600 dark:text-gray-400">Basic membership is free. Premium features are available through our subscription plans.</p>
                   </div>
                 </div>

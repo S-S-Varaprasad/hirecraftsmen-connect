@@ -21,7 +21,7 @@ const HeroSection = () => {
             
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-gray-900 dark:text-white mb-6 leading-tight">
               <span className="block">Connect with skilled</span>
-              <span className="block text-primary">craftspeople near you</span>
+              <span className="block text-primary">professionals near you</span>
             </h1>
             
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-lg">
@@ -35,7 +35,7 @@ const HeroSection = () => {
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
-              <Button size="lg" className="bg-[#8B5CF6] hover:bg-[#7C3AED]" asChild>
+              <Button size="lg" className="bg-[#F97316] hover:bg-[#EA580C]" asChild>
                 <Link to="/join-as-worker">Create Your Profile</Link>
               </Button>
             </div>
@@ -94,8 +94,8 @@ const HeroSection = () => {
             <div className="absolute -inset-2 bg-gradient-radial from-primary/10 to-transparent opacity-70 blur-3xl"></div>
             <div className="relative rounded-2xl overflow-hidden shadow-2xl animate-float">
               <img 
-                src="https://images.unsplash.com/photo-1504903271097-d7e7c7f5f7ad"
-                alt="Skilled workers showcase" 
+                src="/lovable-uploads/a1a246ea-8646-4191-a11b-0905923d9337.png"
+                alt="Construction workers showcase" 
                 className="w-full h-auto object-cover"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = '/placeholder.svg';

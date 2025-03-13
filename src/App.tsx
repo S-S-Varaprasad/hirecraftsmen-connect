@@ -15,6 +15,9 @@ import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
+import WorkerDetail from "./pages/WorkerDetail";
+import MessageWorker from "./pages/MessageWorker";
+import ApplyNow from "./pages/ApplyNow";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +30,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/workers" element={<Workers />} />
+          <Route path="/workers/:id" element={<WorkerDetail />} />
+          <Route path="/message/:id" element={<MessageWorker />} />
+          <Route path="/apply/:id" element={<ApplyNow />} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />

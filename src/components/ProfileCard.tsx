@@ -95,7 +95,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <Button variant="outline" className="w-1/2" asChild>
               <Link to={`/message/${id}`}>Message</Link>
             </Button>
-            <Button className="w-1/2" asChild>
+            <Button className="w-1/2 bg-[#F97316] hover:bg-[#EA580C]" asChild>
               <Link to={`/workers/${id}`}>View Profile</Link>
             </Button>
           </div>

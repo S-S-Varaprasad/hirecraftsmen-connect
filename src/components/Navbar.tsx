@@ -31,7 +31,7 @@ const Navbar = () => {
             className="flex items-center space-x-2 transition-all hover:opacity-80"
           >
             <span className="text-primary font-bold text-xl md:text-2xl tracking-tight">
-              CraftConnect
+              HireEase
             </span>
           </Link>
 
