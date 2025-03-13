@@ -35,7 +35,7 @@ const HeroSection = () => {
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button size="lg" className="bg-[#8B5CF6] hover:bg-[#7C3AED]" asChild>
                 <Link to="/join-as-worker">Create Your Profile</Link>
               </Button>
             </div>
@@ -94,7 +94,7 @@ const HeroSection = () => {
             <div className="absolute -inset-2 bg-gradient-radial from-primary/10 to-transparent opacity-70 blur-3xl"></div>
             <div className="relative rounded-2xl overflow-hidden shadow-2xl animate-float">
               <img 
-                src="https://images.unsplash.com/photo-1504893524553-b855bce32c67"
+                src="https://images.unsplash.com/photo-1504903271097-d7e7c7f5f7ad"
                 alt="Skilled workers showcase" 
                 className="w-full h-auto object-cover"
                 onError={(e) => {

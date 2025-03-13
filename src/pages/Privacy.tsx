@@ -10,88 +10,58 @@ const Privacy = () => {
       
       <main className="flex-grow pt-32 pb-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl font-bold mb-8 text-gray-900 dark:text-white">Privacy Policy</h1>
+          <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8">
+            <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Privacy Policy</h1>
             
             <div className="prose dark:prose-invert prose-lg max-w-none">
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
                 Last Updated: June 1, 2023
               </p>
               
-              <h2>Introduction</h2>
-              <p>
-                CraftConnect ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
-              </p>
+              <div className="space-y-6">
+                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                  <h2 className="text-xl font-semibold mb-2">Information We Collect</h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    We collect personal information (name, email, phone), professional information (skills, experience), and payment details when you register, create profiles, or communicate with us.
+                  </p>
+                </div>
+                
+                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                  <h2 className="text-xl font-semibold mb-2">How We Use Your Information</h2>
+                  <ul className="list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
+                    <li>Connect workers with potential employers</li>
+                    <li>Process payments and transactions</li>
+                    <li>Send technical notices and support messages</li>
+                    <li>Protect against fraudulent activity</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                  <h2 className="text-xl font-semibold mb-2">Information Sharing</h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    We share information with other users to facilitate connections, service providers who perform services on our behalf, and legal authorities when required.
+                  </p>
+                </div>
+                
+                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                  <h2 className="text-xl font-semibold mb-2">Your Choices</h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    You can access, update, or delete your account information at any time by logging into your account or contacting us directly.
+                  </p>
+                </div>
+              </div>
               
-              <h2>Information We Collect</h2>
-              <p>
-                We collect information that you provide directly to us when you:
-              </p>
-              <ul>
-                <li>Create an account or profile</li>
-                <li>Complete forms on our website</li>
-                <li>Communicate with us</li>
-                <li>Post jobs or apply for jobs</li>
-                <li>Leave reviews or feedback</li>
-              </ul>
-              
-              <p>
-                This information may include:
-              </p>
-              <ul>
-                <li>Personal information (name, email address, phone number)</li>
-                <li>Professional information (skills, experience, certifications)</li>
-                <li>Payment information</li>
-                <li>Communication preferences</li>
-              </ul>
-              
-              <h2>How We Use Your Information</h2>
-              <p>
-                We may use the information we collect for various purposes, including to:
-              </p>
-              <ul>
-                <li>Provide, maintain, and improve our services</li>
-                <li>Connect workers with potential employers</li>
-                <li>Process payments and transactions</li>
-                <li>Send you technical notices, updates, and support messages</li>
-                <li>Respond to your comments and questions</li>
-                <li>Protect against fraudulent or illegal activity</li>
-              </ul>
-              
-              <h2>Information Sharing</h2>
-              <p>
-                We may share your information with:
-              </p>
-              <ul>
-                <li>Other users as necessary to facilitate connections between workers and employers</li>
-                <li>Service providers who perform services on our behalf</li>
-                <li>Legal authorities when required by law or to protect our rights</li>
-              </ul>
-              
-              <h2>Data Security</h2>
-              <p>
-                We implement appropriate technical and organizational measures to protect the security of your personal information. However, no method of transmission over the Internet or electronic storage is completely secure, so we cannot guarantee absolute security.
-              </p>
-              
-              <h2>Your Choices</h2>
-              <p>
-                You can access, update, or delete your account information at any time by logging into your account. You may also contact us directly to request changes to or deletion of your information.
-              </p>
-              
-              <h2>Changes to This Privacy Policy</h2>
-              <p>
-                We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date.
-              </p>
-              
-              <h2>Contact Us</h2>
-              <p>
-                If you have any questions about this Privacy Policy, please contact us at:
-              </p>
-              <p>
-                Email: privacy@craftconnect.com<br />
-                Phone: +1 (800) 123-4567<br />
-                Address: 123 Craft Avenue, San Francisco, CA 94103
-              </p>
+              <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-semibold mb-2">Contact Us</h2>
+                <p className="text-gray-600 dark:text-gray-400">
+                  If you have any questions about this Privacy Policy, please contact us:
+                </p>
+                <p className="text-gray-600 dark:text-gray-400 mt-2">
+                  <strong>Email:</strong> privacy@craftconnect.com<br />
+                  <strong>Phone:</strong> +91 80 2345 6789<br />
+                  <strong>Address:</strong> 123 Craft Avenue, Bengaluru, Karnataka 560001
+                </p>
+              </div>
             </div>
           </div>
         </div>

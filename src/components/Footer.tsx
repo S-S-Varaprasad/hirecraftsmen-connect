@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
       <div className="container mx-auto px-4 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">CraftConnect</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -15,60 +15,31 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">For Workers</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">Contact Us</h4>
             <ul className="space-y-2">
-              <li>
-                <Link to="/register" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-all">
-                  Create Profile
-                </Link>
+              <li className="text-gray-600 dark:text-gray-400 text-sm">
+                <strong>Address:</strong> 123 Craft Avenue, Bengaluru, Karnataka 560001
               </li>
-              <li>
-                <Link to="/jobs" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-all">
-                  Find Jobs
-                </Link>
+              <li className="text-gray-600 dark:text-gray-400 text-sm">
+                <strong>Phone:</strong> +91 80 2345 6789
               </li>
-              <li>
-                <Link to="/resources" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-all">
-                  Resources
-                </Link>
+              <li className="text-gray-600 dark:text-gray-400 text-sm">
+                <strong>Email:</strong> info@craftconnect.com
               </li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">For Employers</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/workers" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-all">
-                  Browse Workers
-                </Link>
-              </li>
-              <li>
-                <Link to="/post-job" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-all">
-                  Post a Job
-                </Link>
-              </li>
-              <li>
-                <Link to="/pricing" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-all">
-                  Pricing
-                </Link>
-              </li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">About</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/about" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-all">
-                  Our Story
-                </Link>
+              <li className="text-gray-600 dark:text-gray-400 text-sm">
+                <strong>Hours:</strong> Mon-Sat: 9:00 AM - 6:00 PM
               </li>
               <li>
                 <Link to="/contact" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-all">
-                  Contact Us
+                  Contact Page
                 </Link>
               </li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">Legal</h4>
+            <ul className="space-y-2">
               <li>
                 <Link to="/privacy" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-all">
                   Privacy Policy
