@@ -15,7 +15,7 @@ const About = () => {
         {/* Hero Section */}
         <section className="pt-32 pb-16 bg-gradient-to-b from-primary/5 to-transparent">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white">About CraftConnect</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white">About HireEase</h1>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
               Bridging the gap between skilled workers and those who need them.
             </p>
@@ -29,7 +29,7 @@ const About = () => {
               <div>
                 <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Our Mission</h2>
                 <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
-                  At CraftConnect, we're dedicated to creating opportunities for skilled craftspeople 
+                  At HireEase, we're dedicated to creating opportunities for skilled craftspeople 
                   while helping individuals and organizations find the perfect professionals for their projects.
                 </p>
                 <p className="text-lg text-gray-600 dark:text-gray-400">
@@ -41,8 +41,8 @@ const About = () => {
               <div className="relative">
                 <div className="absolute -inset-4 bg-gradient-radial from-primary/10 to-transparent opacity-70 blur-3xl"></div>
                 <img 
-                  src="/lovable-uploads/b2aa6fb3-3f41-46f1-81ea-37ea94ae8af3.png" 
-                  alt="Craftspeople working together" 
+                  src="/lovable-uploads/b8156b8d-826a-48fe-90d7-4004ed907f37.png" 
+                  alt="Skilled professionals working on projects" 
                   className="rounded-lg shadow-2xl relative"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/placeholder.svg';
@@ -117,7 +117,7 @@ const About = () => {
                   <Button size="lg" className="bg-white text-primary hover:bg-white/90" asChild>
                     <Link to="/workers">Find Workers</Link>
                   </Button>
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" asChild>
+                  <Button size="lg" variant="outline" className="bg-[#8B5CF6] border-none text-white hover:bg-[#8B5CF6]/90" asChild>
                     <Link to="/join-as-worker">Join as a Worker</Link>
                   </Button>
                 </div>
@@ -127,7 +127,7 @@ const About = () => {
             <div className="max-w-3xl mx-auto mt-16 text-center">
               <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Have Questions?</h3>
               <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
-                We're here to help. Contact our support team for assistance with anything related to CraftConnect.
+                We're here to help. Contact our support team for assistance with anything related to HireEase.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button variant="outline" asChild>
