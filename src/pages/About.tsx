@@ -99,36 +99,6 @@ const About = () => {
             </div>
           </div>
         </section>
-        
-        {/* Story Section */}
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">Our Story</h2>
-              <div className="prose dark:prose-invert prose-lg mx-auto">
-                <p>
-                  CraftConnect was founded in 2023 with a simple mission: to create meaningful 
-                  connections between skilled craftspeople and those who need their expertise.
-                </p>
-                <p>
-                  Our founder, having worked as both a contractor and a project manager, saw the 
-                  disconnect between talented workers struggling to find consistent work and 
-                  property owners desperate to find reliable, skilled help for their projects.
-                </p>
-                <p>
-                  What started as a small local network has grown into a comprehensive platform 
-                  serving communities across the country, helping thousands of skilled workers 
-                  find opportunities and enabling countless projects to be completed successfully.
-                </p>
-                <p>
-                  Today, CraftConnect continues to grow and evolve, always with our core mission 
-                  in mind: to celebrate craftsmanship and create opportunities for skilled workers 
-                  while helping individuals and organizations find the perfect professionals for their needs.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
       
       <Footer />
