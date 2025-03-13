@@ -36,24 +36,52 @@ const HeroSection = () => {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link to="/register">Create Your Profile</Link>
+                <Link to="/join-as-worker">Create Your Profile</Link>
               </Button>
             </div>
             
             <div className="mt-8 flex items-center gap-4">
               <div className="flex -space-x-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 overflow-hidden">
-                    <img 
-                      src={`/avatar-${i}.jpg`} 
-                      alt="User avatar" 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/placeholder.svg';
-                      }} 
-                    />
-                  </div>
-                ))}
+                <div className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/b2aa6fb3-3f41-46f1-81ea-37ea94ae8af3.png" 
+                    alt="User avatar" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/placeholder.svg';
+                    }} 
+                  />
+                </div>
+                <div className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/b680b077-f224-42f8-a2d3-95b48ba6e0eb.png" 
+                    alt="User avatar" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/placeholder.svg';
+                    }} 
+                  />
+                </div>
+                <div className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/f5bdc72f-cebf-457f-a3f5-46334ba5cb06.png" 
+                    alt="User avatar" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/placeholder.svg';
+                    }} 
+                  />
+                </div>
+                <div className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/b8156b8d-826a-48fe-90d7-4004ed907f37.png" 
+                    alt="User avatar" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/placeholder.svg';
+                    }} 
+                  />
+                </div>
               </div>
               <div className="text-sm">
                 <span className="font-semibold">1,000+ skilled workers</span>

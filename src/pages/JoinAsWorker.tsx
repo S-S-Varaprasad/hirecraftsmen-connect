@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { User, Mail, Phone, MapPin, Briefcase, Clock, IndianRupee, FileText, Upload, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,8 @@ const JoinAsWorker = () => {
     resume: null as File | null,
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [profilePreview, setProfilePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -31,7 +33,58 @@ const JoinAsWorker = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'profileImage' | 'resume') => {
     if (e.target.files && e.target.files[0]) {
-      setFormData({ ...formData, [fieldName]: e.target.files[0] });
+      const file = e.target.files[0];
+      setFormData({ ...formData, [fieldName]: file });
+      
+      // Create preview for profile image
+      if (fieldName === 'profileImage') {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setProfilePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  };
+
+  const handleProfileUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, fieldName: 'profileImage' | 'resume') => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      
+      // Validate file type for images
+      if (fieldName === 'profileImage' && !file.type.startsWith('image/')) {
+        toast.error('Please upload an image file (JPG, PNG, etc.)');
+        return;
+      }
+      
+      // Validate file type for resume
+      if (fieldName === 'resume' && !['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
+        toast.error('Please upload a PDF or Word document');
+        return;
+      }
+      
+      setFormData({ ...formData, [fieldName]: file });
+      
+      // Create preview for profile image
+      if (fieldName === 'profileImage') {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setProfilePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -45,6 +98,11 @@ const JoinAsWorker = () => {
       
       // Basic validation
       if (formData.name && formData.email && formData.phone && formData.profession) {
+        if (!formData.profileImage) {
+          toast.warning('A profile photo is required to complete your registration.');
+          return;
+        }
+        
         toast.success('Your profile has been submitted! We will review and get back to you soon.');
         // Redirect would happen here in a real implementation
       } else {
@@ -70,6 +128,54 @@ const JoinAsWorker = () => {
                 </div>
                 
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Profile Picture Upload - Enhanced */}
+                  <div className="space-y-4 mb-8">
+                    <h2 className="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">Profile Picture</h2>
+                    <div className="flex flex-col items-center justify-center">
+                      <div 
+                        className="w-32 h-32 mb-4 rounded-full overflow-hidden border-2 border-primary/20 flex items-center justify-center bg-gray-100 dark:bg-gray-700 cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={handleProfileUploadClick}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, 'profileImage')}
+                      >
+                        {profilePreview ? (
+                          <img 
+                            src={profilePreview} 
+                            alt="Profile Preview" 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center text-gray-400">
+                            <User className="w-12 h-12 mb-2" />
+                            <span className="text-xs">Add Photo</span>
+                          </div>
+                        )}
+                      </div>
+                      <input
+                        ref={fileInputRef}
+                        id="profileImage"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleFileChange(e, 'profileImage')}
+                      />
+                      <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-2">
+                        {formData.profileImage ? formData.profileImage.name : "Click or drag & drop to upload your profile photo"}
+                      </p>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleProfileUploadClick}
+                      >
+                        Select Profile Photo
+                      </Button>
+                      <p className="text-xs text-primary mt-2">
+                        * A profile photo is required to complete your registration
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Personal Information */}
                     <div className="space-y-4 md:col-span-2">
@@ -265,47 +371,19 @@ const JoinAsWorker = () => {
                       ></textarea>
                     </div>
                     
-                    {/* File Uploads */}
+                    {/* Resume Upload */}
                     <div className="space-y-4 md:col-span-2">
-                      <h2 className="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">Upload Documents</h2>
-                      
-                      <div className="space-y-1">
-                        <label htmlFor="profileImage" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Profile Picture
-                        </label>
-                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 text-center">
-                          <div className="flex flex-col items-center justify-center">
-                            <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                              {formData.profileImage ? 
-                                formData.profileImage.name : 
-                                "Click to upload or drag and drop"
-                              }
-                            </p>
-                            <input
-                              id="profileImage"
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => handleFileChange(e, 'profileImage')}
-                            />
-                            <Button 
-                              type="button" 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => document.getElementById('profileImage')?.click()}
-                            >
-                              Select File
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
+                      <h2 className="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">Resume/CV</h2>
                       
                       <div className="space-y-1">
                         <label htmlFor="resume" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                           Resume/CV
                         </label>
-                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 text-center">
+                        <div 
+                          className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 text-center"
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => handleDrop(e, 'resume')}
+                        >
                           <div className="flex flex-col items-center justify-center">
                             <FileText className="h-8 w-8 text-gray-400 mb-2" />
                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">

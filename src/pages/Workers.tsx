@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -16,7 +17,7 @@ const workersData = [
     hourlyRate: '₹450',
     skills: ['Furniture', 'Cabinets', 'Remodeling'],
     isAvailable: true,
-    imageUrl: '/avatar-1.jpg',
+    imageUrl: '/lovable-uploads/b2aa6fb3-3f41-46f1-81ea-37ea94ae8af3.png',
   },
   {
     id: '2',
@@ -28,7 +29,7 @@ const workersData = [
     hourlyRate: '₹400',
     skills: ['Wiring', 'Installations', 'Repairs'],
     isAvailable: true,
-    imageUrl: '/avatar-2.jpg',
+    imageUrl: '/lovable-uploads/b680b077-f224-42f8-a2d3-95b48ba6e0eb.png',
   },
   {
     id: '3',
@@ -40,19 +41,19 @@ const workersData = [
     hourlyRate: '₹380',
     skills: ['Repairs', 'Installations', 'Drainage'],
     isAvailable: false,
-    imageUrl: '/avatar-3.jpg',
+    imageUrl: '/lovable-uploads/f5bdc72f-cebf-457f-a3f5-46334ba5cb06.png',
   },
   {
     id: '4',
     name: 'Anjali Desai',
-    profession: 'Wedding Planner',
+    profession: 'Interior Designer',
     location: 'Hubballi, Karnataka',
     rating: 4.9,
     experience: '10 years',
-    hourlyRate: '₹2500',
-    skills: ['Event Planning', 'Decoration', 'Vendor Management'],
+    hourlyRate: '₹650',
+    skills: ['Home Design', 'Decoration', 'Space Planning'],
     isAvailable: true,
-    imageUrl: '/avatar-4.jpg',
+    imageUrl: '/lovable-uploads/b8156b8d-826a-48fe-90d7-4004ed907f37.png',
   },
   {
     id: '5',
@@ -64,7 +65,7 @@ const workersData = [
     hourlyRate: '₹800',
     skills: ['Indian Cuisine', 'Continental', 'Catering'],
     isAvailable: true,
-    imageUrl: '/avatar-5.jpg',
+    imageUrl: '/lovable-uploads/592e4ea0-235a-4c44-b2e3-df92799ed689.png',
   },
   {
     id: '6',
@@ -76,7 +77,43 @@ const workersData = [
     hourlyRate: '₹300',
     skills: ['Event Security', 'Property Protection', 'CCTV Monitoring'],
     isAvailable: false,
-    imageUrl: '/avatar-6.jpg',
+    imageUrl: '/lovable-uploads/9e214f91-cc37-4bef-b75b-c1d84f43ca56.png',
+  },
+  {
+    id: '7',
+    name: 'Aisha Khan',
+    profession: 'Mason',
+    location: 'Mangaluru, Karnataka',
+    rating: 4.7,
+    experience: '11 years',
+    hourlyRate: '₹480',
+    skills: ['Bricklaying', 'Stone Work', 'Plastering'],
+    isAvailable: true,
+    imageUrl: '/lovable-uploads/72177b08-56fb-4500-91e3-8ab16c64d4d9.png',
+  },
+  {
+    id: '8',
+    name: 'Vikram Reddy',
+    profession: 'Mechanic',
+    location: 'Mysuru, Karnataka',
+    rating: 4.9,
+    experience: '14 years',
+    hourlyRate: '₹420',
+    skills: ['Car Repair', 'Engine Work', 'Diagnostics'],
+    isAvailable: true,
+    imageUrl: '/lovable-uploads/a6b350c7-28fb-4792-b521-6c447d991800.png',
+  },
+  {
+    id: '9',
+    name: 'Sunil Patil',
+    profession: 'Painter',
+    location: 'Bengaluru, Karnataka',
+    rating: 4.8,
+    experience: '9 years',
+    hourlyRate: '₹390',
+    skills: ['Interior Painting', 'Wall Design', 'Finish Work'],
+    isAvailable: true,
+    imageUrl: '/lovable-uploads/bf3bc67f-7fc9-49f1-86cc-90cdccac25f7.png',
   },
 ];
 

@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Paintbrush, Wrench, Hammer, Lightbulb, Flame, Sparkles, Star, ChevronRight, Settings, Droplets, Shield, Utensils, Heart } from 'lucide-react';
+import { Paintbrush, Wrench, Hammer, Lightbulb, Flame, Sparkles, Star, ChevronRight, Settings, Droplets, Shield, Utensils, Tractor, HardHat, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -21,7 +20,7 @@ const featuredWorkers = [
     hourlyRate: '₹450',
     skills: ['Furniture', 'Cabinets', 'Remodeling'],
     isAvailable: true,
-    imageUrl: '/avatar-1.jpg',
+    imageUrl: '/lovable-uploads/b2aa6fb3-3f41-46f1-81ea-37ea94ae8af3.png',
   },
   {
     id: '2',
@@ -33,7 +32,7 @@ const featuredWorkers = [
     hourlyRate: '₹400',
     skills: ['Wiring', 'Installations', 'Repairs'],
     isAvailable: true,
-    imageUrl: '/avatar-2.jpg',
+    imageUrl: '/lovable-uploads/b680b077-f224-42f8-a2d3-95b48ba6e0eb.png',
   },
   {
     id: '3',
@@ -45,7 +44,7 @@ const featuredWorkers = [
     hourlyRate: '₹380',
     skills: ['Repairs', 'Installations', 'Drainage'],
     isAvailable: false,
-    imageUrl: '/avatar-3.jpg',
+    imageUrl: '/lovable-uploads/f5bdc72f-cebf-457f-a3f5-46334ba5cb06.png',
   },
 ];
 
@@ -108,11 +107,11 @@ const categories = [
     slug: 'cleaner',
   },
   {
-    title: 'Wedding Planner',
-    icon: Heart,
-    description: 'Expert planners for your special day.',
-    availableWorkers: 23,
-    slug: 'wedding-planner',
+    title: 'Construction Worker',
+    icon: HardHat,
+    description: 'Skilled construction workers for building projects.',
+    availableWorkers: 65,
+    slug: 'construction',
   },
 ];
 
