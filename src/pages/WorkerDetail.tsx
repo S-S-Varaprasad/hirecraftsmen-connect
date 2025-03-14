@@ -115,7 +115,7 @@ const workerData = {
         user: 'Sanjay Kumar',
         date: '2023-05-22',
         rating: 5,
-        comment: 'Mohammed fixed a complicated plumbing issue that other plumbers couldn\'t solve. Highly recommended!'
+        comment: "Mohammed fixed a complicated plumbing issue that other plumbers couldn't solve. Highly recommended!"
       },
       {
         id: '2',
@@ -163,7 +163,7 @@ const workerData = {
         user: 'Karthik Rao',
         date: '2023-04-12',
         rating: 5,
-        comment: 'The best interior designer we've worked with. Very professional and understood our needs perfectly.'
+        comment: "The best interior designer we've worked with. Very professional and understood our needs perfectly."
       },
       {
         id: '3',
@@ -320,21 +320,21 @@ const workerData = {
         user: 'Rahul Menon',
         date: '2023-06-01',
         rating: 5,
-        comment: 'Vikram fixed an issue with my car that three other mechanics couldn't figure out. Excellent service!'
+        comment: "Vikram fixed an issue with my car that three other mechanics couldn't figure out. Excellent service!"
       },
       {
         id: '2',
         user: 'Divya Krishna',
         date: '2023-04-25',
         rating: 5,
-        comment: 'Honest and skilled mechanic. Didn't try to upsell unnecessary services and fixed my car perfectly.'
+        comment: "Honest and skilled mechanic. Didn't try to upsell unnecessary services and fixed my car perfectly."
       },
       {
         id: '3',
         user: 'Naveen Kumar',
         date: '2023-03-20',
         rating: 4,
-        comment: 'Very knowledgeable about all makes and models. Fixed my vintage car when others couldn't.'
+        comment: "Very knowledgeable about all makes and models. Fixed my vintage car when others couldn't."
       }
     ]
   },
@@ -443,7 +443,7 @@ const workerData = {
         user: 'Rekha Iyer',
         date: '2023-05-10',
         rating: 5,
-        comment: 'Sanjay created a beautiful traditional outfit for my daughter's wedding. The craftsmanship is exceptional.'
+        comment: "Sanjay created a beautiful traditional outfit for my daughter's wedding. The craftsmanship is exceptional."
       },
       {
         id: '2',
@@ -539,7 +539,7 @@ const workerData = {
         user: 'Mohan Rao',
         date: '2023-03-15',
         rating: 5,
-        comment: 'Ramesh's expertise in livestock management has greatly improved our dairy farm's productivity.'
+        comment: "Ramesh's expertise in livestock management has greatly improved our dairy farm's productivity."
       }
     ]
   }
