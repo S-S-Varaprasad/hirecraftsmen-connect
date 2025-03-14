@@ -1,12 +1,13 @@
 
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, MapPin, Clock, Briefcase, Mail, Phone, Calendar, MessageCircle, Send, ThumbsUp } from 'lucide-react';
+import { Star, MapPin, Clock, Briefcase, Mail, Phone, Calendar, MessageCircle, Send, ThumbsUp, Award } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 // Sample data - in a real app, this would come from an API
 const workerData = {
@@ -549,6 +550,15 @@ const WorkerDetail = () => {
   const { id } = useParams<{ id: string }>();
   const worker = id ? workerData[id as keyof typeof workerData] : null;
 
+  // Get the initials for the fallback avatar
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase();
+  };
+
   if (!worker) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -557,7 +567,7 @@ const WorkerDetail = () => {
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-2xl font-bold">Worker not found</h1>
             <p className="mt-4">The worker profile you're looking for doesn't exist.</p>
-            <Button className="mt-8" asChild>
+            <Button className="mt-8 bg-[#F97316] hover:bg-[#EA580C]" asChild>
               <Link to="/workers">Browse All Workers</Link>
             </Button>
           </div>
@@ -573,80 +583,106 @@ const WorkerDetail = () => {
       
       <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Profile Sidebar */}
-            <div className="md:col-span-1">
-              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg sticky top-24">
-                <div className="p-6 text-center border-b border-gray-200 dark:border-gray-700">
-                  <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-primary/20">
-                    <img 
-                      src={worker.imageUrl || '/placeholder.svg'} 
-                      alt={worker.name}
-                      className="w-full h-full object-cover"
-                    />
+          {/* Header with background design */}
+          <div className="relative mb-8 rounded-xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-orange-600/30 backdrop-blur-sm"></div>
+            <div className="relative py-6 px-8">
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <Avatar className="w-28 h-28 border-4 border-white/80 shadow-xl">
+                  <AvatarImage 
+                    src={worker.imageUrl || '/placeholder.svg'} 
+                    alt={worker.name}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="text-2xl font-medium bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300">
+                    {getInitials(worker.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 text-center md:text-left">
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{worker.name}</h1>
+                  <p className="text-lg text-gray-700 dark:text-gray-300">{worker.profession}</p>
+                  <div className="flex items-center mt-2 justify-center md:justify-start">
+                    <div className="flex">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`w-5 h-5 ${i < Math.floor(worker.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} 
+                        />
+                      ))}
+                    </div>
+                    <span className="ml-2 font-semibold">{worker.rating.toFixed(1)}</span>
+                    <span className="ml-1 text-gray-600">({worker.reviews.length} reviews)</span>
                   </div>
-                  
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">{worker.name}</h1>
-                  <p className="text-gray-600 dark:text-gray-400">{worker.profession}</p>
-                  
-                  <div className="flex justify-center items-center mt-2">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star 
-                        key={i} 
-                        className={`w-4 h-4 ${i < Math.floor(worker.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} 
-                      />
-                    ))}
-                    <span className="ml-1 text-sm text-gray-600 dark:text-gray-400">{worker.rating.toFixed(1)}</span>
-                  </div>
-                  
-                  <div className="flex justify-center items-center mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    <span>{worker.location}</span>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <Badge variant={worker.isAvailable ? "default" : "secondary"} className={`px-3 py-1 ${worker.isAvailable ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'}`}>
+                  <div className="flex items-center mt-2 justify-center md:justify-start">
+                    <MapPin className="w-5 h-5 mr-1 text-gray-600 dark:text-gray-400" />
+                    <span className="text-gray-700 dark:text-gray-300">{worker.location}</span>
+                    <Badge variant={worker.isAvailable ? "default" : "secondary"} className={`ml-4 px-3 py-1 ${worker.isAvailable ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'}`}>
                       {worker.isAvailable ? 'Available for Work' : 'Currently Unavailable'}
                     </Badge>
                   </div>
                 </div>
-                
-                <div className="p-6">
-                  <div className="space-y-4">
+                <div className="flex gap-2 mt-4 md:mt-0">
+                  <Button className="bg-[#F97316] hover:bg-[#EA580C]" asChild>
+                    <Link to={`/apply/${worker.id}`}>
+                      Hire Me
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="border-gray-300 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200" asChild>
+                    <Link to={`/message/${worker.id}`}>
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Message
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Sidebar with info */}
+            <div className="md:col-span-1">
+              <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md">
+                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center text-gray-900 dark:text-white">
+                    <Award className="w-5 h-5 mr-2 text-orange-500" />
+                    Quick Info
+                  </h3>
+                  
+                  <div className="space-y-6">
                     <div>
-                      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Contact Information</h3>
+                      <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Contact Information</h4>
                       <ul className="space-y-3">
                         <li className="flex items-center text-sm">
-                          <Mail className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                          <Mail className="w-4 h-4 mr-2 text-orange-500" />
                           <span className="text-gray-700 dark:text-gray-300">{worker.email}</span>
                         </li>
                         <li className="flex items-center text-sm">
-                          <Phone className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                          <Phone className="w-4 h-4 mr-2 text-orange-500" />
                           <span className="text-gray-700 dark:text-gray-300">{worker.phone}</span>
                         </li>
                       </ul>
                     </div>
                     
                     <div>
-                      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Work Info</h3>
+                      <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Work Info</h4>
                       <ul className="space-y-3">
                         <li className="flex items-center text-sm">
-                          <Briefcase className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                          <Briefcase className="w-4 h-4 mr-2 text-orange-500" />
                           <span className="text-gray-700 dark:text-gray-300">{worker.experience}</span>
                         </li>
                         <li className="flex items-center text-sm">
-                          <Clock className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                          <Clock className="w-4 h-4 mr-2 text-orange-500" />
                           <span className="text-gray-700 dark:text-gray-300">{worker.hourlyRate}/hr</span>
                         </li>
                         <li className="flex items-center text-sm">
-                          <Calendar className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                          <Calendar className="w-4 h-4 mr-2 text-orange-500" />
                           <span className="text-gray-700 dark:text-gray-300">{worker.completedJobs} Jobs Completed</span>
                         </li>
                       </ul>
                     </div>
                     
                     <div>
-                      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Languages</h3>
+                      <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Languages</h4>
                       <div className="flex flex-wrap gap-2">
                         {worker.languages.map((language, i) => (
                           <Badge key={i} variant="outline" className="bg-gray-50 dark:bg-gray-800">
@@ -655,20 +691,17 @@ const WorkerDetail = () => {
                         ))}
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="mt-6 space-y-3">
-                    <Button className="w-full bg-[#F97316] hover:bg-[#EA580C]" asChild>
-                      <Link to={`/apply/${worker.id}`}>
-                        Hire Me
-                      </Link>
-                    </Button>
-                    <Button variant="outline" className="w-full" asChild>
-                      <Link to={`/message/${worker.id}`}>
-                        <MessageCircle className="w-4 h-4 mr-2" />
-                        Message
-                      </Link>
-                    </Button>
+
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Skills</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {worker.skills.map((skill, i) => (
+                          <Badge key={i} className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-0 dark:bg-orange-900/30 dark:text-orange-300">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -679,43 +712,34 @@ const WorkerDetail = () => {
               <Tabs defaultValue="about" className="w-full">
                 <TabsList className="mb-6 w-full bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
                   <TabsTrigger value="about" className="flex-1">About</TabsTrigger>
-                  <TabsTrigger value="skills" className="flex-1">Skills</TabsTrigger>
+                  <TabsTrigger value="certifications" className="flex-1">Certifications</TabsTrigger>
                   <TabsTrigger value="reviews" className="flex-1">Reviews</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="about" className="space-y-6">
                   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
                     <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">About {worker.name}</h2>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                       {worker.bio}
                     </p>
                   </div>
-                  
+                </TabsContent>
+                
+                <TabsContent value="certifications" className="space-y-6">
                   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                    <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Certifications</h2>
-                    <ul className="space-y-2">
+                    <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Certifications & Credentials</h2>
+                    <ul className="space-y-4">
                       {worker.certifications.map((cert, i) => (
-                        <li key={i} className="flex items-start">
-                          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
-                            <ThumbsUp className="w-3 h-3 text-green-600" />
+                        <li key={i} className="flex items-start p-3 bg-orange-50/50 dark:bg-orange-900/10 rounded-lg">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center mr-3">
+                            <ThumbsUp className="w-4 h-4 text-orange-600" />
                           </div>
-                          <span className="ml-2 text-gray-600 dark:text-gray-400">{cert}</span>
+                          <div>
+                            <span className="text-gray-700 dark:text-gray-300 font-medium">{cert}</span>
+                          </div>
                         </li>
                       ))}
                     </ul>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="skills" className="space-y-6">
-                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                    <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Skills & Expertise</h2>
-                    <div className="flex flex-wrap gap-2">
-                      {worker.skills.map((skill, i) => (
-                        <Badge key={i} className="bg-primary/10 text-primary hover:bg-primary/20 border-0 px-3 py-1">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
                   </div>
                 </TabsContent>
                 
@@ -741,7 +765,7 @@ const WorkerDetail = () => {
                       {worker.reviews.map((review) => (
                         <div key={review.id} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-0 last:pb-0">
                           <div className="flex justify-between mb-2">
-                            <div className="font-medium">{review.user}</div>
+                            <div className="font-medium text-gray-900 dark:text-white">{review.user}</div>
                             <div className="text-sm text-gray-500">{new Date(review.date).toLocaleDateString()}</div>
                           </div>
                           <div className="flex mb-2">
@@ -762,7 +786,7 @@ const WorkerDetail = () => {
                     <h3 className="font-semibold mb-4">Leave a Review</h3>
                     <div className="space-y-4">
                       <div className="flex items-center">
-                        <span className="mr-2">Rating:</span>
+                        <span className="mr-3 text-gray-700 dark:text-gray-300">Rating:</span>
                         <div className="flex">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <Star 
@@ -773,7 +797,7 @@ const WorkerDetail = () => {
                         </div>
                       </div>
                       <textarea 
-                        className="w-full border border-gray-300 dark:border-gray-700 rounded-md p-2 h-24 focus:outline-none focus:ring-2 focus:ring-primary" 
+                        className="w-full border border-gray-300 dark:border-gray-700 rounded-md p-3 h-24 focus:outline-none focus:ring-2 focus:ring-orange-500" 
                         placeholder="Write your review here..."
                       ></textarea>
                       <Button className="bg-[#F97316] hover:bg-[#EA580C]">
