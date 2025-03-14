@@ -8,7 +8,7 @@ import Footer from '@/components/Footer';
 
 const About = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-orange-50/40 dark:bg-gray-900">
       <Navbar />
       
       <main className="flex-grow">
@@ -106,7 +106,7 @@ const About = () => {
                   <Button size="lg" className="bg-white text-orange-600 hover:bg-white/90" asChild>
                     <Link to="/workers">Find Workers</Link>
                   </Button>
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-orange-600/30" asChild>
+                  <Button size="lg" variant="orange" className="border-white text-white" asChild>
                     <Link to="/join-as-worker">Join as a Worker</Link>
                   </Button>
                 </div>

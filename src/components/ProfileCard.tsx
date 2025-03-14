@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Clock, Briefcase } from 'lucide-react';
@@ -108,7 +107,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <Button variant="outline" className="w-1/2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 dark:hover:bg-orange-950/20 dark:hover:border-orange-900/30" asChild>
               <Link to={`/message/${id}`}>Message</Link>
             </Button>
-            <Button className="w-1/2 bg-[#F97316] hover:bg-[#EA580C]" asChild>
+            <Button className="w-1/2" variant="orange" asChild>
               <Link to={`/workers/${id}`}>View Profile</Link>
             </Button>
           </div>

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 
 const HeroSection = () => {
   return (
-    <div className="relative overflow-hidden bg-white dark:bg-gray-900">
+    <div className="relative overflow-hidden bg-orange-50/40 dark:bg-gray-900">
       <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
       
@@ -29,13 +29,13 @@ const HeroSection = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" asChild>
+              <Button size="lg" variant="default" asChild>
                 <Link to="/workers" className="flex items-center gap-2">
                   Find Workers
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
-              <Button size="lg" className="bg-[#F97316] hover:bg-[#EA580C]" asChild>
+              <Button size="lg" variant="orange" asChild>
                 <Link to="/join-as-worker">Create Your Profile</Link>
               </Button>
             </div>

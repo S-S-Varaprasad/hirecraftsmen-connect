@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { User, Mail, Phone, MapPin, Briefcase, Clock, IndianRupee, FileText, Upload, Star } from 'lucide-react';
@@ -36,7 +35,6 @@ const JoinAsWorker = () => {
       const file = e.target.files[0];
       setFormData({ ...formData, [fieldName]: file });
       
-      // Create preview for profile image
       if (fieldName === 'profileImage') {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -63,13 +61,11 @@ const JoinAsWorker = () => {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       
-      // Validate file type for images
       if (fieldName === 'profileImage' && !file.type.startsWith('image/')) {
         toast.error('Please upload an image file (JPG, PNG, etc.)');
         return;
       }
       
-      // Validate file type for resume
       if (fieldName === 'resume' && !['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
         toast.error('Please upload a PDF or Word document');
         return;
@@ -77,7 +73,6 @@ const JoinAsWorker = () => {
       
       setFormData({ ...formData, [fieldName]: file });
       
-      // Create preview for profile image
       if (fieldName === 'profileImage') {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -92,11 +87,9 @@ const JoinAsWorker = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call for worker registration
     setTimeout(() => {
       setIsLoading(false);
       
-      // Basic validation
       if (formData.name && formData.email && formData.phone && formData.profession) {
         if (!formData.profileImage) {
           toast.warning('A profile photo is required to complete your registration.');
@@ -112,10 +105,10 @@ const JoinAsWorker = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-orange-50/40 dark:bg-gray-900">
       <Navbar />
       
-      <main className="flex-grow bg-gray-50 dark:bg-gray-900 pt-24">
+      <main className="flex-grow pt-24">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-3xl mx-auto">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
@@ -128,7 +121,6 @@ const JoinAsWorker = () => {
                 </div>
                 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Profile Picture Upload - Enhanced */}
                   <div className="space-y-4 mb-8">
                     <h2 className="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">Profile Picture</h2>
                     <div className="flex flex-col items-center justify-center">
@@ -178,7 +170,6 @@ const JoinAsWorker = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Personal Information */}
                     <div className="space-y-4 md:col-span-2">
                       <h2 className="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">Personal Information</h2>
                       
@@ -267,7 +258,6 @@ const JoinAsWorker = () => {
                       </div>
                     </div>
                     
-                    {/* Professional Information */}
                     <div className="space-y-4 md:col-span-2">
                       <h2 className="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">Professional Information</h2>
                       
@@ -372,7 +362,6 @@ const JoinAsWorker = () => {
                       ></textarea>
                     </div>
                     
-                    {/* Resume Upload */}
                     <div className="space-y-4 md:col-span-2">
                       <h2 className="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">Resume/CV</h2>
                       
@@ -428,7 +417,8 @@ const JoinAsWorker = () => {
                   
                   <Button
                     type="submit"
-                    className="w-full bg-[#F97316] hover:bg-[#EA580C]"
+                    className="w-full"
+                    variant="orange"
                     disabled={isLoading}
                   >
                     {isLoading ? (

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Calendar, Clock, Briefcase } from 'lucide-react';
@@ -90,7 +89,7 @@ const JobCard: React.FC<JobCardProps> = ({
           <Button variant="outline" asChild>
             <Link to={`/jobs/${id}`}>View Details</Link>
           </Button>
-          <Button asChild>
+          <Button variant="orange" asChild>
             <Link to={`/apply/${id}`}>Apply Now</Link>
           </Button>
         </div>
