@@ -51,13 +51,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       
       <div className="flex flex-col h-full">
         <div className="relative pt-6 px-6 pb-4 flex flex-col items-center text-center">
-          <Avatar className="w-20 h-20 mb-3">
+          <Avatar className="w-20 h-20 mb-3 border-2 border-orange-100 dark:border-orange-900/30">
             <AvatarImage 
               src={imageUrl || '/placeholder.svg'} 
               alt={name}
               className="object-cover"
             />
-            <AvatarFallback className="text-lg font-medium bg-primary/10 text-primary">
+            <AvatarFallback className="text-lg font-medium bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300">
               {getInitials(name)}
             </AvatarFallback>
           </Avatar>
@@ -105,7 +105,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         
         <div className="pt-4 px-6 pb-6 border-t border-gray-100 dark:border-gray-700">
           <div className="flex gap-2">
-            <Button variant="outline" className="w-1/2" asChild>
+            <Button variant="outline" className="w-1/2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 dark:hover:bg-orange-950/20 dark:hover:border-orange-900/30" asChild>
               <Link to={`/message/${id}`}>Message</Link>
             </Button>
             <Button className="w-1/2 bg-[#F97316] hover:bg-[#EA580C]" asChild>

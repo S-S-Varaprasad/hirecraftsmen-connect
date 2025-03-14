@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { Search, Filter, ChevronDown, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 interface SearchFiltersProps {
   onSearch: (filters: any) => void;
@@ -19,16 +21,25 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
     'Painter', 'Carpenter', 'Plumber', 'Welder', 
     'Architect', 'Electrician', 'Mason', 'Landscaper', 
     'Mechanic', 'Security Guard', 'Chef', 'House Cleaner',
-    'Wedding Planner', 'HVAC Technician'
+    'Wedding Planner', 'HVAC Technician', 'Farmer', 'Tailor'
   ];
 
   const handleSearch = () => {
+    // Show a toast notification to confirm search
+    toast.success('Search filters applied');
+    
     onSearch({
       searchTerm,
       location,
       professions: selectedProfessions,
       availableOnly,
     });
+  };
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   const toggleProfession = (profession: string) => {
@@ -44,6 +55,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
     setLocation('');
     setSelectedProfessions([]);
     setAvailableOnly(false);
+    toast.info('All filters cleared');
   };
 
   return (
@@ -58,6 +70,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
               className="pl-9 w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           </div>
           
@@ -68,21 +81,23 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
               className="w-full"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           </div>
           
           <Button 
             variant="default" 
-            className="shrink-0" 
+            className="shrink-0 bg-[#F97316] hover:bg-[#EA580C] text-white" 
             onClick={handleSearch}
           >
+            <Search className="w-4 h-4 mr-2" />
             Search
           </Button>
           
           <Button
             type="button"
             variant="outline"
-            className="shrink-0 flex items-center gap-1"
+            className="shrink-0 flex items-center gap-1 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 dark:hover:bg-orange-950/20 dark:hover:border-orange-900/30"
             onClick={() => setShowFilters(!showFilters)}
           >
             <Filter className="h-4 w-4" />
@@ -98,7 +113,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-8 text-sm text-gray-500 dark:text-gray-400"
+                className="h-8 text-sm text-gray-500 dark:text-gray-400 hover:text-orange-600"
                 onClick={clearFilters}
               >
                 <X className="h-3.5 w-3.5 mr-1" />
@@ -113,7 +128,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
                   <Badge 
                     key={profession}
                     variant={selectedProfessions.includes(profession) ? "default" : "outline"}
-                    className="cursor-pointer"
+                    className={`cursor-pointer ${selectedProfessions.includes(profession) ? 'bg-orange-500 hover:bg-orange-600' : 'hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200'}`}
                     onClick={() => toggleProfession(profession)}
                   >
                     {profession}
@@ -126,7 +141,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
               <label className="flex items-center space-x-2 cursor-pointer">
                 <input 
                   type="checkbox" 
-                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  className="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
                   checked={availableOnly}
                   onChange={() => setAvailableOnly(!availableOnly)}
                 />
