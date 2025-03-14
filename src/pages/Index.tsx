@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Paintbrush, Wrench, Hammer, Lightbulb, Flame, Sparkles, Star, ChevronRight, Settings, Droplets, Shield, Utensils, Tractor, HardHat, Truck } from 'lucide-react';
@@ -231,15 +232,15 @@ const Index = () => {
                     Ready to find the perfect professional for your project?
                   </h2>
                   <p className="text-primary-foreground/90 text-lg">
-                    Join thousands of satisfied customers who have found skilled workers through CraftConnect.
+                    Join thousands of satisfied customers who have found skilled workers through HireEase.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                   <Button size="lg" className="bg-white text-primary hover:bg-white/90" asChild>
                     <Link to="/workers">Find Workers</Link>
                   </Button>
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" asChild>
-                    <Link to="/register">Join as a Worker</Link>
+                  <Button size="lg" variant="outline" className="bg-[#F97316] border-none text-white hover:bg-[#F97316]/90" asChild>
+                    <Link to="/join-as-worker">Join as a Worker</Link>
                   </Button>
                 </div>
               </div>

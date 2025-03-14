@@ -38,17 +38,7 @@ const About = () => {
                   these connections simple, transparent, and beneficial for everyone involved.
                 </p>
               </div>
-              <div className="relative">
-                <div className="absolute -inset-4 bg-gradient-radial from-primary/10 to-transparent opacity-70 blur-3xl"></div>
-                <img 
-                  src="/lovable-uploads/b8156b8d-826a-48fe-90d7-4004ed907f37.png" 
-                  alt="Skilled professionals working on projects" 
-                  className="rounded-lg shadow-2xl relative"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder.svg';
-                  }}
-                />
-              </div>
+              {/* Removed the image div as requested */}
             </div>
           </div>
         </section>
@@ -117,7 +107,7 @@ const About = () => {
                   <Button size="lg" className="bg-white text-primary hover:bg-white/90" asChild>
                     <Link to="/workers">Find Workers</Link>
                   </Button>
-                  <Button size="lg" variant="outline" className="bg-[#8B5CF6] border-none text-white hover:bg-[#8B5CF6]/90" asChild>
+                  <Button size="lg" variant="outline" className="bg-[#F97316] border-none text-white hover:bg-[#F97316]/90" asChild>
                     <Link to="/join-as-worker">Join as a Worker</Link>
                   </Button>
                 </div>

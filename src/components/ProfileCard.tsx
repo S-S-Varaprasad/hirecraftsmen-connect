@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Star, MapPin, Clock, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface ProfileCardProps {
   id: string;
@@ -30,6 +31,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   isAvailable,
   imageUrl,
 }) => {
+  // Get the initials for the fallback avatar
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase();
+  };
+
   return (
     <div className="group relative rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-card hover:shadow-elevated transition-all duration-300 animate-in">
       <div className="absolute top-4 right-4 z-10">
@@ -41,13 +51,16 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       
       <div className="flex flex-col h-full">
         <div className="relative pt-6 px-6 pb-4 flex flex-col items-center text-center">
-          <div className="relative w-20 h-20 mb-3">
-            <img 
+          <Avatar className="w-20 h-20 mb-3">
+            <AvatarImage 
               src={imageUrl || '/placeholder.svg'} 
               alt={name}
-              className="w-20 h-20 rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-sm"
+              className="object-cover"
             />
-          </div>
+            <AvatarFallback className="text-lg font-medium bg-primary/10 text-primary">
+              {getInitials(name)}
+            </AvatarFallback>
+          </Avatar>
           
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{name}</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">{profession}</p>
