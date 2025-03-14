@@ -214,7 +214,7 @@ const Workers = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow bg-gray-50 dark:bg-gray-900 pt-24">
+      <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-3xl mx-auto text-center mb-10">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Find Skilled Professionals</h1>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Clock, Briefcase } from 'lucide-react';
@@ -52,7 +53,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         <div className="relative pt-6 px-6 pb-4 flex flex-col items-center text-center">
           <Avatar className="w-20 h-20 mb-3 border-2 border-orange-100 dark:border-orange-900/30">
             <AvatarImage 
-              src={imageUrl || '/placeholder.svg'} 
+              src={imageUrl} 
               alt={name}
               className="object-cover"
             />
