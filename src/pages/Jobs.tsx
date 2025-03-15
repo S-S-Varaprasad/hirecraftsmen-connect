@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SearchFilters from '@/components/SearchFilters';
 import JobCard from '@/components/JobCard';
+import { Briefcase, Filter } from 'lucide-react';
 
 // Sample jobs data
 const jobsData = [
@@ -122,6 +123,9 @@ const Jobs = () => {
       <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-3xl mx-auto text-center mb-10">
+            <div className="inline-block p-2 px-4 bg-primary/10 text-primary rounded-full text-sm font-medium mb-3">
+              Job Opportunities
+            </div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Browse Available Jobs</h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">
               Find opportunities that match your skills and availability
@@ -145,8 +149,11 @@ const Jobs = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-20">
-                  <h3 className="text-xl font-semibold mb-2">No jobs found</h3>
+                <div className="text-center py-20 bg-white/80 rounded-xl shadow-lg border border-gray-200 dark:bg-gray-800/80 dark:border-gray-700">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 dark:bg-primary/20 text-primary rounded-full flex items-center justify-center">
+                    <Briefcase className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">No jobs found</h3>
                   <p className="text-gray-600 dark:text-gray-400">
                     Try adjusting your search filters or criteria
                   </p>

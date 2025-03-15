@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Calendar, Clock, Briefcase } from 'lucide-react';
@@ -86,10 +87,10 @@ const JobCard: React.FC<JobCardProps> = ({
         </div>
 
         <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
-          <Button variant="outline" asChild>
+          <Button variant="outline" className="border-gray-200 hover:border-primary/20 hover:text-primary" asChild>
             <Link to={`/jobs/${id}`}>View Details</Link>
           </Button>
-          <Button variant="orange" asChild>
+          <Button className="bg-primary hover:bg-primary/90" asChild>
             <Link to={`/apply/${id}`}>Apply Now</Link>
           </Button>
         </div>

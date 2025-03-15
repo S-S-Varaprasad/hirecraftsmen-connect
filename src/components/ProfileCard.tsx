@@ -104,12 +104,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         </div>
         
         <div className="pt-4 px-6 pb-6 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-          <div className="flex gap-2">
-            <Button variant="outline" className="w-1/2 hover:bg-primary/10 hover:text-primary hover:border-primary/20 dark:hover:bg-primary/10 dark:hover:border-primary/30" asChild>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" className="hover:bg-primary/10 hover:text-primary hover:border-primary/20 dark:hover:bg-primary/10 dark:hover:border-primary/30" asChild>
               <Link to={`/message/${id}`}>Message</Link>
             </Button>
-            <Button className="w-1/2" asChild>
+            <Button className="bg-primary hover:bg-primary/90" asChild>
               <Link to={`/workers/${id}`}>View Profile</Link>
+            </Button>
+            <Button variant="default" className="col-span-2 mt-2 bg-green-600 hover:bg-green-700" asChild>
+              <Link to={`/apply/${id}`}>Hire Me</Link>
             </Button>
           </div>
         </div>

@@ -13,7 +13,7 @@ const About = () => {
       
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="pt-32 pb-16 bg-gradient-to-b from-orange-50 to-transparent dark:from-orange-950/20 dark:to-transparent">
+        <section className="pt-32 pb-16 bg-gradient-to-b from-orange-100/80 to-transparent dark:from-orange-950/20 dark:to-transparent">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white">About HireEase</h1>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
@@ -27,7 +27,7 @@ const About = () => {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white text-center">Our Mission</h2>
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-xl border border-orange-100 dark:border-orange-900/20">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
                 <p className="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
                   At HireEase, we're dedicated to creating opportunities for skilled craftspeople 
                   while helping individuals and organizations find the perfect professionals for their projects.
@@ -48,8 +48,8 @@ const About = () => {
             <h2 className="text-3xl font-bold mb-12 text-center text-gray-900 dark:text-white">Our Values</h2>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-orange-100 dark:border-orange-900/20 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                <div className="w-14 h-14 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-500 mb-6">
+              <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+                <div className="w-14 h-14 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary mb-6">
                   <Users className="w-7 h-7" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Community</h3>
@@ -58,8 +58,8 @@ const About = () => {
                 </p>
               </div>
               
-              <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-orange-100 dark:border-orange-900/20 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                <div className="w-14 h-14 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-500 mb-6">
+              <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+                <div className="w-14 h-14 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary mb-6">
                   <ThumbsUp className="w-7 h-7" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Quality</h3>
@@ -68,8 +68,8 @@ const About = () => {
                 </p>
               </div>
               
-              <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-orange-100 dark:border-orange-900/20 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                <div className="w-14 h-14 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-500 mb-6">
+              <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+                <div className="w-14 h-14 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary mb-6">
                   <Clock className="w-7 h-7" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Reliability</h3>
@@ -78,8 +78,8 @@ const About = () => {
                 </p>
               </div>
               
-              <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-orange-100 dark:border-orange-900/20 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                <div className="w-14 h-14 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-500 mb-6">
+              <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+                <div className="w-14 h-14 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary mb-6">
                   <ShieldCheck className="w-7 h-7" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Trust</h3>
@@ -92,21 +92,21 @@ const About = () => {
         </section>
         
         {/* CTA Section */}
-        <section className="py-16 md:py-24 bg-gradient-to-t from-orange-50 to-transparent dark:from-orange-950/20 dark:to-transparent">
+        <section className="py-16 md:py-24 bg-gradient-to-t from-orange-50/70 to-transparent dark:from-orange-950/20 dark:to-transparent">
           <div className="container mx-auto px-4">
-            <div className="max-w-5xl mx-auto bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl shadow-xl overflow-hidden">
+            <div className="max-w-5xl mx-auto bg-gradient-to-r from-primary/90 to-primary rounded-xl shadow-xl overflow-hidden">
               <div className="px-6 py-12 md:p-12 text-center">
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
                   Ready to connect with skilled professionals?
                 </h2>
-                <p className="text-orange-50 text-lg mb-8 max-w-2xl mx-auto">
+                <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
                   Join our community today and find the perfect craftsperson for your next project.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button size="lg" className="bg-white text-orange-600 hover:bg-white/90" asChild>
+                  <Button size="lg" className="bg-white text-primary hover:bg-white/90" asChild>
                     <Link to="/workers">Find Workers</Link>
                   </Button>
-                  <Button size="lg" variant="orange" className="border-white text-white" asChild>
+                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" asChild>
                     <Link to="/join-as-worker">Join as a Worker</Link>
                   </Button>
                 </div>
@@ -119,13 +119,13 @@ const About = () => {
                 We're here to help. Contact our support team for assistance with anything related to HireEase.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button variant="outline" className="border-orange-200 hover:bg-orange-50 hover:text-orange-600 dark:border-orange-800 dark:hover:bg-orange-950/30" asChild>
+                <Button variant="outline" className="border-gray-300 hover:bg-gray-50 hover:text-primary dark:border-gray-700 dark:hover:bg-gray-800/80" asChild>
                   <Link to="/contact">Contact Us</Link>
                 </Button>
-                <Button variant="ghost" className="hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-950/30" asChild>
+                <Button variant="ghost" className="hover:bg-gray-50 hover:text-primary dark:hover:bg-gray-800/80" asChild>
                   <Link to="/privacy">Privacy Policy</Link>
                 </Button>
-                <Button variant="ghost" className="hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-950/30" asChild>
+                <Button variant="ghost" className="hover:bg-gray-50 hover:text-primary dark:hover:bg-gray-800/80" asChild>
                   <Link to="/terms">Terms of Service</Link>
                 </Button>
               </div>
