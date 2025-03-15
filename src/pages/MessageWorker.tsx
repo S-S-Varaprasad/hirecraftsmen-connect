@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 
 // Sample data - in a real app, this would come from an API
@@ -15,22 +16,100 @@ const workerData = {
     name: 'Rajesh Kumar',
     profession: 'Master Carpenter',
     location: 'Bengaluru, Karnataka',
-    imageUrl: '/lovable-uploads/b2aa6fb3-3f41-46f1-81ea-37ea94ae8af3.png',
+    imageUrl: '/lovable-uploads/8982dbbf-4f3f-49f8-a06b-529eec7b9020.png',
   },
   '2': {
     id: '2',
     name: 'Priya Sharma',
     profession: 'Electrician',
     location: 'Mysuru, Karnataka',
-    imageUrl: '/lovable-uploads/b680b077-f224-42f8-a2d3-95b48ba6e0eb.png',
+    imageUrl: '/lovable-uploads/8f4e6d86-e9f4-4c17-8d22-8cb12fc3acf4.png',
   },
   '3': {
     id: '3',
     name: 'Mohammed Ali',
     profession: 'Plumber',
     location: 'Mangaluru, Karnataka',
-    imageUrl: '/lovable-uploads/f5bdc72f-cebf-457f-a3f5-46334ba5cb06.png',
+    imageUrl: '/lovable-uploads/d2ac463f-611d-4d8b-9474-ca1b056c597d.png',
+  },
+  '4': {
+    id: '4',
+    name: 'Anjali Desai',
+    profession: 'Interior Designer',
+    location: 'Hubballi, Karnataka',
+    imageUrl: '/lovable-uploads/d94fa188-2dd5-4b50-9a8a-93a3dd5f344e.png',
+  },
+  '5': {
+    id: '5',
+    name: 'Ravi Verma',
+    profession: 'Chef',
+    location: 'Belagavi, Karnataka',
+    imageUrl: '/lovable-uploads/6d2fd45c-33d8-4c69-bd64-7fbce9cfe1e5.png',
+  },
+  '6': {
+    id: '6',
+    name: 'Deepak Shetty',
+    profession: 'Security Guard',
+    location: 'Bengaluru, Karnataka',
+    imageUrl: '/lovable-uploads/de66de83-4eab-4ecb-8a9b-16d264ae7f98.png',
+  },
+  '7': {
+    id: '7',
+    name: 'Aisha Khan',
+    profession: 'Mason',
+    location: 'Mangaluru, Karnataka',
+    imageUrl: '/lovable-uploads/0dcb5641-c85a-4ed3-a216-73ab21ed7e07.png',
+  },
+  '8': {
+    id: '8',
+    name: 'Vikram Reddy',
+    profession: 'Mechanic',
+    location: 'Mysuru, Karnataka',
+    imageUrl: '/lovable-uploads/8610c79b-f88e-4c51-a8ca-fd53d8dbfe4b.png',
+  },
+  '9': {
+    id: '9',
+    name: 'Sunil Patil',
+    profession: 'Painter',
+    location: 'Bengaluru, Karnataka',
+    imageUrl: '/lovable-uploads/297e83af-a6b8-4a90-9d36-78c87209c047.png',
+  },
+  '10': {
+    id: '10',
+    name: 'Kiran Prakash',
+    profession: 'Gardener',
+    location: 'Dharwad, Karnataka',
+    imageUrl: '/lovable-uploads/14c26b9b-373c-4f48-baff-1ade7682833b.png',
+  },
+  '11': {
+    id: '11',
+    name: 'Sanjay Rao',
+    profession: 'Tailor',
+    location: 'Bellary, Karnataka',
+    imageUrl: '/lovable-uploads/c01178bc-7ba4-4232-a9de-50172c3b3c12.png',
+  },
+  '12': {
+    id: '12',
+    name: 'Lakshmi Devi',
+    profession: 'Housekeeper',
+    location: 'Bengaluru, Karnataka',
+    imageUrl: '/lovable-uploads/0345ffb5-d27a-4f2d-ab99-c1a9ade85a07.png',
+  },
+  '13': {
+    id: '13',
+    name: 'Ramesh Gowda',
+    profession: 'Farmer',
+    location: 'Tumkur, Karnataka',
+    imageUrl: '/lovable-uploads/f44f054e-3f99-4941-b6e9-c16cc3065582.png',
   }
+};
+
+const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .map(part => part[0])
+    .join('')
+    .toUpperCase();
 };
 
 const MessageWorker = () => {
@@ -111,11 +190,16 @@ const MessageWorker = () => {
               </Link>
               
               <div className="flex-shrink-0 mr-3">
-                <img 
-                  src={worker.imageUrl || '/placeholder.svg'} 
-                  alt={worker.name}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
+                <Avatar className="w-10 h-10">
+                  <AvatarImage 
+                    src={worker.imageUrl || '/placeholder.svg'} 
+                    alt={worker.name}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    {getInitials(worker.name)}
+                  </AvatarFallback>
+                </Avatar>
               </div>
               
               <div>
@@ -138,8 +222,8 @@ const MessageWorker = () => {
             <div className="p-4 h-[400px] overflow-y-auto flex flex-col space-y-4">
               {messages.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                    <Send className="h-8 w-8 text-gray-400" />
+                  <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center mb-4">
+                    <Send className="h-8 w-8 text-primary dark:text-primary/90" />
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                     Start a conversation with {worker.name}
@@ -194,7 +278,7 @@ const MessageWorker = () => {
                     </Button>
                   </div>
                 </div>
-                <Button type="submit" className="bg-[#F97316] hover:bg-[#EA580C]">
+                <Button type="submit">
                   <Send className="h-5 w-5" />
                 </Button>
               </form>

@@ -74,7 +74,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
             <Input
               type="text"
               placeholder="Search by name, skills, or profession..."
-              className="pl-10 pr-4 py-3 h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="pl-10 pr-4 py-3 h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -88,7 +88,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
             <Input
               type="text"
               placeholder="Location (city, state)"
-              className="pl-10 pr-4 py-3 h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="pl-10 pr-4 py-3 h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-primary"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -105,14 +105,14 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
                   <Filter className="w-5 h-5 mr-2" />
                   Filters
                   {activeFiltersCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {activeFiltersCount}
                     </span>
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-0" align="end">
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+              <PopoverContent className="w-80 p-0 shadow-lg border border-gray-200 dark:border-gray-700" align="end">
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50">
                   <h4 className="font-medium">Filter Options</h4>
                   <Button 
                     variant="ghost" 
@@ -155,13 +155,13 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
                             key={profession}
                             className={`px-3 py-2 text-sm rounded-md cursor-pointer flex items-center space-x-2 ${
                               selectedProfessions.includes(profession) 
-                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' 
+                                ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary/90' 
                                 : 'bg-gray-50 text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                             }`}
                             onClick={() => toggleProfession(profession)}
                           >
                             {selectedProfessions.includes(profession) ? (
-                              <Check className="w-4 h-4 text-blue-500" />
+                              <Check className="w-4 h-4 text-primary" />
                             ) : (
                               <div className="w-4 h-4" />
                             )}
@@ -175,7 +175,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
                 
                 <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                   <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full"
                     onClick={() => {
                       handleSearch();
                     }}
@@ -188,7 +188,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
             
             <Button 
               onClick={handleSearch}
-              className="h-12 bg-blue-600 hover:bg-blue-700 text-white"
+              className="h-12"
             >
               <Search className="w-5 h-5 mr-2" />
               Search
@@ -259,7 +259,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({ onSearch }) => {
             ))}
             
             <button 
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-primary hover:underline"
               onClick={clearFilters}
             >
               Clear all filters

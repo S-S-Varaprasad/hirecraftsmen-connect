@@ -183,17 +183,17 @@ const SignUp = () => {
                   <input
                     id="terms"
                     type="checkbox"
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
                     required
                   />
                   <label htmlFor="terms" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                    I agree to the <Link to="/terms" className="text-blue-600 hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>
+                    I agree to the <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
                   </label>
                 </div>
                 
                 <Button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  className="w-full"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -210,7 +210,7 @@ const SignUp = () => {
               <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Already have an account?{' '}
-                  <Link to="/login" className="font-medium text-blue-600 hover:underline">
+                  <Link to="/login" className="font-medium text-primary hover:underline">
                     Sign In
                   </Link>
                 </p>
