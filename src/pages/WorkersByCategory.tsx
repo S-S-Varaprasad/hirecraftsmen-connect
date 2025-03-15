@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -6,9 +5,8 @@ import Footer from '@/components/Footer';
 import ProfileCard from '@/components/ProfileCard';
 import SearchFilters from '@/components/SearchFilters';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Briefcase } from 'lucide-react';
 
-// Reusing the existing worker data from the Workers page
 const workersData = [
   {
     id: '1',
@@ -168,7 +166,6 @@ const workersData = [
   }
 ];
 
-// Mapping of slugs to profession names
 const professionMap: { [key: string]: string } = {
   'painter': 'Painter',
   'carpenter': 'Carpenter',
@@ -197,7 +194,6 @@ const WorkersByCategory = () => {
       const profession = professionMap[slug] || '';
       setCategoryName(profession);
       
-      // Simulate API call to fetch workers by category
       setIsLoading(true);
       setTimeout(() => {
         const results = workersData.filter(worker => {
@@ -215,10 +211,8 @@ const WorkersByCategory = () => {
   const handleSearch = (filters: any) => {
     setIsLoading(true);
     
-    // Get the current profession filter
     const profession = professionMap[slug || ''] || '';
     
-    // Clone workers that match the profession
     let results = workersData.filter(worker => {
       const workerProfession = worker.profession.toLowerCase();
       const professionToMatch = profession.toLowerCase();
@@ -226,7 +220,6 @@ const WorkersByCategory = () => {
             worker.skills.some((skill: string) => skill.toLowerCase().includes(professionToMatch));
     });
     
-    // Apply additional filters
     if (filters.searchTerm) {
       const term = filters.searchTerm.toLowerCase();
       results = results.filter(worker => 
