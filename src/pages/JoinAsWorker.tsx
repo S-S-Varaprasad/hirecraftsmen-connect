@@ -158,7 +158,7 @@ const JoinAsWorker = () => {
                         type="button" 
                         variant="outline" 
                         size="sm"
-                        className="bg-[#8B5CF6] text-white hover:bg-[#7C3AED] border-none"
+                        className="bg-blue-600 text-white hover:bg-blue-700 border-none"
                         onClick={handleProfileUploadClick}
                       >
                         Select Profile Photo
@@ -417,8 +417,7 @@ const JoinAsWorker = () => {
                   
                   <Button
                     type="submit"
-                    className="w-full"
-                    variant="orange"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
                     disabled={isLoading}
                   >
                     {isLoading ? (

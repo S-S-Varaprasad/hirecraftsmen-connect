@@ -104,6 +104,14 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .bg-join-worker {
+    @apply bg-blue-600;
+  }
+
+  .btn-hire-me {
+    @apply bg-blue-600 hover:bg-blue-700;
+  }
 }
 
 /* Custom animations */

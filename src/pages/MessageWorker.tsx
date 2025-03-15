@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Send, ArrowLeft, Paperclip, Image, Calendar } from 'lucide-react';
@@ -9,98 +8,97 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 
-// Sample data - in a real app, this would come from an API
 const workerData = {
   '1': {
     id: '1',
     name: 'Rajesh Kumar',
     profession: 'Master Carpenter',
     location: 'Bengaluru, Karnataka',
-    imageUrl: '/lovable-uploads/8982dbbf-4f3f-49f8-a06b-529eec7b9020.png',
+    imageUrl: '/lovable-uploads/ad12a288-99e5-40cc-9fd9-6b749d86ef72.png',
   },
   '2': {
     id: '2',
     name: 'Priya Sharma',
     profession: 'Electrician',
     location: 'Mysuru, Karnataka',
-    imageUrl: '/lovable-uploads/8f4e6d86-e9f4-4c17-8d22-8cb12fc3acf4.png',
+    imageUrl: '/lovable-uploads/eaac9fe5-7bbf-4230-8d24-39cc8b06a181.png',
   },
   '3': {
     id: '3',
     name: 'Mohammed Ali',
     profession: 'Plumber',
     location: 'Mangaluru, Karnataka',
-    imageUrl: '/lovable-uploads/d2ac463f-611d-4d8b-9474-ca1b056c597d.png',
+    imageUrl: '/lovable-uploads/a518f4b7-7466-4a3e-8a41-30b09ed4af12.png',
   },
   '4': {
     id: '4',
     name: 'Anjali Desai',
     profession: 'Interior Designer',
     location: 'Hubballi, Karnataka',
-    imageUrl: '/lovable-uploads/d94fa188-2dd5-4b50-9a8a-93a3dd5f344e.png',
+    imageUrl: '/lovable-uploads/76bf7a4e-88ba-4937-836f-334f4c3080e9.png',
   },
   '5': {
     id: '5',
     name: 'Ravi Verma',
     profession: 'Chef',
     location: 'Belagavi, Karnataka',
-    imageUrl: '/lovable-uploads/6d2fd45c-33d8-4c69-bd64-7fbce9cfe1e5.png',
+    imageUrl: '/lovable-uploads/490b07e5-a79e-4584-a48b-d5664014ced2.png',
   },
   '6': {
     id: '6',
     name: 'Deepak Shetty',
     profession: 'Security Guard',
     location: 'Bengaluru, Karnataka',
-    imageUrl: '/lovable-uploads/de66de83-4eab-4ecb-8a9b-16d264ae7f98.png',
+    imageUrl: '/lovable-uploads/ce356fe1-2b40-4126-88b9-9cb06dea72a3.png',
   },
   '7': {
     id: '7',
     name: 'Aisha Khan',
     profession: 'Mason',
     location: 'Mangaluru, Karnataka',
-    imageUrl: '/lovable-uploads/0dcb5641-c85a-4ed3-a216-73ab21ed7e07.png',
+    imageUrl: '/lovable-uploads/0e1f03a1-4278-4ef2-b427-22b6048ce642.png',
   },
   '8': {
     id: '8',
     name: 'Vikram Reddy',
     profession: 'Mechanic',
     location: 'Mysuru, Karnataka',
-    imageUrl: '/lovable-uploads/8610c79b-f88e-4c51-a8ca-fd53d8dbfe4b.png',
+    imageUrl: '/lovable-uploads/40353383-4a09-47f7-8c4b-7e93a4c84800.png',
   },
   '9': {
     id: '9',
     name: 'Sunil Patil',
     profession: 'Painter',
     location: 'Bengaluru, Karnataka',
-    imageUrl: '/lovable-uploads/297e83af-a6b8-4a90-9d36-78c87209c047.png',
+    imageUrl: '/lovable-uploads/b364ee52-a4f0-44ff-90f5-9d5ec2dfa3ac.png',
   },
   '10': {
     id: '10',
     name: 'Kiran Prakash',
     profession: 'Gardener',
     location: 'Dharwad, Karnataka',
-    imageUrl: '/lovable-uploads/14c26b9b-373c-4f48-baff-1ade7682833b.png',
+    imageUrl: '/lovable-uploads/f46a222d-df5e-43a5-bff6-deed65ae3b15.png',
   },
   '11': {
     id: '11',
     name: 'Sanjay Rao',
     profession: 'Tailor',
     location: 'Bellary, Karnataka',
-    imageUrl: '/lovable-uploads/c01178bc-7ba4-4232-a9de-50172c3b3c12.png',
+    imageUrl: '/lovable-uploads/a518f4b7-7466-4a3e-8a41-30b09ed4af12.png',
   },
   '12': {
     id: '12',
     name: 'Lakshmi Devi',
     profession: 'Housekeeper',
     location: 'Bengaluru, Karnataka',
-    imageUrl: '/lovable-uploads/0345ffb5-d27a-4f2d-ab99-c1a9ade85a07.png',
+    imageUrl: '/lovable-uploads/eaac9fe5-7bbf-4230-8d24-39cc8b06a181.png',
   },
   '13': {
     id: '13',
     name: 'Ramesh Gowda',
     profession: 'Farmer',
     location: 'Tumkur, Karnataka',
-    imageUrl: '/lovable-uploads/f44f054e-3f99-4941-b6e9-c16cc3065582.png',
+    imageUrl: '/lovable-uploads/f46a222d-df5e-43a5-bff6-deed65ae3b15.png',
   }
 };
 
@@ -144,7 +142,6 @@ const MessageWorker = () => {
       return;
     }
     
-    // Add message to the conversation
     setMessages([
       ...messages,
       {
@@ -155,10 +152,8 @@ const MessageWorker = () => {
       }
     ]);
     
-    // Clear the input
     setMessage('');
     
-    // Simulate a reply (in a real app, this would come from the backend)
     setTimeout(() => {
       setMessages((prevMessages) => [
         ...prevMessages,
@@ -178,10 +173,9 @@ const MessageWorker = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow pt-24 pb-16">
+      <main className="flex-grow pt-24 pb-16 bg-orange-50/40 dark:bg-gray-900">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg">
-            {/* Chat Header */}
             <div className="p-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center">
               <Link to={`/workers/${worker.id}`} className="mr-4">
                 <Button variant="ghost" size="sm" className="rounded-full p-2">
@@ -218,7 +212,6 @@ const MessageWorker = () => {
               </div>
             </div>
             
-            {/* Chat Messages */}
             <div className="p-4 h-[400px] overflow-y-auto flex flex-col space-y-4">
               {messages.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
@@ -259,7 +252,6 @@ const MessageWorker = () => {
               )}
             </div>
             
-            {/* Message Input */}
             <div className="p-4 border-t border-gray-200 dark:border-gray-700">
               <form onSubmit={handleSendMessage} className="flex items-end gap-2">
                 <div className="flex-1 relative">
@@ -278,7 +270,7 @@ const MessageWorker = () => {
                     </Button>
                   </div>
                 </div>
-                <Button type="submit">
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
                   <Send className="h-5 w-5" />
                 </Button>
               </form>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -6,7 +5,6 @@ import SearchFilters from '@/components/SearchFilters';
 import ProfileCard from '@/components/ProfileCard';
 import { Briefcase, Filter } from 'lucide-react';
 
-// Sample workers data with updated image URLs
 const workersData = [
   {
     id: '1',
@@ -18,7 +16,7 @@ const workersData = [
     hourlyRate: '₹450',
     skills: ['Furniture', 'Cabinets', 'Remodeling'],
     isAvailable: true,
-    imageUrl: '/lovable-uploads/8982dbbf-4f3f-49f8-a06b-529eec7b9020.png',
+    imageUrl: '/lovable-uploads/ad12a288-99e5-40cc-9fd9-6b749d86ef72.png',
   },
   {
     id: '2',
@@ -30,7 +28,7 @@ const workersData = [
     hourlyRate: '₹400',
     skills: ['Wiring', 'Installations', 'Repairs'],
     isAvailable: true,
-    imageUrl: '/lovable-uploads/8f4e6d86-e9f4-4c17-8d22-8cb12fc3acf4.png',
+    imageUrl: '/lovable-uploads/eaac9fe5-7bbf-4230-8d24-39cc8b06a181.png',
   },
   {
     id: '3',
@@ -42,7 +40,7 @@ const workersData = [
     hourlyRate: '₹380',
     skills: ['Repairs', 'Installations', 'Drainage'],
     isAvailable: false,
-    imageUrl: '/lovable-uploads/d2ac463f-611d-4d8b-9474-ca1b056c597d.png',
+    imageUrl: '/lovable-uploads/a518f4b7-7466-4a3e-8a41-30b09ed4af12.png',
   },
   {
     id: '4',
@@ -54,7 +52,7 @@ const workersData = [
     hourlyRate: '₹650',
     skills: ['Home Design', 'Decoration', 'Space Planning'],
     isAvailable: true,
-    imageUrl: '/lovable-uploads/d94fa188-2dd5-4b50-9a8a-93a3dd5f344e.png',
+    imageUrl: '/lovable-uploads/76bf7a4e-88ba-4937-836f-334f4c3080e9.png',
   },
   {
     id: '5',
@@ -66,7 +64,7 @@ const workersData = [
     hourlyRate: '₹800',
     skills: ['Indian Cuisine', 'Continental', 'Catering'],
     isAvailable: true,
-    imageUrl: '/lovable-uploads/6d2fd45c-33d8-4c69-bd64-7fbce9cfe1e5.png',
+    imageUrl: '/lovable-uploads/490b07e5-a79e-4584-a48b-d5664014ced2.png',
   },
   {
     id: '6',
@@ -78,7 +76,7 @@ const workersData = [
     hourlyRate: '₹300',
     skills: ['Event Security', 'Property Protection', 'CCTV Monitoring'],
     isAvailable: false,
-    imageUrl: '/lovable-uploads/de66de83-4eab-4ecb-8a9b-16d264ae7f98.png',
+    imageUrl: '/lovable-uploads/ce356fe1-2b40-4126-88b9-9cb06dea72a3.png',
   },
   {
     id: '7',
@@ -90,7 +88,7 @@ const workersData = [
     hourlyRate: '₹480',
     skills: ['Bricklaying', 'Stone Work', 'Plastering'],
     isAvailable: true,
-    imageUrl: '/lovable-uploads/0dcb5641-c85a-4ed3-a216-73ab21ed7e07.png',
+    imageUrl: '/lovable-uploads/0e1f03a1-4278-4ef2-b427-22b6048ce642.png',
   },
   {
     id: '8',
@@ -102,7 +100,7 @@ const workersData = [
     hourlyRate: '₹420',
     skills: ['Car Repair', 'Engine Work', 'Diagnostics'],
     isAvailable: true,
-    imageUrl: '/lovable-uploads/8610c79b-f88e-4c51-a8ca-fd53d8dbfe4b.png',
+    imageUrl: '/lovable-uploads/40353383-4a09-47f7-8c4b-7e93a4c84800.png',
   },
   {
     id: '9',
@@ -114,7 +112,7 @@ const workersData = [
     hourlyRate: '₹390',
     skills: ['Interior Painting', 'Wall Design', 'Finish Work'],
     isAvailable: true,
-    imageUrl: '/lovable-uploads/297e83af-a6b8-4a90-9d36-78c87209c047.png',
+    imageUrl: '/lovable-uploads/b364ee52-a4f0-44ff-90f5-9d5ec2dfa3ac.png',
   },
   {
     id: '10',
@@ -126,7 +124,7 @@ const workersData = [
     hourlyRate: '₹350',
     skills: ['Landscaping', 'Plant Care', 'Garden Design'],
     isAvailable: true,
-    imageUrl: '/lovable-uploads/14c26b9b-373c-4f48-baff-1ade7682833b.png',
+    imageUrl: '/lovable-uploads/f46a222d-df5e-43a5-bff6-deed65ae3b15.png',
   },
   {
     id: '11',
@@ -138,7 +136,7 @@ const workersData = [
     hourlyRate: '₹500',
     skills: ['Stitching', 'Alterations', 'Traditional Clothing'],
     isAvailable: false,
-    imageUrl: '/lovable-uploads/c01178bc-7ba4-4232-a9de-50172c3b3c12.png',
+    imageUrl: '/lovable-uploads/a518f4b7-7466-4a3e-8a41-30b09ed4af12.png',
   },
   {
     id: '12',
@@ -150,7 +148,7 @@ const workersData = [
     hourlyRate: '₹320',
     skills: ['Cleaning', 'Organization', 'Eldercare'],
     isAvailable: true,
-    imageUrl: '/lovable-uploads/0345ffb5-d27a-4f2d-ab99-c1a9ade85a07.png',
+    imageUrl: '/lovable-uploads/eaac9fe5-7bbf-4230-8d24-39cc8b06a181.png',
   },
   {
     id: '13',
@@ -162,7 +160,7 @@ const workersData = [
     hourlyRate: '₹380',
     skills: ['Organic Farming', 'Crop Management', 'Livestock'],
     isAvailable: true,
-    imageUrl: '/lovable-uploads/f44f054e-3f99-4941-b6e9-c16cc3065582.png',
+    imageUrl: '/lovable-uploads/f46a222d-df5e-43a5-bff6-deed65ae3b15.png',
   }
 ];
 
@@ -215,7 +213,7 @@ const Workers = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow bg-slate-50 dark:bg-gray-900 pt-24">
+      <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-3xl mx-auto text-center mb-10">
             <div className="inline-block p-2 px-4 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-3">

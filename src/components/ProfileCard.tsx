@@ -111,7 +111,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <Button className="bg-primary hover:bg-primary/90" asChild>
               <Link to={`/workers/${id}`}>View Profile</Link>
             </Button>
-            <Button variant="default" className="col-span-2 mt-2 bg-green-600 hover:bg-green-700" asChild>
+            <Button variant="default" className="col-span-2 mt-2 btn-hire-me" asChild>
               <Link to={`/apply/${id}`}>Hire Me</Link>
             </Button>
           </div>
