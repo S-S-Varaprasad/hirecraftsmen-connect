@@ -27,6 +27,11 @@ const AvatarImage = React.forwardRef<
     ref={ref}
     className={cn("aspect-square h-full w-full object-cover", className)}
     {...props}
+    onError={(e) => {
+      // Hide broken image icon if image fails to load
+      const target = e.target as HTMLImageElement;
+      target.style.display = 'none';
+    }}
   />
 ))
 AvatarImage.displayName = AvatarPrimitive.Image.displayName

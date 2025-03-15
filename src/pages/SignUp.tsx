@@ -46,14 +46,14 @@ const SignUp = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow bg-gray-50 dark:bg-gray-900 pt-24 flex items-center justify-center">
+      <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24 flex items-center justify-center">
         <div className="container max-w-md mx-auto px-4 py-8">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
             <div className="p-8">
               <div className="text-center mb-8">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Create Your Account</h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Join CraftConnect and connect with skilled professionals
+                  Join HireEase and connect with skilled professionals
                 </p>
               </div>
               
@@ -183,17 +183,17 @@ const SignUp = () => {
                   <input
                     id="terms"
                     type="checkbox"
-                    className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                    className="h-4 w-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
                     required
                   />
                   <label htmlFor="terms" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                    I agree to the <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+                    I agree to the <Link to="/terms" className="text-orange-500 hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-orange-500 hover:underline">Privacy Policy</Link>
                   </label>
                 </div>
                 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full bg-orange-500 hover:bg-orange-600"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -210,7 +210,7 @@ const SignUp = () => {
               <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Already have an account?{' '}
-                  <Link to="/login" className="font-medium text-primary hover:underline">
+                  <Link to="/login" className="font-medium text-orange-500 hover:underline">
                     Sign In
                   </Link>
                 </p>

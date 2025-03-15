@@ -1,12 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import SearchFilters from '@/components/SearchFilters';
 import ProfileCard from '@/components/ProfileCard';
-import { Briefcase, Filter } from 'lucide-react';
+import SearchFilters from '@/components/SearchFilters';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
-// Sample workers data with updated image URLs
+// Reusing the existing worker data from the Workers page
 const workersData = [
   {
     id: '1',
@@ -166,49 +168,89 @@ const workersData = [
   }
 ];
 
-const Workers = () => {
-  const [filteredWorkers, setFilteredWorkers] = useState(workersData);
-  const [isLoading, setIsLoading] = useState(false);
+// Mapping of slugs to profession names
+const professionMap: { [key: string]: string } = {
+  'painter': 'Painter',
+  'carpenter': 'Carpenter',
+  'plumber': 'Plumber',
+  'electrician': 'Electrician',
+  'mechanic': 'Mechanic',
+  'security': 'Security Guard',
+  'chef': 'Chef',
+  'cleaner': 'Housekeeper',
+  'construction': 'Construction Worker',
+  'mason': 'Mason',
+  'gardener': 'Gardener',
+  'tailor': 'Tailor',
+  'farmer': 'Farmer',
+  'interior-designer': 'Interior Designer'
+};
+
+const WorkersByCategory = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const [filteredWorkers, setFilteredWorkers] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [categoryName, setCategoryName] = useState<string>('');
+
+  useEffect(() => {
+    if (slug) {
+      const profession = professionMap[slug] || '';
+      setCategoryName(profession);
+      
+      // Simulate API call to fetch workers by category
+      setIsLoading(true);
+      setTimeout(() => {
+        const results = workersData.filter(worker => {
+          const workerProfession = worker.profession.toLowerCase();
+          const professionToMatch = profession.toLowerCase();
+          return workerProfession.includes(professionToMatch) || 
+                worker.skills.some((skill: string) => skill.toLowerCase().includes(professionToMatch));
+        });
+        setFilteredWorkers(results);
+        setIsLoading(false);
+      }, 500);
+    }
+  }, [slug]);
 
   const handleSearch = (filters: any) => {
     setIsLoading(true);
     
-    // Simulate API call
+    // Get the current profession filter
+    const profession = professionMap[slug || ''] || '';
+    
+    // Clone workers that match the profession
+    let results = workersData.filter(worker => {
+      const workerProfession = worker.profession.toLowerCase();
+      const professionToMatch = profession.toLowerCase();
+      return workerProfession.includes(professionToMatch) || 
+            worker.skills.some((skill: string) => skill.toLowerCase().includes(professionToMatch));
+    });
+    
+    // Apply additional filters
+    if (filters.searchTerm) {
+      const term = filters.searchTerm.toLowerCase();
+      results = results.filter(worker => 
+        worker.name.toLowerCase().includes(term) || 
+        worker.profession.toLowerCase().includes(term) ||
+        worker.skills.some((skill: string) => skill.toLowerCase().includes(term))
+      );
+    }
+    
+    if (filters.location) {
+      const location = filters.location.toLowerCase();
+      results = results.filter(worker => 
+        worker.location.toLowerCase().includes(location)
+      );
+    }
+    
+    if (filters.availableOnly) {
+      results = results.filter(worker => worker.isAvailable);
+    }
+    
     setTimeout(() => {
-      let results = [...workersData];
-      
-      // Apply filters
-      if (filters.searchTerm) {
-        const term = filters.searchTerm.toLowerCase();
-        results = results.filter(worker => 
-          worker.name.toLowerCase().includes(term) || 
-          worker.profession.toLowerCase().includes(term) ||
-          worker.skills.some((skill: string) => skill.toLowerCase().includes(term))
-        );
-      }
-      
-      if (filters.location) {
-        const location = filters.location.toLowerCase();
-        results = results.filter(worker => 
-          worker.location.toLowerCase().includes(location)
-        );
-      }
-      
-      if (filters.professions && filters.professions.length > 0) {
-        results = results.filter(worker => 
-          filters.professions.some((p: string) => 
-            worker.profession.toLowerCase().includes(p.toLowerCase())
-          )
-        );
-      }
-      
-      if (filters.availableOnly) {
-        results = results.filter(worker => worker.isAvailable);
-      }
-      
       setFilteredWorkers(results);
       setIsLoading(false);
-    }, 500);
+    }, 400);
   };
 
   return (
@@ -217,14 +259,23 @@ const Workers = () => {
       
       <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
         <div className="container mx-auto px-4 py-8">
-          <div className="max-w-3xl mx-auto text-center mb-10">
-            <div className="inline-block p-2 px-4 bg-orange-100 text-orange-800 rounded-full text-sm font-medium mb-3">
-              Professional Directory
+          <div className="mb-8">
+            <Link to="/" className="inline-flex items-center text-primary hover:underline mb-4">
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back to Home
+            </Link>
+            
+            <div className="max-w-3xl mx-auto text-center mb-10">
+              <div className="inline-block p-2 px-4 bg-orange-100 text-orange-800 rounded-full text-sm font-medium mb-3">
+                {categoryName || 'Specialized'} Professionals
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+                {categoryName ? `Top ${categoryName} Professionals` : 'Specialized Professionals'}
+              </h1>
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                Browse our selection of qualified {categoryName.toLowerCase()} experts ready to help with your next project
+              </p>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Find Skilled Professionals</h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              Browse our directory of qualified workers ready to help with your next project
-            </p>
           </div>
           
           <div className="mb-8">
@@ -233,7 +284,7 @@ const Workers = () => {
           
           {isLoading ? (
             <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
             </div>
           ) : (
             <>
@@ -249,9 +300,12 @@ const Workers = () => {
                     <Briefcase className="w-8 h-8" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">No workers found</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Try adjusting your search filters or criteria
+                  <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                    We couldn't find any {categoryName.toLowerCase()} professionals matching your criteria. Try adjusting your filters or browse all workers.
                   </p>
+                  <Button variant="default" className="bg-orange-500 hover:bg-orange-600" asChild>
+                    <Link to="/workers">Browse All Workers</Link>
+                  </Button>
                 </div>
               )}
             </>
@@ -264,4 +318,4 @@ const Workers = () => {
   );
 };
 
-export default Workers;
+export default WorkersByCategory;

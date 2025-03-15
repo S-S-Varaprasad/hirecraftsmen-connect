@@ -9,7 +9,7 @@ import HeroSection from '@/components/HeroSection';
 import CategoryCard from '@/components/CategoryCard';
 import ProfileCard from '@/components/ProfileCard';
 
-// Sample featured workers data
+// Sample featured workers data with updated images
 const featuredWorkers = [
   {
     id: '1',
@@ -21,7 +21,7 @@ const featuredWorkers = [
     hourlyRate: '₹450',
     skills: ['Furniture', 'Cabinets', 'Remodeling'],
     isAvailable: true,
-    imageUrl: '/lovable-uploads/b2aa6fb3-3f41-46f1-81ea-37ea94ae8af3.png',
+    imageUrl: '/lovable-uploads/8982dbbf-4f3f-49f8-a06b-529eec7b9020.png',
   },
   {
     id: '2',
@@ -33,7 +33,7 @@ const featuredWorkers = [
     hourlyRate: '₹400',
     skills: ['Wiring', 'Installations', 'Repairs'],
     isAvailable: true,
-    imageUrl: '/lovable-uploads/b680b077-f224-42f8-a2d3-95b48ba6e0eb.png',
+    imageUrl: '/lovable-uploads/8f4e6d86-e9f4-4c17-8d22-8cb12fc3acf4.png',
   },
   {
     id: '3',
@@ -45,7 +45,7 @@ const featuredWorkers = [
     hourlyRate: '₹380',
     skills: ['Repairs', 'Installations', 'Drainage'],
     isAvailable: false,
-    imageUrl: '/lovable-uploads/f5bdc72f-cebf-457f-a3f5-46334ba5cb06.png',
+    imageUrl: '/lovable-uploads/d2ac463f-611d-4d8b-9474-ca1b056c597d.png',
   },
 ];
 
@@ -126,23 +126,26 @@ const Index = () => {
         <HeroSection />
         
         {/* Categories Section */}
-        <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-900">
+        <section className="py-16 md:py-24 bg-orange-50/40 dark:bg-gray-900">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
+              <div className="inline-block p-2 px-4 bg-orange-100 text-orange-800 rounded-full text-sm font-medium mb-3">
+                Categories
+              </div>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Explore by Profession</h2>
               <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
                 Find the right skilled professional for your project needs
               </p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {categories.map((category, index) => (
                 <CategoryCard key={index} {...category} />
               ))}
             </div>
             
             <div className="mt-12 text-center">
-              <Button variant="outline" size="lg" asChild>
+              <Button variant="outline" size="lg" className="border-orange-500 text-orange-600 hover:bg-orange-50" asChild>
                 <Link to="/workers" className="flex items-center gap-2">
                   View All Categories
                   <ChevronRight className="w-4 h-4" />
@@ -157,12 +160,15 @@ const Index = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
               <div className="mb-6 md:mb-0">
+                <div className="inline-block p-2 px-4 bg-orange-100 text-orange-800 rounded-full text-sm font-medium mb-3">
+                  Featured
+                </div>
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Featured Professionals</h2>
                 <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">
                   Top-rated craftspeople ready to help with your next project
                 </p>
               </div>
-              <Button variant="outline" asChild>
+              <Button variant="outline" className="border-orange-500 text-orange-600 hover:bg-orange-50" asChild>
                 <Link to="/workers" className="flex items-center gap-2">
                   Browse All
                   <ChevronRight className="w-4 h-4" />
@@ -179,9 +185,12 @@ const Index = () => {
         </section>
         
         {/* How It Works Section */}
-        <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-900">
+        <section className="py-16 md:py-24 bg-orange-50/40 dark:bg-gray-900">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
+              <div className="inline-block p-2 px-4 bg-orange-100 text-orange-800 rounded-full text-sm font-medium mb-3">
+                Process
+              </div>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">How It Works</h2>
               <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
                 Simple steps to connect with skilled professionals
@@ -189,8 +198,8 @@ const Index = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
+              <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-500 mx-auto mb-4">
                   <Sparkles className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3">1. Find a Professional</h3>
@@ -199,8 +208,8 @@ const Index = () => {
                 </p>
               </div>
               
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
+              <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-500 mx-auto mb-4">
                   <Star className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3">2. Review Profiles</h3>
@@ -209,8 +218,8 @@ const Index = () => {
                 </p>
               </div>
               
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
+              <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-500 mx-auto mb-4">
                   <Flame className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3">3. Connect & Hire</h3>
@@ -225,21 +234,21 @@ const Index = () => {
         {/* CTA Section */}
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-primary rounded-2xl overflow-hidden shadow-xl">
+            <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl overflow-hidden shadow-xl">
               <div className="px-6 py-12 md:p-12 text-center md:text-left md:flex md:items-center md:justify-between">
                 <div className="mb-8 md:mb-0 md:max-w-2xl">
                   <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
                     Ready to find the perfect professional for your project?
                   </h2>
-                  <p className="text-primary-foreground/90 text-lg">
+                  <p className="text-orange-50 text-lg">
                     Join thousands of satisfied customers who have found skilled workers through HireEase.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                  <Button size="lg" className="bg-white text-primary hover:bg-white/90" asChild>
+                  <Button size="lg" className="bg-white text-orange-600 hover:bg-white/90" asChild>
                     <Link to="/workers">Find Workers</Link>
                   </Button>
-                  <Button size="lg" variant="outline" className="bg-[#F97316] border-none text-white hover:bg-[#F97316]/90" asChild>
+                  <Button size="lg" variant="outline" className="border-white bg-transparent text-white hover:bg-white/10" asChild>
                     <Link to="/join-as-worker">Join as a Worker</Link>
                   </Button>
                 </div>
