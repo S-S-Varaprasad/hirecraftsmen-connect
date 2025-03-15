@@ -51,13 +51,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       
       <div className="flex flex-col h-full">
         <div className="relative pt-6 px-6 pb-4 flex flex-col items-center text-center">
-          <Avatar className="w-24 h-24 mb-4 border-4 border-orange-100 dark:border-orange-900/30 ring-2 ring-orange-500/20 shadow-lg">
+          <Avatar className="w-24 h-24 mb-4 border-4 border-blue-100 dark:border-blue-900/30 ring-2 ring-blue-500/20 shadow-lg">
             <AvatarImage 
               src={imageUrl} 
               alt={name}
               className="object-cover"
             />
-            <AvatarFallback className="text-lg font-medium bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300">
+            <AvatarFallback className="text-lg font-medium bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300">
               {getInitials(name)}
             </AvatarFallback>
           </Avatar>
@@ -105,10 +105,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         
         <div className="pt-4 px-6 pb-6 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
           <div className="flex gap-2">
-            <Button variant="outline" className="w-1/2 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 dark:hover:bg-orange-950/20 dark:hover:border-orange-900/30" asChild>
+            <Button variant="outline" className="w-1/2 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-950/20 dark:hover:border-blue-900/30" asChild>
               <Link to={`/message/${id}`}>Message</Link>
             </Button>
-            <Button className="w-1/2 bg-[#F97316] hover:bg-[#EA580C]" asChild>
+            <Button className="w-1/2 bg-blue-600 hover:bg-blue-700" asChild>
               <Link to={`/workers/${id}`}>View Profile</Link>
             </Button>
           </div>
