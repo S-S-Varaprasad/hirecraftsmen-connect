@@ -15,21 +15,21 @@ export function useStorage() {
       setIsLoading(true);
       setError(null);
 
-      // Use a stronger type assertion with 'as any' to bypass TypeScript's type checking
-      const { data, error } = await supabase.storage
+      // Cast the entire supabase.storage to any to bypass type checking
+      const { data, error } = await (supabase.storage as any)
         .from(bucket)
         .upload(path, file, {
           upsert: true,
-        }) as any;
+        });
 
       if (error) {
         throw error;
       }
 
       // Get public URL with stronger type assertion
-      const { data: urlData } = supabase.storage
+      const { data: urlData } = (supabase.storage as any)
         .from(bucket)
-        .getPublicUrl(data.path) as any;
+        .getPublicUrl(data.path);
 
       return urlData.publicUrl;
     } catch (err: any) {
@@ -46,10 +46,10 @@ export function useStorage() {
       setIsLoading(true);
       setError(null);
 
-      // Use a stronger type assertion with 'as any' to bypass TypeScript's type checking
-      const { error } = await supabase.storage
+      // Cast the entire supabase.storage to any to bypass type checking
+      const { error } = await (supabase.storage as any)
         .from(bucket)
-        .remove([path]) as any;
+        .remove([path]);
 
       if (error) {
         throw error;

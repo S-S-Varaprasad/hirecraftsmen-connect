@@ -16,10 +16,10 @@ export interface Worker {
 }
 
 export const getWorkers = async () => {
-  // Use a stronger type assertion with 'as any' to bypass TypeScript's type checking
-  const { data, error } = await supabase
+  // Cast the entire supabase client to any to bypass type checking
+  const { data, error } = await (supabase as any)
     .from('workers')
-    .select('*') as any;
+    .select('*');
   
   if (error) {
     console.error('Error fetching workers:', error);
@@ -30,11 +30,11 @@ export const getWorkers = async () => {
 };
 
 export const getWorkersByCategory = async (category: string) => {
-  // Use a stronger type assertion with 'as any' to bypass TypeScript's type checking
-  const { data, error } = await supabase
+  // Cast the entire supabase client to any to bypass type checking
+  const { data, error } = await (supabase as any)
     .from('workers')
     .select('*')
-    .ilike('profession', `%${category}%`) as any;
+    .ilike('profession', `%${category}%`);
   
   if (error) {
     console.error('Error fetching workers by category:', error);
@@ -45,12 +45,12 @@ export const getWorkersByCategory = async (category: string) => {
 };
 
 export const getWorkerById = async (id: string) => {
-  // Use a stronger type assertion with 'as any' to bypass TypeScript's type checking
-  const { data, error } = await supabase
+  // Cast the entire supabase client to any to bypass type checking
+  const { data, error } = await (supabase as any)
     .from('workers')
     .select('*')
     .eq('id', id)
-    .single() as any;
+    .single();
   
   if (error) {
     console.error('Error fetching worker:', error);
@@ -61,8 +61,8 @@ export const getWorkerById = async (id: string) => {
 };
 
 export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating'>) => {
-  // Use a stronger type assertion with 'as any' to bypass TypeScript's type checking
-  const { data, error } = await supabase
+  // Cast the entire supabase client to any to bypass type checking
+  const { data, error } = await (supabase as any)
     .from('workers')
     .insert([
       {
@@ -70,7 +70,7 @@ export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating'>) 
         rating: 0,
       }
     ])
-    .select() as any;
+    .select();
   
   if (error) {
     console.error('Error registering worker:', error);
