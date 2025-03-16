@@ -19,7 +19,7 @@ export function useStorage() {
         .from(bucket)
         .upload(path, file, {
           upsert: true,
-        }) as any;
+        }) as { data: { path: string } | null, error: any };
 
       if (error) {
         throw error;
@@ -28,7 +28,7 @@ export function useStorage() {
       // Get public URL
       const { data: urlData } = supabase.storage
         .from(bucket)
-        .getPublicUrl(data.path) as any;
+        .getPublicUrl(data.path) as { data: { publicUrl: string } };
 
       return urlData.publicUrl;
     } catch (err: any) {
@@ -47,7 +47,7 @@ export function useStorage() {
 
       const { error } = await supabase.storage
         .from(bucket)
-        .remove([path]) as any;
+        .remove([path]) as { data: any, error: any };
 
       if (error) {
         throw error;
