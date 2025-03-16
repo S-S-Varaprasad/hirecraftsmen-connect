@@ -15,20 +15,20 @@ export function useStorage() {
       setIsLoading(true);
       setError(null);
 
-      const { data, error } = await supabase.storage
+      const { data, error } = await (supabase.storage
         .from(bucket)
         .upload(path, file, {
           upsert: true,
-        }) as { data: { path: string } | null, error: any };
+        }) as unknown as Promise<{ data: { path: string } | null, error: any }>);
 
       if (error) {
         throw error;
       }
 
       // Get public URL
-      const { data: urlData } = supabase.storage
+      const { data: urlData } = (supabase.storage
         .from(bucket)
-        .getPublicUrl(data.path) as { data: { publicUrl: string } };
+        .getPublicUrl(data.path) as unknown as { data: { publicUrl: string } });
 
       return urlData.publicUrl;
     } catch (err: any) {
@@ -45,9 +45,9 @@ export function useStorage() {
       setIsLoading(true);
       setError(null);
 
-      const { error } = await supabase.storage
+      const { error } = await (supabase.storage
         .from(bucket)
-        .remove([path]) as { data: any, error: any };
+        .remove([path]) as unknown as Promise<{ data: any, error: any }>);
 
       if (error) {
         throw error;

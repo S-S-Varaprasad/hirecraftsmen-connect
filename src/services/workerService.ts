@@ -16,9 +16,9 @@ export interface Worker {
 }
 
 export const getWorkers = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from('workers')
-    .select('*') as { data: Worker[] | null, error: any };
+    .select('*') as unknown as Promise<{ data: Worker[] | null, error: any }>);
   
   if (error) {
     console.error('Error fetching workers:', error);
@@ -29,10 +29,10 @@ export const getWorkers = async () => {
 };
 
 export const getWorkersByCategory = async (category: string) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from('workers')
     .select('*')
-    .ilike('profession', `%${category}%`) as { data: Worker[] | null, error: any };
+    .ilike('profession', `%${category}%`) as unknown as Promise<{ data: Worker[] | null, error: any }>);
   
   if (error) {
     console.error('Error fetching workers by category:', error);
@@ -43,11 +43,11 @@ export const getWorkersByCategory = async (category: string) => {
 };
 
 export const getWorkerById = async (id: string) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from('workers')
     .select('*')
     .eq('id', id)
-    .single() as { data: Worker | null, error: any };
+    .single() as unknown as Promise<{ data: Worker | null, error: any }>);
   
   if (error) {
     console.error('Error fetching worker:', error);
@@ -58,7 +58,7 @@ export const getWorkerById = async (id: string) => {
 };
 
 export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating'>) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from('workers')
     .insert([
       {
@@ -66,7 +66,7 @@ export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating'>) 
         rating: 0,
       }
     ])
-    .select() as { data: Worker[] | null, error: any };
+    .select() as unknown as Promise<{ data: Worker[] | null, error: any }>);
   
   if (error) {
     console.error('Error registering worker:', error);
