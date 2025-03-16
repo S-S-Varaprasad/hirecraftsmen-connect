@@ -1,35 +1,43 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { User, Lock, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { signIn, isAuthenticated } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Redirect if already logged in
+  if (isAuthenticated) {
+    return <Navigate to="/" />;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call for login
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { error } = await signIn(email, password);
       
-      // This is just a demo validation - in a real app, this would be handled by a backend
-      if (email && password.length >= 6) {
-        toast.success('Successfully logged in!');
-        // Redirect would happen here in a real implementation
+      if (error) {
+        toast.error(error.message || 'Login failed. Please check your credentials.');
       } else {
-        toast.error('Invalid credentials. Please try again.');
+        toast.success('Successfully logged in!');
       }
-    }, 1500);
+    } catch (error: any) {
+      toast.error(error.message || 'An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

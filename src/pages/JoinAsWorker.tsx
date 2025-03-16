@@ -1,13 +1,18 @@
+
 import React, { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { User, Mail, Phone, MapPin, Briefcase, Clock, IndianRupee, FileText, Upload, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
+import { registerWorker } from '@/services/workerService';
+import { supabase } from '@/integrations/supabase/client';
 
 const JoinAsWorker = () => {
+  const { user, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,6 +29,12 @@ const JoinAsWorker = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Redirect if not logged in
+  if (!isAuthenticated) {
+    toast.error('Please log in to register as a worker');
+    return <Navigate to="/login" />;
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -83,29 +94,74 @@ const JoinAsWorker = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      if (formData.name && formData.email && formData.phone && formData.profession) {
-        if (!formData.profileImage) {
-          toast.warning('A profile photo is required to complete your registration.');
+    try {
+      if (!formData.name || !formData.email || !formData.phone || !formData.profession || !formData.location) {
+        toast.warning('Please fill all required fields.');
+        setIsLoading(false);
+        return;
+      }
+
+      if (!formData.profileImage) {
+        toast.warning('A profile photo is required to complete your registration.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Upload profile image to Supabase Storage
+      let imageUrl = null;
+      if (formData.profileImage) {
+        const fileExt = formData.profileImage.name.split('.').pop();
+        const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
+        
+        const { error: storageError, data: storageData } = await supabase
+          .storage
+          .from('worker-profiles')
+          .upload(fileName, formData.profileImage);
+          
+        if (storageError) {
+          toast.error('Error uploading profile image');
+          console.error(storageError);
+          setIsLoading(false);
           return;
         }
         
-        toast.success('Your profile has been submitted! We will review and get back to you soon.');
-        // Redirect would happen here in a real implementation
-      } else {
-        toast.error('Please fill all required fields.');
+        imageUrl = supabase.storage.from('worker-profiles').getPublicUrl(fileName).data.publicUrl;
       }
-    }, 1500);
+
+      // Register worker in database
+      await registerWorker({
+        name: formData.name,
+        profession: formData.profession,
+        location: formData.location,
+        experience: formData.experience,
+        hourly_rate: formData.hourlyRate,
+        skills: formData.skills.split(',').map(skill => skill.trim()),
+        is_available: true,
+        image_url: imageUrl,
+        about: formData.about
+      });
+
+      toast.success('Your profile has been submitted! We will review and get back to you soon.');
+      
+      // Redirect to workers page
+      setTimeout(() => {
+        window.location.href = '/workers';
+      }, 2000);
+      
+    } catch (error: any) {
+      console.error('Error registering worker:', error);
+      toast.error(error.message || 'An error occurred while submitting your profile');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-orange-50/40 dark:bg-gray-900">
+    <div className="min-h-screen flex flex-col bg-blue-50/40 dark:bg-gray-900">
       <Navbar />
       
       <main className="flex-grow pt-24">

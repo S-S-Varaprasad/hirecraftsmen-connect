@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -6,165 +7,8 @@ import ProfileCard from '@/components/ProfileCard';
 import SearchFilters from '@/components/SearchFilters';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Briefcase } from 'lucide-react';
-
-const workersData = [
-  {
-    id: '1',
-    name: 'Rajesh Kumar',
-    profession: 'Master Carpenter',
-    location: 'Bengaluru, Karnataka',
-    rating: 4.9,
-    experience: '15 years',
-    hourlyRate: '₹450',
-    skills: ['Furniture', 'Cabinets', 'Remodeling'],
-    isAvailable: true,
-    imageUrl: '/lovable-uploads/ad12a288-99e5-40cc-9fd9-6b749d86ef72.png',
-  },
-  {
-    id: '2',
-    name: 'Priya Sharma',
-    profession: 'Electrician',
-    location: 'Mysuru, Karnataka',
-    rating: 4.8,
-    experience: '8 years',
-    hourlyRate: '₹400',
-    skills: ['Wiring', 'Installations', 'Repairs'],
-    isAvailable: true,
-    imageUrl: '/lovable-uploads/eaac9fe5-7bbf-4230-8d24-39cc8b06a181.png',
-  },
-  {
-    id: '3',
-    name: 'Mohammed Ali',
-    profession: 'Plumber',
-    location: 'Mangaluru, Karnataka',
-    rating: 4.7,
-    experience: '12 years',
-    hourlyRate: '₹380',
-    skills: ['Repairs', 'Installations', 'Drainage'],
-    isAvailable: false,
-    imageUrl: '/lovable-uploads/a518f4b7-7466-4a3e-8a41-30b09ed4af12.png',
-  },
-  {
-    id: '4',
-    name: 'Anjali Desai',
-    profession: 'Interior Designer',
-    location: 'Hubballi, Karnataka',
-    rating: 4.9,
-    experience: '10 years',
-    hourlyRate: '₹650',
-    skills: ['Home Design', 'Decoration', 'Space Planning'],
-    isAvailable: true,
-    imageUrl: '/lovable-uploads/76bf7a4e-88ba-4937-836f-334f4c3080e9.png',
-  },
-  {
-    id: '5',
-    name: 'Ravi Verma',
-    profession: 'Chef',
-    location: 'Belagavi, Karnataka',
-    rating: 4.6,
-    experience: '7 years',
-    hourlyRate: '₹800',
-    skills: ['Indian Cuisine', 'Continental', 'Catering'],
-    isAvailable: true,
-    imageUrl: '/lovable-uploads/490b07e5-a79e-4584-a48b-d5664014ced2.png',
-  },
-  {
-    id: '6',
-    name: 'Deepak Shetty',
-    profession: 'Security Guard',
-    location: 'Bengaluru, Karnataka',
-    rating: 4.8,
-    experience: '9 years',
-    hourlyRate: '₹300',
-    skills: ['Event Security', 'Property Protection', 'CCTV Monitoring'],
-    isAvailable: false,
-    imageUrl: '/lovable-uploads/ce356fe1-2b40-4126-88b9-9cb06dea72a3.png',
-  },
-  {
-    id: '7',
-    name: 'Aisha Khan',
-    profession: 'Mason',
-    location: 'Mangaluru, Karnataka',
-    rating: 4.7,
-    experience: '11 years',
-    hourlyRate: '₹480',
-    skills: ['Bricklaying', 'Stone Work', 'Plastering'],
-    isAvailable: true,
-    imageUrl: '/lovable-uploads/0e1f03a1-4278-4ef2-b427-22b6048ce642.png',
-  },
-  {
-    id: '8',
-    name: 'Vikram Reddy',
-    profession: 'Mechanic',
-    location: 'Mysuru, Karnataka',
-    rating: 4.9,
-    experience: '14 years',
-    hourlyRate: '₹420',
-    skills: ['Car Repair', 'Engine Work', 'Diagnostics'],
-    isAvailable: true,
-    imageUrl: '/lovable-uploads/40353383-4a09-47f7-8c4b-7e93a4c84800.png',
-  },
-  {
-    id: '9',
-    name: 'Sunil Patil',
-    profession: 'Painter',
-    location: 'Bengaluru, Karnataka',
-    rating: 4.8,
-    experience: '9 years',
-    hourlyRate: '₹390',
-    skills: ['Interior Painting', 'Wall Design', 'Finish Work'],
-    isAvailable: true,
-    imageUrl: '/lovable-uploads/b364ee52-a4f0-44ff-90f5-9d5ec2dfa3ac.png',
-  },
-  {
-    id: '10',
-    name: 'Kiran Prakash',
-    profession: 'Gardener',
-    location: 'Dharwad, Karnataka',
-    rating: 4.7,
-    experience: '12 years',
-    hourlyRate: '₹350',
-    skills: ['Landscaping', 'Plant Care', 'Garden Design'],
-    isAvailable: true,
-    imageUrl: '/lovable-uploads/f46a222d-df5e-43a5-bff6-deed65ae3b15.png',
-  },
-  {
-    id: '11',
-    name: 'Sanjay Rao',
-    profession: 'Tailor',
-    location: 'Bellary, Karnataka',
-    rating: 4.9,
-    experience: '18 years',
-    hourlyRate: '₹500',
-    skills: ['Stitching', 'Alterations', 'Traditional Clothing'],
-    isAvailable: false,
-    imageUrl: '/lovable-uploads/a518f4b7-7466-4a3e-8a41-30b09ed4af12.png',
-  },
-  {
-    id: '12',
-    name: 'Lakshmi Devi',
-    profession: 'Housekeeper',
-    location: 'Bengaluru, Karnataka',
-    rating: 4.8,
-    experience: '10 years',
-    hourlyRate: '₹320',
-    skills: ['Cleaning', 'Organization', 'Eldercare'],
-    isAvailable: true,
-    imageUrl: '/lovable-uploads/eaac9fe5-7bbf-4230-8d24-39cc8b06a181.png',
-  },
-  {
-    id: '13',
-    name: 'Ramesh Gowda',
-    profession: 'Farmer',
-    location: 'Tumkur, Karnataka',
-    rating: 4.7,
-    experience: '25 years',
-    hourlyRate: '₹380',
-    skills: ['Organic Farming', 'Crop Management', 'Livestock'],
-    isAvailable: true,
-    imageUrl: '/lovable-uploads/f46a222d-df5e-43a5-bff6-deed65ae3b15.png',
-  }
-];
+import { useQuery } from '@tanstack/react-query';
+import { getWorkers, Worker } from '@/services/workerService';
 
 const professionMap: { [key: string]: string } = {
   'painter': 'Painter',
@@ -185,37 +29,41 @@ const professionMap: { [key: string]: string } = {
 
 const WorkersByCategory = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [filteredWorkers, setFilteredWorkers] = useState<any[]>([]);
+  const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [categoryName, setCategoryName] = useState<string>('');
 
+  const { data: workersData = [], isLoading: isLoadingWorkers } = useQuery({
+    queryKey: ['workers'],
+    queryFn: getWorkers,
+  });
+
   useEffect(() => {
-    if (slug) {
+    if (slug && workersData.length > 0) {
       const profession = professionMap[slug] || '';
       setCategoryName(profession || 'Specialized');
       
       setIsLoading(true);
-      setTimeout(() => {
-        // This ensures we have results even if the profession isn't found directly
-        const professionToMatch = profession.toLowerCase();
-        let results = [];
-        
-        if (professionToMatch) {
-          results = workersData.filter(worker => {
-            const workerProfession = worker.profession.toLowerCase();
-            return workerProfession.includes(professionToMatch) || 
-                  worker.skills.some((skill: string) => skill.toLowerCase().includes(professionToMatch));
-          });
-        } else {
-          // If no profession matches, just show some workers to avoid empty results
-          results = workersData.slice(0, 6);
-        }
-        
-        setFilteredWorkers(results);
-        setIsLoading(false);
-      }, 500);
+      
+      // This ensures we have results even if the profession isn't found directly
+      const professionToMatch = profession.toLowerCase();
+      let results = [];
+      
+      if (professionToMatch) {
+        results = workersData.filter(worker => {
+          const workerProfession = worker.profession.toLowerCase();
+          return workerProfession.includes(professionToMatch) || 
+                worker.skills.some((skill: string) => skill.toLowerCase().includes(professionToMatch));
+        });
+      } else {
+        // If no profession matches, just show some workers to avoid empty results
+        results = workersData.slice(0, 6);
+      }
+      
+      setFilteredWorkers(results);
+      setIsLoading(false);
     }
-  }, [slug]);
+  }, [slug, workersData]);
 
   const handleSearch = (filters: any) => {
     setIsLoading(true);
@@ -246,7 +94,7 @@ const WorkersByCategory = () => {
     }
     
     if (filters.availableOnly) {
-      results = results.filter(worker => worker.isAvailable);
+      results = results.filter(worker => worker.is_available);
     }
     
     setTimeout(() => {
@@ -254,6 +102,18 @@ const WorkersByCategory = () => {
       setIsLoading(false);
     }, 400);
   };
+
+  if (isLoadingWorkers) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -293,7 +153,19 @@ const WorkersByCategory = () => {
               {filteredWorkers.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredWorkers.map((worker) => (
-                    <ProfileCard key={worker.id} {...worker} />
+                    <ProfileCard 
+                      key={worker.id} 
+                      id={worker.id}
+                      name={worker.name}
+                      profession={worker.profession}
+                      location={worker.location}
+                      rating={worker.rating}
+                      experience={worker.experience}
+                      hourlyRate={worker.hourly_rate}
+                      skills={worker.skills}
+                      isAvailable={worker.is_available}
+                      imageUrl={worker.image_url || '/placeholder.svg'}
+                    />
                   ))}
                 </div>
               ) : (

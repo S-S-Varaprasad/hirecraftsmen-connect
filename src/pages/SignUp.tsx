@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { User, Lock, Eye, EyeOff, Mail, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
 
 const SignUp = () => {
   const [name, setName] = useState('');
@@ -17,8 +18,14 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { signUp, isAuthenticated } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Redirect if already logged in
+  if (isAuthenticated) {
+    return <Navigate to="/" />;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
@@ -28,18 +35,19 @@ const SignUp = () => {
     
     setIsLoading(true);
 
-    // Simulate API call for registration
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { error } = await signUp(email, password, name, phone);
       
-      // This is just a demo validation
-      if (email && password.length >= 6) {
-        toast.success('Account created successfully!');
-        // Redirect would happen here in a real implementation
+      if (error) {
+        toast.error(error.message || 'Registration failed. Please try again.');
       } else {
-        toast.error('Please fill all required fields correctly.');
+        toast.success('Account created successfully! Please check your email to confirm your account.');
       }
-    }, 1500);
+    } catch (error: any) {
+      toast.error(error.message || 'An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
