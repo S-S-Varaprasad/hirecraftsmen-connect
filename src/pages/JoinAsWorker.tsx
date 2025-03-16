@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { User, Mail, Phone, MapPin, Briefcase, Clock, IndianRupee, FileText, Upload, Star } from 'lucide-react';
@@ -132,7 +131,7 @@ const JoinAsWorker = () => {
         imageUrl = supabase.storage.from('worker-profiles').getPublicUrl(fileName).data.publicUrl;
       }
 
-      // Register worker in database
+      // Register worker in database - add user_id from the authenticated user
       await registerWorker({
         name: formData.name,
         profession: formData.profession,
@@ -142,7 +141,8 @@ const JoinAsWorker = () => {
         skills: formData.skills.split(',').map(skill => skill.trim()),
         is_available: true,
         image_url: imageUrl,
-        about: formData.about
+        about: formData.about,
+        user_id: user?.id || null,  // Add user_id from the authenticated user
       });
 
       toast.success('Your profile has been submitted! We will review and get back to you soon.');
