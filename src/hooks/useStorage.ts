@@ -15,30 +15,21 @@ export function useStorage() {
       setIsLoading(true);
       setError(null);
 
-      // Use a type assertion to properly cast the Supabase storage response
-      const uploadResponse = await supabase.storage
+      // Use a stronger type assertion with 'as any' to bypass TypeScript's type checking
+      const { data, error } = await supabase.storage
         .from(bucket)
         .upload(path, file, {
           upsert: true,
-        });
-
-      const { data, error } = uploadResponse as unknown as { 
-        data: { path: string } | null, 
-        error: any 
-      };
+        }) as any;
 
       if (error) {
         throw error;
       }
 
-      // Get public URL with proper type assertion
-      const urlResponse = supabase.storage
+      // Get public URL with stronger type assertion
+      const { data: urlData } = supabase.storage
         .from(bucket)
-        .getPublicUrl(data!.path);
-
-      const { data: urlData } = urlResponse as unknown as { 
-        data: { publicUrl: string } 
-      };
+        .getPublicUrl(data.path) as any;
 
       return urlData.publicUrl;
     } catch (err: any) {
@@ -55,15 +46,10 @@ export function useStorage() {
       setIsLoading(true);
       setError(null);
 
-      // Use a type assertion to properly cast the Supabase storage response
-      const deleteResponse = await supabase.storage
+      // Use a stronger type assertion with 'as any' to bypass TypeScript's type checking
+      const { error } = await supabase.storage
         .from(bucket)
-        .remove([path]);
-
-      const { error } = deleteResponse as unknown as { 
-        data: any, 
-        error: any 
-      };
+        .remove([path]) as any;
 
       if (error) {
         throw error;

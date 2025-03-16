@@ -16,12 +16,10 @@ export interface Worker {
 }
 
 export const getWorkers = async () => {
-  // Use a type assertion to properly cast the Supabase response
-  const response = await supabase
+  // Use a stronger type assertion with 'as any' to bypass TypeScript's type checking
+  const { data, error } = await supabase
     .from('workers')
-    .select('*');
-  
-  const { data, error } = response as unknown as { data: Worker[] | null, error: any };
+    .select('*') as any;
   
   if (error) {
     console.error('Error fetching workers:', error);
@@ -32,13 +30,11 @@ export const getWorkers = async () => {
 };
 
 export const getWorkersByCategory = async (category: string) => {
-  // Use a type assertion to properly cast the Supabase response
-  const response = await supabase
+  // Use a stronger type assertion with 'as any' to bypass TypeScript's type checking
+  const { data, error } = await supabase
     .from('workers')
     .select('*')
-    .ilike('profession', `%${category}%`);
-  
-  const { data, error } = response as unknown as { data: Worker[] | null, error: any };
+    .ilike('profession', `%${category}%`) as any;
   
   if (error) {
     console.error('Error fetching workers by category:', error);
@@ -49,14 +45,12 @@ export const getWorkersByCategory = async (category: string) => {
 };
 
 export const getWorkerById = async (id: string) => {
-  // Use a type assertion to properly cast the Supabase response
-  const response = await supabase
+  // Use a stronger type assertion with 'as any' to bypass TypeScript's type checking
+  const { data, error } = await supabase
     .from('workers')
     .select('*')
     .eq('id', id)
-    .single();
-  
-  const { data, error } = response as unknown as { data: Worker | null, error: any };
+    .single() as any;
   
   if (error) {
     console.error('Error fetching worker:', error);
@@ -67,8 +61,8 @@ export const getWorkerById = async (id: string) => {
 };
 
 export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating'>) => {
-  // Use a type assertion to properly cast the Supabase response
-  const response = await supabase
+  // Use a stronger type assertion with 'as any' to bypass TypeScript's type checking
+  const { data, error } = await supabase
     .from('workers')
     .insert([
       {
@@ -76,9 +70,7 @@ export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating'>) 
         rating: 0,
       }
     ])
-    .select();
-  
-  const { data, error } = response as unknown as { data: Worker[] | null, error: any };
+    .select() as any;
   
   if (error) {
     console.error('Error registering worker:', error);
