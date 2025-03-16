@@ -3,10 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X, Search, User, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
+import UserProfile from './UserProfile';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,12 +57,19 @@ const Navbar = () => {
               <Search className="w-4 h-4" />
               <span>Search</span>
             </Button>
-            <Link to="/login">
-              <Button variant="ghost" size="sm">Login</Button>
-            </Link>
-            <Link to="/register">
-              <Button variant="default" size="sm">Sign Up</Button>
-            </Link>
+            
+            {isAuthenticated ? (
+              <UserProfile />
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" size="sm">Login</Button>
+                </Link>
+                <Link to="/register">
+                  <Button variant="default" size="sm">Sign Up</Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -99,20 +109,28 @@ const Navbar = () => {
           </div>
           
           <div className="space-y-2">
-            <Link 
-              to="/login" 
-              className="block w-full py-3 px-4 rounded-md text-center font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Log In
-            </Link>
-            <Link 
-              to="/register" 
-              className="block w-full py-3 px-4 rounded-md text-center font-medium text-white bg-primary hover:bg-primary/90 transition-all"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Sign Up
-            </Link>
+            {isAuthenticated ? (
+              <div className="py-3 px-4 rounded-md text-center font-medium bg-gray-50 dark:bg-gray-800 mb-4">
+                <UserProfile />
+              </div>
+            ) : (
+              <>
+                <Link 
+                  to="/login" 
+                  className="block w-full py-3 px-4 rounded-md text-center font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Log In
+                </Link>
+                <Link 
+                  to="/register" 
+                  className="block w-full py-3 px-4 rounded-md text-center font-medium text-white bg-primary hover:bg-primary/90 transition-all"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
             <Link 
               to="/join-as-worker" 
               className="block w-full py-3 px-4 rounded-md text-center font-medium text-primary border border-primary bg-white dark:bg-transparent hover:bg-primary/10 transition-all"

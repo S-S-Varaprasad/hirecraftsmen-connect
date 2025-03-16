@@ -7,6 +7,7 @@ import ProfileCard from '@/components/ProfileCard';
 import { Briefcase, Filter } from 'lucide-react';
 import { getWorkers, Worker } from '@/services/workerService';
 import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 const Workers = () => {
   const { data: workersData = [], isLoading: isLoadingWorkers, error } = useQuery({
@@ -61,6 +62,9 @@ const Workers = () => {
       
       setFilteredWorkers(results);
       setIsLoading(false);
+      
+      // Show toast notification for search results
+      toast.info(`Found ${results.length} worker${results.length !== 1 ? 's' : ''} matching your search criteria`);
     }, 500);
   };
 

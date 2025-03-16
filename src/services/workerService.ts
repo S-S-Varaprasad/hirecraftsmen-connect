@@ -13,6 +13,8 @@ export interface Worker {
   is_available: boolean;
   image_url: string | null;
   about: string | null;
+  user_id: string | null;
+  created_at: string;
 }
 
 export const getWorkers = async () => {
@@ -60,7 +62,23 @@ export const getWorkerById = async (id: string) => {
   return data as Worker;
 };
 
-export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating'>) => {
+export const getWorkerByUserId = async (userId: string) => {
+  // Cast the entire supabase client to any to bypass type checking
+  const { data, error } = await (supabase as any)
+    .from('workers')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') { // PGRST116 is the error code for "no rows returned"
+    console.error('Error fetching worker by user id:', error);
+    throw error;
+  }
+  
+  return data as Worker | null;
+};
+
+export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating' | 'created_at'>) => {
   // Cast the entire supabase client to any to bypass type checking
   const { data, error } = await (supabase as any)
     .from('workers')
@@ -74,6 +92,22 @@ export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating'>) 
   
   if (error) {
     console.error('Error registering worker:', error);
+    throw error;
+  }
+  
+  return data?.[0] as Worker;
+};
+
+export const updateWorker = async (id: string, workerData: Partial<Worker>) => {
+  // Cast the entire supabase client to any to bypass type checking
+  const { data, error } = await (supabase as any)
+    .from('workers')
+    .update(workerData)
+    .eq('id', id)
+    .select();
+  
+  if (error) {
+    console.error('Error updating worker:', error);
     throw error;
   }
   

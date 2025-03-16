@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Calendar, Clock, Briefcase } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { MapPin, Briefcase, IndianRupee, Clock, Calendar, ArrowRight } from 'lucide-react';
 
 interface JobCardProps {
   id: string;
@@ -28,74 +29,87 @@ const JobCard: React.FC<JobCardProps> = ({
   urgency,
   postedDate,
   skills,
-  description,
+  description
 }) => {
-  const urgencyColors = {
-    Low: 'bg-blue-500',
-    Medium: 'bg-yellow-500',
-    High: 'bg-red-500',
+  // Determine badge color based on urgency
+  const getBadgeColor = () => {
+    switch (urgency) {
+      case 'High':
+        return 'bg-red-500 hover:bg-red-600';
+      case 'Medium':
+        return 'bg-yellow-500 hover:bg-yellow-600';
+      case 'Low':
+        return 'bg-green-500 hover:bg-green-600';
+      default:
+        return 'bg-blue-500 hover:bg-blue-600';
+    }
+  };
+
+  // Truncate description to avoid too much text
+  const truncateDescription = (text: string, maxLength: number = 150) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-card hover:shadow-elevated transition-all duration-300 animate-in">
-      <div className="px-6 py-5">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
+    <Card className="h-full flex flex-col transition-all duration-300 hover:shadow-md animate-in">
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-              {title}
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{company}</p>
+            <CardTitle className="text-xl">{title}</CardTitle>
+            <CardDescription className="text-base">{company}</CardDescription>
           </div>
-          <div className="mt-2 sm:mt-0">
-            <Badge className={`${urgencyColors[urgency]} hover:${urgencyColors[urgency]}`}>
-              {urgency} Urgency
-            </Badge>
+          <Badge className={getBadgeColor()}>
+            {urgency} Priority
+          </Badge>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="flex-grow">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-4">
+          <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+            <MapPin className="w-4 h-4 mr-2 text-gray-500" />
+            <span>{location}</span>
+          </div>
+          <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+            <Briefcase className="w-4 h-4 mr-2 text-gray-500" />
+            <span>{jobType}</span>
+          </div>
+          <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+            <IndianRupee className="w-4 h-4 mr-2 text-gray-500" />
+            <span>{rate}</span>
+          </div>
+          <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+            <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+            <span>Posted {postedDate}</span>
           </div>
         </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-y-2 mb-4 text-sm">
-          <div className="flex items-center">
-            <MapPin className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-            <span className="text-gray-700 dark:text-gray-300">{location}</span>
-          </div>
-          <div className="flex items-center">
-            <Briefcase className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-            <span className="text-gray-700 dark:text-gray-300">{jobType}</span>
-          </div>
-          <div className="flex items-center">
-            <Clock className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-            <span className="text-gray-700 dark:text-gray-300">{rate}</span>
-          </div>
-          <div className="flex items-center">
-            <Calendar className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-            <span className="text-gray-700 dark:text-gray-300">{postedDate}</span>
-          </div>
-        </div>
-
-        <div className="mb-4">
-          <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
-            {description}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-1 mb-4">
-          {skills.map((skill, index) => (
-            <Badge key={index} variant="outline" className="bg-gray-50 dark:bg-gray-800">
-              {skill}
-            </Badge>
+        
+        <p className="text-gray-700 dark:text-gray-300 text-sm mb-4">
+          {truncateDescription(description)}
+        </p>
+        
+        <div className="flex flex-wrap gap-1 mt-auto">
+          {skills.slice(0, 3).map((skill, i) => (
+            <Badge key={i} variant="outline" className="bg-gray-50 dark:bg-gray-800">{skill}</Badge>
           ))}
+          {skills.length > 3 && (
+            <Badge variant="outline" className="bg-transparent">+{skills.length - 3}</Badge>
+          )}
         </div>
-
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
-          <Button variant="outline" className="border-gray-200 hover:border-primary/20 hover:text-primary" asChild>
+      </CardContent>
+      
+      <CardFooter className="pt-2 border-t">
+        <div className="flex justify-between w-full">
+          <Button variant="outline" asChild>
             <Link to={`/jobs/${id}`}>View Details</Link>
           </Button>
-          <Button className="bg-primary hover:bg-primary/90" asChild>
+          <Button asChild>
             <Link to={`/apply/${id}`}>Apply Now</Link>
           </Button>
         </div>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 };
 

@@ -1,120 +1,84 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SearchFilters from '@/components/SearchFilters';
 import JobCard from '@/components/JobCard';
 import { Briefcase, Filter } from 'lucide-react';
-
-// Sample jobs data
-const jobsData = [
-  {
-    id: '1',
-    title: 'Bathroom Remodeling Project',
-    company: 'HomeRenovate India',
-    location: 'Bengaluru, Karnataka',
-    jobType: 'Contract',
-    rate: '₹400-500/hr',
-    urgency: 'Medium' as const,
-    postedDate: '2 days ago',
-    skills: ['Plumbing', 'Tiling', 'Carpentry'],
-    description: 'Looking for experienced professionals to help with a complete bathroom renovation project. The work includes installing new fixtures, tiling, and some light carpentry work.',
-  },
-  {
-    id: '2',
-    title: 'Electrical System Upgrade',
-    company: 'Modern Electric Solutions',
-    location: 'Mysuru, Karnataka',
-    jobType: 'Full-time',
-    rate: '₹350-450/hr',
-    urgency: 'High' as const,
-    postedDate: '1 day ago',
-    skills: ['Electrical', 'Wiring', 'Panel Installation'],
-    description: 'We need a certified electrician to upgrade the electrical system in a commercial building. Must have experience with commercial projects and be available immediately.',
-  },
-  {
-    id: '3',
-    title: 'Custom Furniture Building',
-    company: 'Artisan Woodworks Karnataka',
-    location: 'Mangaluru, Karnataka',
-    jobType: 'Project-based',
-    rate: '₹35,000 total',
-    urgency: 'Low' as const,
-    postedDate: '1 week ago',
-    skills: ['Carpentry', 'Woodworking', 'Finishing'],
-    description: 'Artisan woodworking shop seeking a skilled carpenter to help build custom furniture pieces for an upcoming exhibition. Creative input welcome.',
-  },
-  {
-    id: '4',
-    title: 'Interior Painting - 3 Bedroom Apartment',
-    company: 'Fresh Look Painting',
-    location: 'Hubballi, Karnataka',
-    jobType: 'Contract',
-    rate: '₹300-350/hr',
-    urgency: 'Medium' as const,
-    postedDate: '3 days ago',
-    skills: ['Interior Painting', 'Prep Work', 'Clean-up'],
-    description: 'Need professional painters for a complete interior paint job. The apartment is approximately 1,500 sq ft with 3 bedrooms and 2 bathrooms. All materials will be provided.',
-  },
-  {
-    id: '5',
-    title: 'Security Staff for Corporate Event',
-    company: 'SecureEvents Karnataka',
-    location: 'Belagavi, Karnataka',
-    jobType: 'Short-term',
-    rate: '₹2,500/day',
-    urgency: 'High' as const,
-    postedDate: '12 hours ago',
-    skills: ['Event Security', 'Crowd Management', 'VIP Protection'],
-    description: 'Looking for experienced security personnel for a two-day corporate event in Belagavi. Must have prior experience with corporate events and good communication skills.',
-  },
-  {
-    id: '6',
-    title: 'Wedding Decoration Setup',
-    company: 'Dream Weddings',
-    location: 'Shivamogga, Karnataka',
-    jobType: 'Project-based',
-    rate: '₹20,000 total',
-    urgency: 'Medium' as const,
-    postedDate: '4 days ago',
-    skills: ['Decoration', 'Floral Arrangement', 'Event Setup'],
-    description: 'Need skilled decorators for a traditional Karnataka-style wedding setup. Experience with traditional South Indian wedding decorations required.',
-  },
-];
+import { useQuery } from '@tanstack/react-query';
+import { getJobs, Job, getJobsBySearch } from '@/services/jobService';
+import { toast } from 'sonner';
 
 const Jobs = () => {
-  const [filteredJobs, setFilteredJobs] = useState(jobsData);
-  const [isLoading, setIsLoading] = useState(false);
+  const { data: jobsData = [], isLoading: isLoadingJobs, error } = useQuery({
+    queryKey: ['jobs'],
+    queryFn: getJobs,
+  });
+  
+  const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSearch = (filters: any) => {
+  useEffect(() => {
+    if (jobsData) {
+      setFilteredJobs(jobsData);
+      setIsLoading(false);
+    }
+  }, [jobsData]);
+
+  const handleSearch = async (filters: any) => {
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      let results = [...jobsData];
+    try {
+      // Convert filter format for our service
+      const searchParams = {
+        searchTerm: filters.searchTerm,
+        location: filters.location,
+        jobTypes: filters.jobTypes,
+        urgency: filters.urgency
+      };
       
-      // Apply filters
-      if (filters.searchTerm) {
-        const term = filters.searchTerm.toLowerCase();
-        results = results.filter(job => 
-          job.title.toLowerCase().includes(term) || 
-          job.company.toLowerCase().includes(term) ||
-          job.description.toLowerCase().includes(term) ||
-          job.skills.some((skill: string) => skill.toLowerCase().includes(term))
-        );
-      }
-      
-      if (filters.location) {
-        const location = filters.location.toLowerCase();
-        results = results.filter(job => 
-          job.location.toLowerCase().includes(location)
-        );
-      }
-      
+      // Use real search function instead of setTimeout
+      const results = await getJobsBySearch(searchParams);
       setFilteredJobs(results);
+      
+      // Show toast notification for search results
+      toast.info(`Found ${results.length} job${results.length !== 1 ? 's' : ''} matching your search criteria`);
+    } catch (error) {
+      console.error('Error searching jobs:', error);
+      toast.error('Error searching for jobs. Please try again.');
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
+
+  if (isLoadingJobs) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24 flex justify-center items-center">
+          <div className="text-center py-20 bg-white/80 rounded-xl shadow-sm border border-gray-100 dark:bg-gray-800/80 dark:border-gray-700 max-w-md mx-auto px-4">
+            <h3 className="text-xl font-semibold mb-2">Error loading jobs</h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              There was a problem fetching the job data. Please try again later.
+            </p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -145,7 +109,23 @@ const Jobs = () => {
               {filteredJobs.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {filteredJobs.map((job) => (
-                    <JobCard key={job.id} {...job} />
+                    <JobCard 
+                      key={job.id}
+                      id={job.id}
+                      title={job.title}
+                      company={job.company}
+                      location={job.location}
+                      jobType={job.job_type}
+                      rate={job.rate}
+                      urgency={job.urgency}
+                      postedDate={new Date(job.posted_date).toLocaleDateString('en-US', { 
+                        year: 'numeric',
+                        month: 'short', 
+                        day: 'numeric'
+                      })}
+                      skills={job.skills}
+                      description={job.description}
+                    />
                   ))}
                 </div>
               ) : (

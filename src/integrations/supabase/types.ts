@@ -9,7 +9,174 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      applications: {
+        Row: {
+          created_at: string | null
+          id: string
+          job_id: string
+          message: string | null
+          status: string
+          updated_at: string | null
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          job_id: string
+          message?: string | null
+          status?: string
+          updated_at?: string | null
+          worker_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          job_id?: string
+          message?: string | null
+          status?: string
+          updated_at?: string | null
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          company: string
+          created_at: string | null
+          description: string
+          employer_id: string | null
+          id: string
+          job_type: string
+          location: string
+          posted_date: string | null
+          rate: string
+          skills: string[]
+          title: string
+          urgency: string
+        }
+        Insert: {
+          company: string
+          created_at?: string | null
+          description: string
+          employer_id?: string | null
+          id?: string
+          job_type: string
+          location: string
+          posted_date?: string | null
+          rate: string
+          skills: string[]
+          title: string
+          urgency: string
+        }
+        Update: {
+          company?: string
+          created_at?: string | null
+          description?: string
+          employer_id?: string | null
+          id?: string
+          job_type?: string
+          location?: string
+          posted_date?: string | null
+          rate?: string
+          skills?: string[]
+          title?: string
+          urgency?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          related_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          related_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          related_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      workers: {
+        Row: {
+          about: string | null
+          created_at: string | null
+          experience: string
+          hourly_rate: string
+          id: string
+          image_url: string | null
+          is_available: boolean | null
+          location: string
+          name: string
+          profession: string
+          rating: number | null
+          skills: string[]
+          user_id: string | null
+        }
+        Insert: {
+          about?: string | null
+          created_at?: string | null
+          experience: string
+          hourly_rate: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          location: string
+          name: string
+          profession: string
+          rating?: number | null
+          skills: string[]
+          user_id?: string | null
+        }
+        Update: {
+          about?: string | null
+          created_at?: string | null
+          experience?: string
+          hourly_rate?: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          location?: string
+          name?: string
+          profession?: string
+          rating?: number | null
+          skills?: string[]
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
