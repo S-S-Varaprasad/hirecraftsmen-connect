@@ -15,20 +15,30 @@ export function useStorage() {
       setIsLoading(true);
       setError(null);
 
-      const { data, error } = await supabase.storage
+      // Use a type assertion to properly cast the Supabase storage response
+      const uploadResponse = await supabase.storage
         .from(bucket)
         .upload(path, file, {
           upsert: true,
-        }) as any;
+        });
+
+      const { data, error } = uploadResponse as unknown as { 
+        data: { path: string } | null, 
+        error: any 
+      };
 
       if (error) {
         throw error;
       }
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
+      // Get public URL with proper type assertion
+      const urlResponse = supabase.storage
         .from(bucket)
-        .getPublicUrl(data.path) as any;
+        .getPublicUrl(data!.path);
+
+      const { data: urlData } = urlResponse as unknown as { 
+        data: { publicUrl: string } 
+      };
 
       return urlData.publicUrl;
     } catch (err: any) {
@@ -45,9 +55,15 @@ export function useStorage() {
       setIsLoading(true);
       setError(null);
 
-      const { error } = await supabase.storage
+      // Use a type assertion to properly cast the Supabase storage response
+      const deleteResponse = await supabase.storage
         .from(bucket)
-        .remove([path]) as any;
+        .remove([path]);
+
+      const { error } = deleteResponse as unknown as { 
+        data: any, 
+        error: any 
+      };
 
       if (error) {
         throw error;

@@ -16,9 +16,12 @@ export interface Worker {
 }
 
 export const getWorkers = async () => {
-  const { data, error } = await supabase
+  // Use a type assertion to properly cast the Supabase response
+  const response = await supabase
     .from('workers')
-    .select('*') as any;
+    .select('*');
+  
+  const { data, error } = response as unknown as { data: Worker[] | null, error: any };
   
   if (error) {
     console.error('Error fetching workers:', error);
@@ -29,10 +32,13 @@ export const getWorkers = async () => {
 };
 
 export const getWorkersByCategory = async (category: string) => {
-  const { data, error } = await supabase
+  // Use a type assertion to properly cast the Supabase response
+  const response = await supabase
     .from('workers')
     .select('*')
-    .ilike('profession', `%${category}%`) as any;
+    .ilike('profession', `%${category}%`);
+  
+  const { data, error } = response as unknown as { data: Worker[] | null, error: any };
   
   if (error) {
     console.error('Error fetching workers by category:', error);
@@ -43,11 +49,14 @@ export const getWorkersByCategory = async (category: string) => {
 };
 
 export const getWorkerById = async (id: string) => {
-  const { data, error } = await supabase
+  // Use a type assertion to properly cast the Supabase response
+  const response = await supabase
     .from('workers')
     .select('*')
     .eq('id', id)
-    .single() as any;
+    .single();
+  
+  const { data, error } = response as unknown as { data: Worker | null, error: any };
   
   if (error) {
     console.error('Error fetching worker:', error);
@@ -58,7 +67,8 @@ export const getWorkerById = async (id: string) => {
 };
 
 export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating'>) => {
-  const { data, error } = await supabase
+  // Use a type assertion to properly cast the Supabase response
+  const response = await supabase
     .from('workers')
     .insert([
       {
@@ -66,7 +76,9 @@ export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating'>) 
         rating: 0,
       }
     ])
-    .select() as any;
+    .select();
+  
+  const { data, error } = response as unknown as { data: Worker[] | null, error: any };
   
   if (error) {
     console.error('Error registering worker:', error);
