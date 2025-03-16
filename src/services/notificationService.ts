@@ -12,7 +12,7 @@ export interface Notification {
 }
 
 export const getNotifications = async (userId: string) => {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('notifications')
     .select('*')
     .eq('user_id', userId)
@@ -27,7 +27,7 @@ export const getNotifications = async (userId: string) => {
 };
 
 export const getUnreadNotificationsCount = async (userId: string) => {
-  const { data, error, count } = await (supabase as any)
+  const { data, error, count } = await supabase
     .from('notifications')
     .select('*', { count: 'exact' })
     .eq('user_id', userId)
@@ -42,7 +42,7 @@ export const getUnreadNotificationsCount = async (userId: string) => {
 };
 
 export const markNotificationAsRead = async (id: string) => {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('notifications')
     .update({ is_read: true })
     .eq('id', id)
@@ -62,7 +62,7 @@ export const createNotification = async (
   type: string,
   relatedId?: string
 ) => {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('notifications')
     .insert([
       {
@@ -83,7 +83,7 @@ export const createNotification = async (
 };
 
 export const markAllNotificationsAsRead = async (userId: string) => {
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('notifications')
     .update({ is_read: true })
     .eq('user_id', userId)
@@ -95,4 +95,33 @@ export const markAllNotificationsAsRead = async (userId: string) => {
   }
   
   return true;
+};
+
+export const createWorkerApplicationNotification = async (
+  employerId: string, 
+  workerId: string,
+  workerName: string,
+  jobId: string,
+  jobTitle: string
+) => {
+  return createNotification(
+    employerId,
+    `${workerName} has applied to your job: ${jobTitle}`,
+    'application',
+    jobId
+  );
+};
+
+export const createJobAcceptedNotification = async (
+  workerId: string,
+  employerName: string,
+  jobId: string,
+  jobTitle: string
+) => {
+  return createNotification(
+    workerId,
+    `${employerName} has accepted your application for: ${jobTitle}`,
+    'job_accepted',
+    jobId
+  );
 };

@@ -18,8 +18,13 @@ export interface Worker {
 }
 
 export const getWorkers = async () => {
-  // Cast the entire supabase client to any to bypass type checking
-  const { data, error } = await (supabase as any)
+  // Update Rahul Kumar's image first
+  await supabase
+    .from('workers')
+    .update({ image_url: '/lovable-uploads/bae49f34-0d6e-4f1b-bf50-8d6cf6e46fa1.png' })
+    .eq('name', 'Rahul Kumar');
+    
+  const { data, error } = await supabase
     .from('workers')
     .select('*');
   
@@ -32,8 +37,7 @@ export const getWorkers = async () => {
 };
 
 export const getWorkersByCategory = async (category: string) => {
-  // Cast the entire supabase client to any to bypass type checking
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('workers')
     .select('*')
     .ilike('profession', `%${category}%`);
@@ -47,8 +51,7 @@ export const getWorkersByCategory = async (category: string) => {
 };
 
 export const getWorkerById = async (id: string) => {
-  // Cast the entire supabase client to any to bypass type checking
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('workers')
     .select('*')
     .eq('id', id)
@@ -63,8 +66,7 @@ export const getWorkerById = async (id: string) => {
 };
 
 export const getWorkerByUserId = async (userId: string) => {
-  // Cast the entire supabase client to any to bypass type checking
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('workers')
     .select('*')
     .eq('user_id', userId)
@@ -79,8 +81,7 @@ export const getWorkerByUserId = async (userId: string) => {
 };
 
 export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating' | 'created_at'>) => {
-  // Cast the entire supabase client to any to bypass type checking
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('workers')
     .insert([
       {
@@ -99,8 +100,7 @@ export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating' | 
 };
 
 export const updateWorker = async (id: string, workerData: Partial<Worker>) => {
-  // Cast the entire supabase client to any to bypass type checking
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('workers')
     .update(workerData)
     .eq('id', id)
@@ -112,4 +112,18 @@ export const updateWorker = async (id: string, workerData: Partial<Worker>) => {
   }
   
   return data?.[0] as Worker;
+};
+
+export const searchWorkers = async (searchTerm: string) => {
+  const { data, error } = await supabase
+    .from('workers')
+    .select('*')
+    .or(`name.ilike.%${searchTerm}%,profession.ilike.%${searchTerm}%,skills.cs.{${searchTerm}}`);
+  
+  if (error) {
+    console.error('Error searching workers:', error);
+    throw error;
+  }
+  
+  return data || [] as Worker[];
 };

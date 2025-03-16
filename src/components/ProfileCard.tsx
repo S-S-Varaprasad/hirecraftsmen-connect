@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star, MapPin, Clock, Briefcase } from 'lucide-react';
+import { Star, MapPin, Clock, Briefcase, Eye, BriefcaseBusiness } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -109,10 +109,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               <Link to={`/message/${id}`}>Message</Link>
             </Button>
             <Button className="bg-primary hover:bg-primary/90" asChild>
-              <Link to={`/workers/${id}`}>View Profile</Link>
+              <Link to={`/workers/${id}`}><Eye className="w-4 h-4 mr-1" />View Profile</Link>
             </Button>
             <Button variant="default" className="col-span-2 mt-2 btn-hire-me" asChild>
-              <Link to={`/apply/${id}`}>Hire Me</Link>
+              <Link to={`/apply/${id}`}><BriefcaseBusiness className="w-4 h-4 mr-1" />Hire Me</Link>
             </Button>
           </div>
         </div>
