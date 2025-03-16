@@ -16,10 +16,10 @@ export interface Worker {
 }
 
 export const getWorkers = async () => {
-  // Use a cast to any to bypass type checking, then cast to the expected return type
+  // Use a stronger type assertion to bypass TypeScript's type checking
   const { data, error } = await (supabase
     .from('workers')
-    .select('*') as any);
+    .select('*') as unknown as { data: Worker[] | null, error: any });
   
   if (error) {
     console.error('Error fetching workers:', error);
@@ -33,7 +33,7 @@ export const getWorkersByCategory = async (category: string) => {
   const { data, error } = await (supabase
     .from('workers')
     .select('*')
-    .ilike('profession', `%${category}%`) as any);
+    .ilike('profession', `%${category}%`) as unknown as { data: Worker[] | null, error: any });
   
   if (error) {
     console.error('Error fetching workers by category:', error);
@@ -48,7 +48,7 @@ export const getWorkerById = async (id: string) => {
     .from('workers')
     .select('*')
     .eq('id', id)
-    .single() as any);
+    .single() as unknown as { data: Worker | null, error: any });
   
   if (error) {
     console.error('Error fetching worker:', error);
@@ -67,7 +67,7 @@ export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating'>) 
         rating: 0,
       }
     ])
-    .select() as any);
+    .select() as unknown as { data: Worker[] | null, error: any });
   
   if (error) {
     console.error('Error registering worker:', error);
