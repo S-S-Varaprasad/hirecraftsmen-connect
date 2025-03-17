@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Filter, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ import {
   SheetFooter,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SearchFiltersProps {
   onSearch: (filters: any) => void;
@@ -23,7 +22,7 @@ interface SearchFiltersProps {
 }
 
 const SearchFilters = ({ onSearch, initialSearchTerm = '', initialLocation = '' }: SearchFiltersProps) => {
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [location, setLocation] = useState(initialLocation);
@@ -31,7 +30,6 @@ const SearchFilters = ({ onSearch, initialSearchTerm = '', initialLocation = '' 
   const [availableOnly, setAvailableOnly] = useState(false);
 
   useEffect(() => {
-    // If initial values are provided, trigger search automatically
     if (initialSearchTerm || initialLocation) {
       handleSearch();
     }
