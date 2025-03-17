@@ -50,9 +50,11 @@ const WorkerDetail = () => {
     queryKey: ['worker', id],
     queryFn: () => getWorkerById(id as string),
     enabled: !!id,
-    onError: (err) => {
-      console.error('Error fetching worker details:', err);
-      toast.error('Failed to load worker details');
+    meta: {
+      onError: (err: Error) => {
+        console.error('Error fetching worker details:', err);
+        toast.error('Failed to load worker details');
+      }
     }
   });
 
