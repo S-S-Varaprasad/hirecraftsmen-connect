@@ -106,7 +106,7 @@ const About = () => {
                   <Button size="lg" className="bg-white text-primary hover:bg-white/90" asChild>
                     <Link to="/workers">Find Workers</Link>
                   </Button>
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" asChild>
+                  <Button size="lg" variant="outline" className="bg-join-worker border-white text-white hover:bg-blue-700" asChild>
                     <Link to="/join-as-worker">Join as a Worker</Link>
                   </Button>
                 </div>
