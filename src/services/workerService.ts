@@ -18,7 +18,6 @@ export interface Worker {
 }
 
 export const getWorkers = async () => {
-  // No need to update here anymore as we have proper data
   const { data, error } = await supabase
     .from('workers')
     .select('*');

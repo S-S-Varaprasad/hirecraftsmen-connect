@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Search, User, Briefcase } from 'lucide-react';
+import { Menu, X, User, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import UserProfile from './UserProfile';
@@ -53,11 +53,6 @@ const Navbar = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="outline" size="sm" className="flex items-center gap-1">
-              <Search className="w-4 h-4" />
-              <span>Search</span>
-            </Button>
-            
             {isAuthenticated ? (
               <UserProfile />
             ) : (

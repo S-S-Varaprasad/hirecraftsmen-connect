@@ -1,10 +1,14 @@
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, MapPin, Clock, Briefcase, Eye, BriefcaseBusiness } from 'lucide-react';
+import { Star, MapPin, Clock, Briefcase, Eye, BriefcaseBusiness, Upload, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { useAuth } from '@/context/AuthContext';
+import { updateWorkerProfilePicture } from '@/services/workerService';
+import { useStorage } from '@/hooks/useStorage';
+import { toast } from 'sonner';
 
 interface ProfileCardProps {
   id: string;
@@ -17,6 +21,7 @@ interface ProfileCardProps {
   skills: string[];
   isAvailable: boolean;
   imageUrl: string;
+  userId?: string | null;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -30,7 +35,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   skills,
   isAvailable,
   imageUrl,
+  userId,
 }) => {
+  const { user } = useAuth();
+  const [uploading, setUploading] = useState(false);
+  const [editingImage, setEditingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { uploadFile } = useStorage();
+
   // Get the initials for the fallback avatar
   const getInitials = (name: string) => {
     return name
@@ -38,6 +50,45 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       .map(part => part[0])
       .join('')
       .toUpperCase();
+  };
+
+  // Check if the current user owns this worker profile
+  const isOwner = user && user.id === userId;
+
+  const handleProfilePictureClick = () => {
+    if (isOwner && !uploading) {
+      setEditingImage(true);
+    }
+  };
+
+  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    try {
+      setUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `worker_${id}_${Date.now()}.${fileExt}`;
+      
+      const publicUrl = await uploadFile('public', fileName, file);
+      
+      if (publicUrl) {
+        await updateWorkerProfilePicture(id, publicUrl);
+        toast.success('Profile picture updated successfully');
+        // Force a refresh of the page to show the new image
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      toast.error('Failed to update profile picture');
+    } finally {
+      setUploading(false);
+      setEditingImage(false);
+    }
+  };
+
+  const cancelImageEdit = () => {
+    setEditingImage(false);
   };
 
   return (
@@ -51,16 +102,74 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       
       <div className="flex flex-col h-full">
         <div className="relative pt-6 px-6 pb-4 flex flex-col items-center text-center">
-          <Avatar className="w-24 h-24 mb-4 border-4 border-primary/10 dark:border-primary/20 ring-2 ring-primary/20 shadow-lg">
-            <AvatarImage 
-              src={imageUrl} 
-              alt={name}
-              className="object-cover"
-            />
-            <AvatarFallback className="text-lg font-medium bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary/90">
-              {getInitials(name)}
-            </AvatarFallback>
-          </Avatar>
+          {isOwner && (
+            <div className="absolute top-0 right-0 mt-1 mr-1 z-20">
+              {editingImage ? (
+                <div className="flex space-x-1">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 w-7 p-0 rounded-full bg-white shadow-sm"
+                    onClick={cancelImageEdit}
+                  >
+                    <X className="h-4 w-4 text-red-500" />
+                  </Button>
+                </div>
+              ) : (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-7 w-7 p-0 rounded-full bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => setEditingImage(true)}
+                >
+                  <Upload className="h-4 w-4 text-gray-600" />
+                </Button>
+              )}
+            </div>
+          )}
+          
+          <div className="relative">
+            <Avatar 
+              className={`w-24 h-24 mb-4 border-4 border-primary/10 dark:border-primary/20 ring-2 ring-primary/20 shadow-lg ${isOwner ? 'cursor-pointer hover:opacity-90' : ''}`}
+              onClick={isOwner ? handleProfilePictureClick : undefined}
+            >
+              <AvatarImage 
+                src={imageUrl} 
+                alt={name}
+                className="object-cover"
+              />
+              <AvatarFallback className="text-lg font-medium bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary/90">
+                {getInitials(name)}
+              </AvatarFallback>
+            </Avatar>
+            
+            {isOwner && editingImage && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileInputChange}
+                />
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="text-white hover:bg-black/30"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="h-5 w-5 mr-1" />
+                  Upload
+                </Button>
+              </div>
+            )}
+            
+            {uploading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
+              </div>
+            )}
+          </div>
           
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">{name}</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">{profession}</p>
