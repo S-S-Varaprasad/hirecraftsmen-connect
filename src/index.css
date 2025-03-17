@@ -86,6 +86,77 @@
   .dark body {
     @apply bg-gray-900;
   }
+
+  /* Standardize headings */
+  h1, .h1 {
+    @apply text-3xl font-bold text-gray-900 dark:text-white mb-3;
+  }
+
+  h2, .h2 {
+    @apply text-2xl font-bold text-gray-900 dark:text-white mb-2;
+  }
+
+  h3, .h3 {
+    @apply text-xl font-semibold text-gray-900 dark:text-white mb-2;
+  }
+
+  h4, .h4 {
+    @apply text-lg font-medium text-gray-900 dark:text-white mb-1;
+  }
+
+  p {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+}
+
+@layer components {
+  /* Standard badge styles */
+  .badge-blue {
+    @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300;
+  }
+
+  .badge-orange {
+    @apply bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300;
+  }
+
+  .badge-green {
+    @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300;
+  }
+
+  /* Standard section styles */
+  .section-container {
+    @apply container mx-auto px-4 py-8 sm:px-6 lg:px-8;
+  }
+
+  .section-title-container {
+    @apply text-center mb-10;
+  }
+
+  .section-badge {
+    @apply inline-block p-2 px-4 bg-primary/10 text-primary rounded-full text-sm font-medium mb-3;
+  }
+
+  /* Standard card styles */
+  .standard-card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden;
+  }
+
+  /* Standard button styles */
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary/90 transition-colors;
+  }
+
+  .btn-outline-primary {
+    @apply border-primary text-primary hover:bg-primary/10 transition-colors;
+  }
+
+  .btn-blue {
+    @apply bg-blue-600 text-white hover:bg-blue-700 transition-colors;
+  }
+
+  .btn-orange {
+    @apply bg-orange-500 text-white hover:bg-orange-600 transition-colors;
+  }
 }
 
 @layer utilities {
@@ -106,11 +177,16 @@
   }
 
   .bg-join-worker {
-    @apply bg-blue-600;
+    @apply bg-blue-600 hover:bg-blue-700;
   }
 
   .btn-hire-me {
-    @apply bg-blue-600 hover:bg-blue-700;
+    @apply bg-orange-500 hover:bg-orange-600;
+  }
+
+  /* Loading spinner */
+  .loading-spinner {
+    @apply animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary;
   }
 }
 

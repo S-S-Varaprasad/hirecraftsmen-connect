@@ -128,7 +128,7 @@ const Navbar = () => {
             )}
             <Link 
               to="/join-as-worker" 
-              className="block w-full py-3 px-4 rounded-md text-center font-medium text-primary border border-primary bg-white dark:bg-transparent hover:bg-primary/10 transition-all"
+              className="block w-full py-3 px-4 rounded-md text-center font-medium text-white bg-blue-600 hover:bg-blue-700 transition-all"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Join as a Worker
