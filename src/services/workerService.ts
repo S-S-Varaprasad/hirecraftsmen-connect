@@ -18,12 +18,7 @@ export interface Worker {
 }
 
 export const getWorkers = async () => {
-  // Update Rahul Kumar's image first
-  await supabase
-    .from('workers')
-    .update({ image_url: '/lovable-uploads/bae49f34-0d6e-4f1b-bf50-8d6cf6e46fa1.png' })
-    .eq('name', 'Rahul Kumar');
-    
+  // No need to update here anymore as we have proper data
   const { data, error } = await supabase
     .from('workers')
     .select('*');
@@ -112,6 +107,10 @@ export const updateWorker = async (id: string, workerData: Partial<Worker>) => {
   }
   
   return data?.[0] as Worker;
+};
+
+export const updateWorkerProfilePicture = async (id: string, imageUrl: string) => {
+  return updateWorker(id, { image_url: imageUrl });
 };
 
 export const searchWorkers = async (searchTerm: string) => {

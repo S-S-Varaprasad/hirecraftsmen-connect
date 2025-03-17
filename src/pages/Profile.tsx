@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -10,19 +10,25 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Mail, MapPin, Phone, Briefcase, Clock, FileEdit, Building } from 'lucide-react';
+import { User, Mail, MapPin, Phone, Briefcase, Clock, FileEdit, Building, Upload, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { getWorkerByUserId, updateWorker } from '@/services/workerService';
+import { getWorkerByUserId, updateWorker, updateWorkerProfilePicture } from '@/services/workerService';
 import { Worker } from '@/services/workerService';
 import { useToast } from '@/hooks/use-toast';
+import { useStorage } from '@/hooks/useStorage';
+import { toast } from 'sonner';
 
 const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const [worker, setWorker] = useState<Worker | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { uploadFile, isLoading: isUploadLoading, error: uploadError } = useStorage();
+  
   const [formData, setFormData] = useState({
     name: '',
     profession: '',
@@ -61,18 +67,14 @@ const Profile = () => {
         }
       } catch (error) {
         console.error('Error fetching worker profile:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load your profile',
-          variant: 'destructive',
-        });
+        toast.error('Failed to load your profile');
       } finally {
         setLoading(false);
       }
     };
 
     fetchWorkerProfile();
-  }, [user, navigate, toast]);
+  }, [user, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -86,6 +88,35 @@ const Profile = () => {
 
   const handleAvailabilityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, is_available: e.target.checked });
+  };
+
+  const handleProfilePictureClick = () => {
+    if (!editing || !worker) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!worker || !e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    try {
+      setUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `worker_${worker.id}_${Date.now()}.${fileExt}`;
+      
+      const publicUrl = await uploadFile('public', fileName, file);
+      
+      if (publicUrl) {
+        const updatedWorker = await updateWorkerProfilePicture(worker.id, publicUrl);
+        setWorker(updatedWorker);
+        toast.success('Profile picture updated successfully');
+      }
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      toast.error('Failed to update profile picture');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -105,17 +136,10 @@ const Profile = () => {
       
       setWorker(updatedWorker);
       setEditing(false);
-      toast({
-        title: 'Success',
-        description: 'Your profile has been updated',
-      });
+      toast.success('Your profile has been updated');
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update your profile',
-        variant: 'destructive',
-      });
+      toast.error('Failed to update your profile');
     }
   };
 
@@ -160,12 +184,34 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-                    <Avatar className="w-24 h-24 border-4 border-white shadow">
-                      <AvatarImage src={user.user_metadata?.avatar_url} />
-                      <AvatarFallback className="bg-orange-100 text-orange-800 text-xl">
-                        {user.email ? getInitials(user.email) : "U"}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="relative">
+                      <Avatar 
+                        className={`w-24 h-24 border-4 border-white shadow ${editing ? 'cursor-pointer hover:opacity-90' : ''}`}
+                        onClick={handleProfilePictureClick}
+                      >
+                        <AvatarImage src={user.user_metadata?.avatar_url} />
+                        <AvatarFallback className="bg-orange-100 text-orange-800 text-xl">
+                          {user.email ? getInitials(user.email) : "U"}
+                        </AvatarFallback>
+                        {editing && (
+                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 hover:opacity-100 transition-opacity">
+                            <Upload className="h-8 w-8 text-white" />
+                          </div>
+                        )}
+                      </Avatar>
+                      <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={handleFileChange} 
+                        accept="image/*" 
+                        className="hidden" 
+                      />
+                      {uploading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                          <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
                     
                     <div className="space-y-4 flex-1">
                       <div>
@@ -225,6 +271,35 @@ const Profile = () => {
                   <CardContent className="space-y-6">
                     {editing ? (
                       <div className="space-y-4">
+                        <div className="relative">
+                          <Avatar 
+                            className="w-24 h-24 mx-auto mb-4 border-4 border-white shadow cursor-pointer hover:opacity-90"
+                            onClick={handleProfilePictureClick}
+                          >
+                            <AvatarImage src={worker.image_url || ''} />
+                            <AvatarFallback className="bg-orange-100 text-orange-800 text-xl">
+                              {getInitials(worker.name)}
+                            </AvatarFallback>
+                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 hover:opacity-100 transition-opacity">
+                              <Upload className="h-8 w-8 text-white" />
+                            </div>
+                          </Avatar>
+                          {worker.image_url && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="absolute top-0 right-0 rounded-full p-1 h-6 w-6"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                await updateWorkerProfilePicture(worker.id, '');
+                                setWorker({...worker, image_url: null});
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="name">Full Name</Label>
@@ -312,6 +387,18 @@ const Profile = () => {
                       </div>
                     ) : (
                       <div className="space-y-6">
+                        <div className="flex justify-center mb-6">
+                          <Avatar className="w-32 h-32 border-4 border-white shadow">
+                            <AvatarImage 
+                              src={worker.image_url || ''} 
+                              alt={worker.name}
+                            />
+                            <AvatarFallback className="bg-orange-100 text-orange-800 text-2xl">
+                              {getInitials(worker.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
                             <h3 className="text-sm font-medium text-gray-500">Full Name</h3>

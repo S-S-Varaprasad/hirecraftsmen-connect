@@ -1,15 +1,21 @@
 
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SearchFilters from '@/components/SearchFilters';
 import ProfileCard from '@/components/ProfileCard';
 import { Briefcase, Filter } from 'lucide-react';
-import { getWorkers, Worker } from '@/services/workerService';
+import { getWorkers, Worker, searchWorkers } from '@/services/workerService';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 const Workers = () => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const initialSearch = searchParams.get('search') || '';
+  const initialLocation = searchParams.get('location') || '';
+
   const { data: workersData = [], isLoading: isLoadingWorkers, error } = useQuery({
     queryKey: ['workers'],
     queryFn: getWorkers,
@@ -20,10 +26,39 @@ const Workers = () => {
 
   useEffect(() => {
     if (workersData) {
-      setFilteredWorkers(workersData);
+      // Apply initial filters from URL if they exist
+      if (initialSearch || initialLocation) {
+        let results = [...workersData];
+        
+        if (initialSearch) {
+          const term = initialSearch.toLowerCase();
+          results = results.filter(worker => 
+            worker.name.toLowerCase().includes(term) || 
+            worker.profession.toLowerCase().includes(term) ||
+            worker.skills.some((skill: string) => skill.toLowerCase().includes(term))
+          );
+        }
+        
+        if (initialLocation) {
+          const locationTerm = initialLocation.toLowerCase();
+          results = results.filter(worker => 
+            worker.location.toLowerCase().includes(locationTerm)
+          );
+        }
+        
+        setFilteredWorkers(results);
+        if (results.length > 0) {
+          toast.info(`Found ${results.length} worker${results.length !== 1 ? 's' : ''} matching your search criteria`);
+        } else {
+          toast.info('No workers found matching your search criteria. Showing all workers instead.');
+          setFilteredWorkers(workersData);
+        }
+      } else {
+        setFilteredWorkers(workersData);
+      }
       setIsLoading(false);
     }
-  }, [workersData]);
+  }, [workersData, initialSearch, initialLocation]);
 
   const handleSearch = (filters: any) => {
     setIsLoading(true);
@@ -114,7 +149,11 @@ const Workers = () => {
           </div>
           
           <div className="mb-8">
-            <SearchFilters onSearch={handleSearch} />
+            <SearchFilters 
+              onSearch={handleSearch} 
+              initialSearchTerm={initialSearch}
+              initialLocation={initialLocation}
+            />
           </div>
           
           {isLoading ? (

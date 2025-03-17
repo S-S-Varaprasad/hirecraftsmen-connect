@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -11,11 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings as SettingsIcon, Bell, Lock, UserCog, Palette, Moon, Sun, Globe } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const Settings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   
   const [notifications, setNotifications] = useState({
     email: true,
@@ -37,42 +38,67 @@ const Settings = () => {
     contactInfo: 'authenticated'
   });
 
+  // Save settings to localStorage
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('userSettings');
+    if (savedSettings) {
+      const parsedSettings = JSON.parse(savedSettings);
+      if (parsedSettings.notifications) setNotifications(parsedSettings.notifications);
+      if (parsedSettings.appearance) setAppearance(parsedSettings.appearance);
+      if (parsedSettings.privacy) setPrivacy(parsedSettings.privacy);
+    }
+  }, []);
+
+  // Save settings when they change
+  useEffect(() => {
+    localStorage.setItem('userSettings', JSON.stringify({
+      notifications,
+      appearance,
+      privacy
+    }));
+  }, [notifications, appearance, privacy]);
+
   // Handle toggles for notification settings
   const handleNotificationChange = (setting: keyof typeof notifications) => {
-    setNotifications({
-      ...notifications,
-      [setting]: !notifications[setting]
-    });
-    
-    toast({
-      title: "Settings updated",
-      description: "Your notification preferences have been saved.",
+    setNotifications(prev => {
+      const updated = {
+        ...prev,
+        [setting]: !prev[setting]
+      };
+
+      toast.success("Notification settings updated");
+      return updated;
     });
   };
   
   // Handle toggles for appearance settings
   const handleAppearanceChange = (setting: keyof typeof appearance, value: any) => {
-    setAppearance({
-      ...appearance,
-      [setting]: typeof value === 'boolean' ? value : value
-    });
-    
-    toast({
-      title: "Appearance updated",
-      description: "Your display preferences have been saved.",
+    setAppearance(prev => {
+      const updated = {
+        ...prev,
+        [setting]: typeof value === 'boolean' ? value : value
+      };
+
+      // Apply dark mode immediately if changed
+      if (setting === 'darkMode') {
+        document.documentElement.classList.toggle('dark', value);
+      }
+
+      toast.success("Appearance settings updated");
+      return updated;
     });
   };
   
   // Handle toggles for privacy settings
   const handlePrivacyChange = (setting: keyof typeof privacy, value: any) => {
-    setPrivacy({
-      ...privacy,
-      [setting]: value
-    });
-    
-    toast({
-      title: "Privacy settings updated",
-      description: "Your privacy preferences have been saved.",
+    setPrivacy(prev => {
+      const updated = {
+        ...prev,
+        [setting]: value
+      };
+
+      toast.success("Privacy settings updated");
+      return updated;
     });
   };
 
