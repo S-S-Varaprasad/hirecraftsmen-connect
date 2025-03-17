@@ -19,12 +19,19 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        orange: "bg-orange-500 text-white hover:bg-orange-600",
-        blue: "bg-blue-600 text-white hover:bg-blue-700",
-        green: "bg-green-500 text-white hover:bg-green-600",
-        purple: "bg-purple-500 text-white hover:bg-purple-600",
-        "orange-outline": "border border-orange-500 text-orange-500 bg-transparent hover:bg-orange-50 dark:hover:bg-orange-950/20",
-        "blue-outline": "border border-blue-600 text-blue-600 bg-transparent hover:bg-blue-50 dark:hover:bg-blue-950/20",
+        
+        // New standardized variants based on our color palette
+        orange: "bg-app-orange text-white hover:bg-app-orange/90",
+        blue: "bg-app-blue text-white hover:bg-app-blue/90",
+        yellow: "bg-app-yellow text-app-charcoal hover:bg-app-yellow/90",
+        teal: "bg-app-teal text-white hover:bg-app-teal/90",
+        red: "bg-app-red text-white hover:bg-app-red/90",
+        
+        // Outline variants
+        "blue-outline": "border border-app-blue text-app-blue bg-transparent hover:bg-app-blue/10",
+        "orange-outline": "border border-app-orange text-app-orange bg-transparent hover:bg-app-orange/10",
+        "yellow-outline": "border border-app-yellow text-app-charcoal bg-transparent hover:bg-app-yellow/10",
+        "teal-outline": "border border-app-teal text-app-teal bg-transparent hover:bg-app-teal/10",
       },
       size: {
         default: "h-10 px-4 py-2",

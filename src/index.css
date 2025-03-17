@@ -8,64 +8,64 @@
 @layer base {
   :root {
     --background: 210 20% 98%;
-    --foreground: 224 71.4% 4.1%;
+    --foreground: 0 0% 20%;  /* Charcoal Black */
     
     --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
+    --card-foreground: 0 0% 20%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
+    --popover-foreground: 0 0% 20%;
     
-    --primary: 220 80% 45%;
-    --primary-foreground: 210 20% 98%;
+    --primary: 212 100% 36%;  /* Strong Blue */
+    --primary-foreground: 0 0% 100%;
     
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 222 47% 11.2%;
+    --secondary: 0 0% 96%;  /* Light Grey */
+    --secondary-foreground: 0 0% 20%;
     
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 8.9% 46.1%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
     
-    --accent: 220 14% 96%;
-    --accent-foreground: 222 47% 11.2%;
+    --accent: 45 100% 50%;  /* Vibrant Yellow */
+    --accent-foreground: 0 0% 20%;
     
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive: 355 78% 59%;  /* Soft Red */
+    --destructive-foreground: 0 0% 100%;
     
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 220 80% 45%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 212 100% 36%;
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
+    --background: 0 0% 20%;  /* Charcoal Black */
+    --foreground: 0 0% 100%;
     
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
+    --card: 0 0% 20%;
+    --card-foreground: 0 0% 100%;
     
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 0 0% 20%;
+    --popover-foreground: 0 0% 100%;
     
-    --primary: 218 65% 55%;
-    --primary-foreground: 222 47% 11.2%;
+    --primary: 212 100% 36%;  /* Strong Blue */
+    --primary-foreground: 0 0% 100%;
     
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
     
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
     
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
+    --accent: 45 100% 50%;  /* Vibrant Yellow */
+    --accent-foreground: 0 0% 20%;
     
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive: 355 78% 59%;  /* Soft Red */
+    --destructive-foreground: 0 0% 100%;
     
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 216 12.2% 83.9%;
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --ring: 212 100% 36%;
   }
 }
 
@@ -79,48 +79,52 @@
     @apply scroll-smooth;
   }
   body {
-    @apply bg-orange-50/40 text-foreground font-sans;
+    @apply bg-app-lightGrey text-app-charcoal font-sans;
     font-family: 'Inter', sans-serif;
   }
   
   .dark body {
-    @apply bg-gray-900;
+    @apply bg-app-charcoal text-white;
   }
 
   /* Standardize headings */
   h1, .h1 {
-    @apply text-3xl font-bold text-gray-900 dark:text-white mb-3;
+    @apply text-3xl font-bold text-app-charcoal dark:text-white mb-3;
   }
 
   h2, .h2 {
-    @apply text-2xl font-bold text-gray-900 dark:text-white mb-2;
+    @apply text-2xl font-bold text-app-charcoal dark:text-white mb-2;
   }
 
   h3, .h3 {
-    @apply text-xl font-semibold text-gray-900 dark:text-white mb-2;
+    @apply text-xl font-semibold text-app-charcoal dark:text-white mb-2;
   }
 
   h4, .h4 {
-    @apply text-lg font-medium text-gray-900 dark:text-white mb-1;
+    @apply text-lg font-medium text-app-charcoal dark:text-white mb-1;
   }
 
   p {
-    @apply text-gray-600 dark:text-gray-400;
+    @apply text-app-charcoal/80 dark:text-gray-300;
   }
 }
 
 @layer components {
   /* Standard badge styles */
   .badge-blue {
-    @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300;
+    @apply bg-app-blue/10 text-app-blue dark:bg-app-blue/20 dark:text-app-blue/90;
   }
 
   .badge-orange {
-    @apply bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300;
+    @apply bg-app-orange/10 text-app-orange dark:bg-app-orange/20 dark:text-app-orange/90;
   }
 
-  .badge-green {
-    @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300;
+  .badge-teal {
+    @apply bg-app-teal/10 text-app-teal dark:bg-app-teal/20 dark:text-app-teal/90;
+  }
+
+  .badge-yellow {
+    @apply bg-app-yellow/10 text-app-yellow dark:bg-app-yellow/20 dark:text-app-yellow/90;
   }
 
   /* Standard section styles */
@@ -133,7 +137,7 @@
   }
 
   .section-badge {
-    @apply inline-block p-2 px-4 bg-primary/10 text-primary rounded-full text-sm font-medium mb-3;
+    @apply inline-block p-2 px-4 bg-app-blue/10 text-app-blue rounded-full text-sm font-medium mb-3;
   }
 
   /* Standard card styles */
@@ -143,19 +147,31 @@
 
   /* Standard button styles */
   .btn-primary {
-    @apply bg-primary text-white hover:bg-primary/90 transition-colors;
+    @apply bg-app-blue text-white hover:bg-app-blue/90 transition-colors;
+  }
+
+  .btn-accent {
+    @apply bg-app-yellow text-app-charcoal hover:bg-app-yellow/90 transition-colors;
+  }
+
+  .btn-highlight {
+    @apply bg-app-orange text-white hover:bg-app-orange/90 transition-colors;
+  }
+
+  .btn-success {
+    @apply bg-app-teal text-white hover:bg-app-teal/90 transition-colors;
+  }
+
+  .btn-danger {
+    @apply bg-app-red text-white hover:bg-app-red/90 transition-colors;
   }
 
   .btn-outline-primary {
-    @apply border-primary text-primary hover:bg-primary/10 transition-colors;
+    @apply border-app-blue text-app-blue hover:bg-app-blue/10 transition-colors;
   }
 
-  .btn-blue {
-    @apply bg-blue-600 text-white hover:bg-blue-700 transition-colors;
-  }
-
-  .btn-orange {
-    @apply bg-orange-500 text-white hover:bg-orange-600 transition-colors;
+  .btn-outline-accent {
+    @apply border-app-yellow text-app-charcoal hover:bg-app-yellow/10 transition-colors;
   }
 }
 
@@ -165,7 +181,7 @@
   }
   
   .dark .glass {
-    @apply bg-black/60 backdrop-blur-lg border border-white/10;
+    @apply bg-app-charcoal/60 backdrop-blur-lg border border-white/10;
   }
   
   .transition-all-gpu {
@@ -177,16 +193,34 @@
   }
 
   .bg-join-worker {
-    @apply bg-blue-600 hover:bg-blue-700;
+    @apply bg-app-blue hover:bg-app-blue/90;
   }
 
   .btn-hire-me {
-    @apply bg-orange-500 hover:bg-orange-600;
+    @apply bg-app-orange hover:bg-app-orange/90;
+  }
+
+  /* Status indicators */
+  .status-verified {
+    @apply text-app-teal;
+  }
+  
+  .status-pending {
+    @apply text-app-yellow;
+  }
+  
+  .status-alert {
+    @apply text-app-red;
   }
 
   /* Loading spinner */
   .loading-spinner {
-    @apply animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary;
+    @apply animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-app-blue;
+  }
+
+  /* Notification indicators */
+  .notification-badge {
+    @apply absolute -top-1 -right-1 bg-app-red text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center;
   }
 }
 
