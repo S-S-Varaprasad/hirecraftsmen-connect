@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,18 @@ const Settings = () => {
   const [profileVisibility, setProfileVisibility] = useState('public');
   const [locationSharing, setLocationSharing] = useState(true);
   const [activityStatus, setActivityStatus] = useState(true);
+
+  // Toggle dark mode function
+  const toggleDarkMode = (checked: boolean) => {
+    const newTheme = checked ? 'dark' : 'light';
+    setTheme(newTheme);
+    
+    // Display toast notification
+    toast({
+      title: checked ? "Dark Mode Enabled" : "Light Mode Enabled",
+      description: checked ? "The dark side welcomes you." : "Let there be light!",
+    });
+  };
 
   // Handle account deactivation
   const handleDeactivateAccount = () => {
@@ -146,13 +159,7 @@ const Settings = () => {
                       <Switch 
                         id="dark-mode" 
                         checked={theme === 'dark'}
-                        onCheckedChange={(checked) => {
-                          setTheme(checked ? 'dark' : 'light');
-                          toast({
-                            title: checked ? "Dark Mode Enabled" : "Light Mode Enabled",
-                            description: checked ? "The dark side welcomes you." : "Let there be light!",
-                          });
-                        }}
+                        onCheckedChange={toggleDarkMode}
                       />
                     </div>
                   </div>
