@@ -40,6 +40,7 @@ function App() {
   useEffect(() => {
     // Add sample workers when the app loads
     addSampleWorkers();
+    console.log('App initialized - sample workers added if needed');
   }, []);
 
   return (

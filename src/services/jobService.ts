@@ -17,7 +17,7 @@ export interface Job {
 }
 
 export const getJobs = async () => {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('jobs')
     .select('*')
     .order('created_at', { ascending: false });
@@ -36,7 +36,7 @@ export const getJobsBySearch = async (searchParams: {
   jobTypes?: string[];
   urgency?: string[];
 }) => {
-  let query = (supabase as any)
+  let query = supabase
     .from('jobs')
     .select('*')
     .order('created_at', { ascending: false });
@@ -69,7 +69,7 @@ export const getJobsBySearch = async (searchParams: {
 };
 
 export const getJobById = async (id: string) => {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('jobs')
     .select('*')
     .eq('id', id)
@@ -84,7 +84,7 @@ export const getJobById = async (id: string) => {
 };
 
 export const createJob = async (jobData: Omit<Job, 'id' | 'posted_date' | 'created_at'>) => {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('jobs')
     .insert([jobData])
     .select();
@@ -98,7 +98,7 @@ export const createJob = async (jobData: Omit<Job, 'id' | 'posted_date' | 'creat
 };
 
 export const updateJob = async (id: string, jobData: Partial<Job>) => {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('jobs')
     .update(jobData)
     .eq('id', id)
@@ -113,7 +113,7 @@ export const updateJob = async (id: string, jobData: Partial<Job>) => {
 };
 
 export const deleteJob = async (id: string) => {
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('jobs')
     .delete()
     .eq('id', id);

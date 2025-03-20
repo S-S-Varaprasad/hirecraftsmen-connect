@@ -36,7 +36,7 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle } from 'lucide-react';
 
 // Form validation schema
 const formSchema = z.object({
@@ -83,10 +83,13 @@ const PostJob = () => {
     }
 
     setIsSubmitting(true);
+    console.log('Submitting job with data:', data);
 
     try {
       // Convert skills string to array
       const skillsArray = data.skills.split(',').map(skill => skill.trim());
+      
+      console.log('Creating job with skills:', skillsArray);
       
       // Create job
       const newJob = await createJob({
@@ -101,8 +104,11 @@ const PostJob = () => {
         employer_id: user.id,
       });
       
+      console.log('Job created successfully:', newJob);
+      
       // Notify matched workers if option is selected
       if (data.notifyWorkers && newJob) {
+        console.log('Notifying workers about new job');
         await notifyWorkers(
           newJob.id, 
           newJob.title, 
