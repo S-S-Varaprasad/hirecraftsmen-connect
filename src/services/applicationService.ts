@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Job } from './jobService';
 import { Worker } from './workerService';
@@ -15,6 +14,14 @@ export interface Application {
   job?: Job;
   worker?: Worker;
 }
+
+// Status descriptions for user-friendly display
+export const APPLICATION_STATUS_DESCRIPTIONS = {
+  applied: "Your application is awaiting review by the employer.",
+  accepted: "Your application has been accepted! You can now start working on this job.",
+  rejected: "Your application was not accepted for this position.",
+  completed: "This job has been marked as completed and payment has been processed."
+};
 
 export const getApplicationsByWorkerId = async (workerId: string) => {
   console.log('Fetching applications for worker ID:', workerId);
@@ -131,12 +138,10 @@ export const updateApplicationStatus = async (
   return data?.[0] as Application;
 };
 
-// Add a new function to mark jobs as completed (for payment tracking)
 export const markApplicationCompleted = async (id: string) => {
   return updateApplicationStatus(id, 'completed');
 };
 
-// Add a direct check function to debug if a specific application exists
 export const checkApplicationExists = async (jobId: string, workerId: string) => {
   console.log(`Checking if application exists for job ${jobId} and worker ${workerId}`);
   
@@ -153,4 +158,9 @@ export const checkApplicationExists = async (jobId: string, workerId: string) =>
   
   console.log(`Found ${count} applications for this job/worker combination`);
   return { exists: count && count > 0, applications: data };
+};
+
+export const getApplicationStatusDescription = (status: string): string => {
+  return APPLICATION_STATUS_DESCRIPTIONS[status as keyof typeof APPLICATION_STATUS_DESCRIPTIONS] || 
+    "Status information unavailable";
 };

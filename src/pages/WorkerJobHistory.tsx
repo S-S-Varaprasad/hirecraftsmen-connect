@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useQuery } from '@tanstack/react-query';
-import { getApplicationsByWorkerId, checkApplicationExists } from '@/services/applicationService';
+import { getApplicationsByWorkerId } from '@/services/applicationService';
 import { toast } from 'sonner';
 
 const WorkerJobHistory = () => {
@@ -54,6 +54,7 @@ const WorkerJobHistory = () => {
     staleTime: 0, // Always consider data stale to force refresh
     refetchOnWindowFocus: true,
     refetchOnMount: true,
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Force refetch on mount to ensure we have the latest data
@@ -61,16 +62,6 @@ const WorkerJobHistory = () => {
     if (user?.id) {
       console.log('Forcing refetch of job applications on page mount for user:', user.id);
       refetch();
-      
-      // Debug: check if a specific application exists
-      // This helps verify if data exists in the database
-      checkApplicationExists('any-recent-job-id', user.id)
-        .then(result => {
-          console.log('Application existence check result:', result);
-        })
-        .catch(err => {
-          console.error('Error checking application existence:', err);
-        });
     }
   }, [user?.id, refetch]);
 
