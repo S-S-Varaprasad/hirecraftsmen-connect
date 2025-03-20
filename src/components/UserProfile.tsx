@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -17,11 +17,13 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useNotifications } from '@/hooks/useNotifications';
 import { toast } from 'sonner';
+import { NotificationHistory } from '@/components/NotificationHistory';
 
 const UserProfile = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { notifications, unreadCount, markAsRead, markAllAsRead, loading } = useNotifications();
+  const { unreadCount } = useNotifications();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   
   // Get user initials for the avatar fallback
   const getInitials = () => {
@@ -44,37 +46,16 @@ const UserProfile = () => {
     }
   };
 
-  const handleMarkAllAsRead = async () => {
-    try {
-      await markAllAsRead();
-      toast.success('All notifications marked as read');
-    } catch (error) {
-      console.error('Error marking notifications as read:', error);
-      toast.error('Failed to mark notifications as read');
-    }
-  };
-
-  const handleNotificationClick = (notification) => {
-    markAsRead(notification.id);
-    
-    // Navigate based on notification type
-    if (notification.related_id) {
-      if (notification.type === 'application' || notification.type === 'new_application') {
-        navigate(`/jobs/${notification.related_id}`);
-      } else if (notification.type === 'job_accepted' || notification.type === 'job_application' || notification.type === 'job_completed') {
-        navigate(`/job-history`);
-      } else if (notification.type === 'new_job' || notification.type === 'job_updated') {
-        navigate(`/jobs/${notification.related_id}`);
-      }
-    }
-  };
-
   return (
     <div className="flex items-center gap-2">
       {/* Notifications */}
-      <Popover>
+      <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="relative h-9 w-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
               <Badge 
@@ -85,46 +66,12 @@ const UserProfile = () => {
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80 p-0">
-          <div className="p-3 font-medium border-b flex justify-between items-center">
-            <span>Notifications</span>
-            {unreadCount > 0 && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-xs h-7 px-2"
-                onClick={handleMarkAllAsRead}
-              >
-                Mark all as read
-              </Button>
-            )}
-          </div>
-          <div className="max-h-[300px] overflow-y-auto">
-            {loading ? (
-              <div className="p-4 text-center">
-                <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-                <p className="text-sm text-gray-500">Loading notifications...</p>
-              </div>
-            ) : !notifications || notifications.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
-                No notifications yet
-              </div>
-            ) : (
-              notifications.map(notification => (
-                <div 
-                  key={notification.id} 
-                  className={`p-3 border-b text-sm hover:bg-gray-50 dark:hover:bg-gray-800 ${!notification.is_read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
-                  onClick={() => handleNotificationClick(notification)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <p className="mb-1">{notification.message}</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(notification.created_at).toLocaleString()}
-                  </p>
-                </div>
-              ))
-            )}
-          </div>
+        <PopoverContent 
+          className="w-80 p-0 rounded-xl shadow-xl border-0"
+          align="end"
+          sideOffset={8}
+        >
+          <NotificationHistory onClose={() => setNotificationsOpen(false)} />
         </PopoverContent>
       </Popover>
 
