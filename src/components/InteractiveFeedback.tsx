@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react';
@@ -57,14 +56,12 @@ const InteractiveFeedback: React.FC<InteractiveFeedbackProps> = ({
       // Save feedback to Supabase if available
       const { error } = await supabase
         .from('feedback')
-        .insert([
-          { 
-            page_id: pageId,
-            rating: rating === 'positive' ? 1 : -1,
-            comment: feedback,
-            user_id: user?.id || null
-          }
-        ]);
+        .insert({
+          page_id: pageId,
+          rating: rating === 'positive' ? 1 : -1,
+          comment: feedback,
+          user_id: user?.id || null
+        });
       
       if (error) throw error;
       

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -90,10 +91,15 @@ const ApplyNow = () => {
         // Check if the worker has already applied for this job
         const { exists, applications } = await checkApplicationExists(jobId, worker.id);
         
-        if (exists) {
-          const application = applications[0];
+        if (exists && applications.length > 0) {
+          // Type assertion to ensure the application matches the Application interface
+          const typedApplication: Application = {
+            ...applications[0],
+            status: applications[0].status as 'applied' | 'accepted' | 'rejected' | 'completed'
+          };
+          
           setAlreadyApplied(true);
-          setExistingApplication(application);
+          setExistingApplication(typedApplication);
         }
       } catch (err: any) {
         console.error('Error fetching data:', err);

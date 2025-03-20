@@ -235,6 +235,7 @@ export const markApplicationCompleted = async (id: string) => {
   return updateApplicationStatus(id, 'completed');
 };
 
+// Modify checkApplicationExists to cast status to the correct type
 export const checkApplicationExists = async (jobId: string, workerId: string) => {
   console.log(`Checking if application exists for job ${jobId} and worker ${workerId}`);
   
@@ -256,8 +257,14 @@ export const checkApplicationExists = async (jobId: string, workerId: string) =>
       throw error;
     }
     
+    // Cast the data to ensure status is of the correct type
+    const typedApplications = data?.map(app => ({
+      ...app,
+      status: app.status as 'applied' | 'accepted' | 'rejected' | 'completed'
+    })) || [];
+    
     console.log(`Found ${count} applications for this job/worker combination`);
-    return { exists: count && count > 0, applications: data || [] };
+    return { exists: count && count > 0, applications: typedApplications };
   } catch (err) {
     console.error('Exception checking application existence:', err);
     return { exists: false, applications: [] };
