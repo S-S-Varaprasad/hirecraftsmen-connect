@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Worker {
@@ -28,10 +27,8 @@ export const getWorkers = async () => {
     throw error;
   }
   
-  // Add empty languages array for each worker if not present
   const workersWithLanguages = data?.map(worker => ({
     ...worker,
-    // Explicitly cast to any to avoid TypeScript errors
     languages: (worker as any).languages || []
   })) || [];
   
@@ -49,10 +46,8 @@ export const getWorkersByCategory = async (category: string) => {
     throw error;
   }
   
-  // Add empty languages array for each worker if not present
   const workersWithLanguages = data?.map(worker => ({
     ...worker,
-    // Explicitly cast to any to avoid TypeScript errors
     languages: (worker as any).languages || []
   })) || [];
   
@@ -71,10 +66,8 @@ export const getWorkerById = async (id: string) => {
     throw error;
   }
   
-  // Add empty languages array if not present
   const workerWithLanguages = {
     ...data,
-    // Explicitly cast to any to avoid TypeScript errors
     languages: (data as any).languages || []
   };
   
@@ -93,10 +86,8 @@ export const getWorkerByUserId = async (userId: string) => {
     throw error;
   }
   
-  // Add empty languages array if not present for the worker
   const workerWithLanguages = data ? {
     ...data,
-    // Explicitly cast to any to avoid TypeScript errors
     languages: (data as any).languages || []
   } : null;
   
@@ -182,17 +173,14 @@ export const searchWorkers = async (searchTerm: string) => {
     throw error;
   }
   
-  // Add empty languages array for each worker if not present
   const workersWithLanguages = data?.map(worker => ({
     ...worker,
-    // Explicitly cast to any to avoid TypeScript errors
     languages: (worker as any).languages || []
   })) || [];
   
   return workersWithLanguages as Worker[];
 };
 
-// New function to notify workers about jobs
 export const notifyWorkersAboutJob = async (
   jobId: string,
   jobTitle: string,
@@ -203,11 +191,11 @@ export const notifyWorkersAboutJob = async (
   employerId?: string
 ) => {
   try {
-    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/notify-workers`, {
+    const response = await fetch(`${process.env.SUPABASE_URL}/functions/v1/notify-workers`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabase.supabaseKey}`
+        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify({
         jobId,

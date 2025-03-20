@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Notification {
@@ -148,11 +149,11 @@ export const notifyWorkersAboutJob = async (
   sendSms: boolean = false
 ) => {
   try {
-    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/notify-workers`, {
+    const response = await fetch(`${process.env.SUPABASE_URL}/functions/v1/notify-workers`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabase.supabaseKey}`
+        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify({
         jobId,
@@ -194,11 +195,11 @@ export const notifyEmployerAboutApplication = async (
     
     if (sendEmail) {
       try {
-        const response = await fetch(`${supabase.supabaseUrl}/functions/v1/send-notification`, {
+        const response = await fetch(`${process.env.SUPABASE_URL}/functions/v1/send-notification`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabase.supabaseKey}`
+            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
           },
           body: JSON.stringify({
             userId: employerId,
