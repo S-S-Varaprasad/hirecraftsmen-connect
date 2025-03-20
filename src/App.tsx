@@ -28,6 +28,9 @@ import MessageWorker from '@/pages/MessageWorker';
 import DeactivateWorker from '@/pages/DeactivateWorker';
 import DeleteWorker from '@/pages/DeleteWorker';
 
+// Import CSS file
+import './App.css';
+
 function App() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -42,7 +45,7 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <AuthProvider>
           <QueryClientProvider client={queryClient}>
-            <div className="min-h-screen flex flex-col app-page-background">
+            <div className="app-page-background">
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />

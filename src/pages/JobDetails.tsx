@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -35,7 +36,7 @@ const JobDetails = () => {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col app-page-background">
+      <div className="flex flex-col app-page-background">
         <Navbar />
         <main className="flex-grow pt-24 flex justify-center items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -47,7 +48,7 @@ const JobDetails = () => {
   
   if (error || !job) {
     return (
-      <div className="min-h-screen flex flex-col app-page-background">
+      <div className="flex flex-col app-page-background">
         <Navbar />
         <main className="flex-grow pt-24 flex justify-center items-center">
           <Card className="max-w-md p-8 text-center">
@@ -86,7 +87,7 @@ const JobDetails = () => {
   };
   
   return (
-    <div className="min-h-screen flex flex-col app-page-background">
+    <div className="flex flex-col app-page-background">
       <Navbar />
       
       <main className="flex-grow pt-32 pb-16">
