@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X, User, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import UserProfile from './UserProfile';
+import { NotificationBell } from '@/components/NotificationBell';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
