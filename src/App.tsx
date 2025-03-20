@@ -4,6 +4,7 @@ import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import InteractiveFeedback from '@/components/InteractiveFeedback';
 
 import Index from '@/pages/Index';
 import About from '@/pages/About';
@@ -31,15 +32,38 @@ import ContactEmployer from '@/pages/ContactEmployer';
 import WorkerJobHistory from '@/pages/WorkerJobHistory';
 import { AuthProvider } from '@/context/AuthContext';
 
-// Create a client
-const queryClient = new QueryClient();
+// Create a client with better cache configuration
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60, // 1 minute
+      retry: 1,
+      refetchOnWindowFocus: true,
+      refetchOnMount: true,
+      refetchOnReconnect: true,
+    },
+  },
+});
 
 function App() {
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState('');
 
   useEffect(() => {
     // Simulate loading
     setTimeout(() => setLoading(false), 1000);
+    
+    // Track current page for feedback component
+    const handleRouteChange = () => {
+      setCurrentPage(window.location.pathname);
+    };
+    
+    window.addEventListener('popstate', handleRouteChange);
+    handleRouteChange();
+    
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+    };
   }, []);
 
   return (
@@ -75,6 +99,13 @@ function App() {
                 <Route path="/delete-worker/:id" element={<DeleteWorker />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              
+              {/* Interactive feedback component on all pages */}
+              <InteractiveFeedback 
+                pageId={currentPage} 
+                position="bottom-right" 
+                compact={true}
+              />
             </AuthProvider>
           </ThemeProvider>
         </div>
