@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
   getApplicationsByWorkerId, 
   Application, 
-  getApplicationStatusDescription 
+  getApplicationStatusDescription
 } from '@/services/applicationService';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -114,24 +114,40 @@ const WorkerHistory = ({
     enabled: !!workerId && externalApplications === undefined,
     staleTime: 0,
     refetchOnWindowFocus: true,
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const applications = externalApplications || fetchedApplications;
   const isLoading = externalLoading !== undefined ? externalLoading : fetchLoading;
   const error = externalError || fetchError;
 
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('WorkerHistory rendering with:');
     console.log('- Using external applications:', externalApplications !== undefined);
     console.log('- Applications count:', applications?.length || 0);
     console.log('- Loading state:', isLoading);
     console.log('- Error state:', !!error);
+    console.log('- Worker ID:', workerId);
     
-    if (workerId && !externalApplications) {
+    if (workerId) {
       console.log('Forcing refetch of applications on component mount');
       refetch();
+    } else {
+      console.error('No worker ID provided to WorkerHistory component');
     }
-  }, [workerId, applications, externalApplications, isLoading, error, refetch]);
+  }, [workerId, externalApplications, refetch]);
+
+  useEffect(() => {
+    if (applications?.length) {
+      console.log(`Received ${applications.length} applications:`, applications.map(a => ({
+        id: a.id,
+        job_title: a.job?.title,
+        status: a.status,
+        created_at: a.created_at
+      })));
+    }
+  }, [applications]);
 
   const handleMarkComplete = (applicationId: string) => {
     markJobCompleted.mutate({ applicationId }, {
