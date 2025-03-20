@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Worker {
@@ -27,6 +28,7 @@ export const getWorkers = async () => {
     throw error;
   }
   
+  // Add empty languages array for each worker if not present
   const workersWithLanguages = data?.map(worker => ({
     ...worker,
     languages: worker.languages || []
@@ -46,6 +48,7 @@ export const getWorkersByCategory = async (category: string) => {
     throw error;
   }
   
+  // Add empty languages array for each worker if not present
   const workersWithLanguages = data?.map(worker => ({
     ...worker,
     languages: worker.languages || []
@@ -66,6 +69,7 @@ export const getWorkerById = async (id: string) => {
     throw error;
   }
   
+  // Add empty languages array if not present
   const workerWithLanguages = {
     ...data,
     languages: data.languages || []
@@ -86,6 +90,7 @@ export const getWorkerByUserId = async (userId: string) => {
     throw error;
   }
   
+  // Add empty languages array if not present for the worker
   const workerWithLanguages = data ? {
     ...data,
     languages: data.languages || []
