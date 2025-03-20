@@ -45,6 +45,21 @@ const JobCard: React.FC<JobCardProps> = ({
     }
   };
 
+  // Format date to a user-friendly format
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric',
+        month: 'short', 
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error('Invalid date format:', dateString);
+      return 'Recently';
+    }
+  };
+
   // Truncate description to avoid too much text
   const truncateDescription = (text: string, maxLength: number = 150) => {
     if (text.length <= maxLength) return text;
@@ -81,7 +96,7 @@ const JobCard: React.FC<JobCardProps> = ({
           </div>
           <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
             <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-            <span>Posted {postedDate}</span>
+            <span>Posted {formatDate(postedDate)}</span>
           </div>
         </div>
         

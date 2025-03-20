@@ -108,7 +108,8 @@ export const createJob = async (jobData: Omit<Job, 'id' | 'posted_date' | 'creat
   // Validate urgency field before inserting
   const validatedJobData = {
     ...jobData,
-    urgency: validateUrgency(jobData.urgency)
+    urgency: validateUrgency(jobData.urgency),
+    posted_date: new Date().toISOString() // Explicitly set posted_date to current time
   };
 
   const { data, error } = await supabase

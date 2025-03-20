@@ -118,11 +118,7 @@ const Jobs = () => {
                       jobType={job.job_type}
                       rate={job.rate}
                       urgency={job.urgency}
-                      postedDate={new Date(job.posted_date).toLocaleDateString('en-US', { 
-                        year: 'numeric',
-                        month: 'short', 
-                        day: 'numeric'
-                      })}
+                      postedDate={job.posted_date || job.created_at}
                       skills={job.skills}
                       description={job.description}
                     />
