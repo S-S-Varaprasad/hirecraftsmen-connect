@@ -83,6 +83,46 @@ const sampleWorkers = [
     skills: ['Garment Construction', 'Alterations', 'Custom Designs', 'Embroidery'],
     about: 'Expert tailor specializing in custom clothing and alterations.',
     image_url: 'https://randomuser.me/api/portraits/women/68.jpg'
+  },
+  {
+    name: 'Aditya Mehta',
+    profession: 'Driver',
+    location: 'Jaipur, Rajasthan',
+    experience: '10 years',
+    hourly_rate: '₹350',
+    skills: ['Safe Driving', 'Route Planning', 'Vehicle Maintenance', 'Customer Service'],
+    about: 'Professional driver with clean record and excellent customer service skills.',
+    image_url: 'https://randomuser.me/api/portraits/men/72.jpg'
+  },
+  {
+    name: 'Neha Gupta',
+    profession: 'House Cleaning',
+    location: 'Lucknow, Uttar Pradesh',
+    experience: '3 years',
+    hourly_rate: '₹250',
+    skills: ['Dusting', 'Mopping', 'Bathroom Cleaning', 'Kitchen Cleaning'],
+    about: 'Reliable house cleaner offering thorough cleaning services for homes and apartments.',
+    image_url: 'https://randomuser.me/api/portraits/women/33.jpg'
+  },
+  {
+    name: 'Sanjay Kumar',
+    profession: 'Cook',
+    location: 'Kochi, Kerala',
+    experience: '8 years',
+    hourly_rate: '₹500',
+    skills: ['Indian Cuisine', 'Baking', 'Meal Planning', 'Catering'],
+    about: 'Experienced cook specializing in traditional and fusion Indian cuisine.',
+    image_url: 'https://randomuser.me/api/portraits/men/55.jpg'
+  },
+  {
+    name: 'Meera Pillai',
+    profession: 'Babysitter',
+    location: 'Goa',
+    experience: '6 years',
+    hourly_rate: '₹300',
+    skills: ['Childcare', 'First Aid', 'Meal Preparation', 'Educational Activities'],
+    about: 'Caring and reliable babysitter with experience in early childhood education.',
+    image_url: 'https://randomuser.me/api/portraits/women/38.jpg'
   }
 ];
 
@@ -90,28 +130,43 @@ const sampleWorkers = [
 export const addSampleWorkers = async () => {
   try {
     // Check if we already have workers
-    const { count } = await supabase
+    const { count, error } = await supabase
       .from('workers')
       .select('*', { count: 'exact', head: true });
     
+    if (error) {
+      console.error('Error checking workers count:', error);
+      return false;
+    }
+    
     // Only add sample workers if there are fewer than 5 workers
     if (count !== null && count < 5) {
+      console.log(`Only ${count} workers found, adding sample workers...`);
+      
       for (const worker of sampleWorkers) {
-        await registerWorker({
-          name: worker.name,
-          profession: worker.profession,
-          location: worker.location,
-          experience: worker.experience,
-          hourly_rate: worker.hourly_rate,
-          skills: worker.skills,
-          is_available: true,
-          image_url: worker.image_url,
-          about: worker.about,
-          user_id: null, // Sample workers don't have user accounts
-        });
+        try {
+          await registerWorker({
+            name: worker.name,
+            profession: worker.profession,
+            location: worker.location,
+            experience: worker.experience,
+            hourly_rate: worker.hourly_rate,
+            skills: worker.skills,
+            is_available: true,
+            image_url: worker.image_url,
+            about: worker.about,
+            user_id: null, // Sample workers don't have user accounts
+          });
+          console.log(`Added sample worker: ${worker.name}`);
+        } catch (workerError) {
+          console.error(`Error adding sample worker ${worker.name}:`, workerError);
+        }
       }
+      
       console.log('Sample workers added successfully');
       return true;
+    } else {
+      console.log(`Already have ${count} workers, skipping sample data`);
     }
     
     return false;

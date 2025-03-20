@@ -5,11 +5,17 @@ import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useStorage } from '@/hooks/useStorage';
 import { createNotification } from '@/services/notificationService';
+import { ensureStorageBuckets } from '@/services/storageService';
 
 export const useWorkerProfiles = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { uploadFile } = useStorage();
+
+  // Ensure storage buckets exist
+  ensureStorageBuckets().catch(error => {
+    console.error('Error ensuring storage buckets:', error);
+  });
 
   // Fetch all workers
   const { data: workers = [], isLoading, error, refetch } = useQuery({
@@ -30,6 +36,7 @@ export const useWorkerProfiles = () => {
       skills: string;
       about: string;
       profileImage: File | null;
+      resume: File | null;
     }) => {
       try {
         if (!user) throw new Error('You must be logged in to create a profile');
@@ -39,7 +46,7 @@ export const useWorkerProfiles = () => {
         // Upload profile image if provided
         let imageUrl = null;
         if (workerData.profileImage) {
-          console.log('Uploading profile image...');
+          console.log('Uploading profile image...', workerData.profileImage);
           const fileExt = workerData.profileImage.name.split('.').pop();
           const fileName = `${user.id}-${Date.now()}.${fileExt}`;
           
@@ -51,6 +58,18 @@ export const useWorkerProfiles = () => {
           if (!imageUrl) {
             throw new Error('Failed to upload profile image');
           }
+        }
+        
+        // Upload resume if provided
+        let resumeUrl = null;
+        if (workerData.resume) {
+          console.log('Uploading resume...');
+          const fileExt = workerData.resume.name.split('.').pop();
+          const fileName = `${user.id}-resume-${Date.now()}.${fileExt}`;
+          
+          resumeUrl = await uploadFile('resumes', fileName, workerData.resume);
+          
+          console.log('Resume upload result:', resumeUrl);
         }
         
         // Parse skills from comma-separated string to array
@@ -79,7 +98,7 @@ export const useWorkerProfiles = () => {
         
         console.log('Worker registered successfully:', newWorker);
         
-        // Notify admins about new worker registration
+        // Notify user about profile creation
         if (user.id) {
           try {
             await createNotification(

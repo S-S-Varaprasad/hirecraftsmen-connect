@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ensureStorageBuckets } from '@/services/storageService';
 
 export function useStorage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,23 +19,9 @@ export function useStorage() {
 
       console.log(`Attempting to upload file to bucket: ${bucket}, path: ${path}`);
       
-      // Create the bucket if it doesn't exist
-      try {
-        const { data: buckets } = await supabase.storage.listBuckets();
-        if (!buckets?.find(b => b.name === bucket)) {
-          console.log(`Bucket ${bucket} does not exist, creating it...`);
-          const { error } = await supabase.storage.createBucket(bucket, { public: true });
-          if (error) {
-            console.error(`Error creating bucket: ${error.message}`);
-          } else {
-            console.log(`Created bucket: ${bucket}`);
-          }
-        }
-      } catch (err) {
-        console.log(`Error checking/creating bucket: ${err}`);
-        // Continue even if bucket creation fails
-      }
-
+      // First ensure all required buckets exist
+      await ensureStorageBuckets();
+      
       // Upload the file
       const { data, error: uploadError } = await supabase.storage
         .from(bucket)

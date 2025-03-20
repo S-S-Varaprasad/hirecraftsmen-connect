@@ -125,3 +125,72 @@ export const createJobAcceptedNotification = async (
     jobId
   );
 };
+
+export const createNewJobNotification = async (
+  workerId: string,
+  jobId: string,
+  jobTitle: string,
+  jobCategory: string
+) => {
+  return createNotification(
+    workerId,
+    `New job posted that matches your skills: ${jobTitle}`,
+    'new_job',
+    jobId
+  );
+};
+
+export const notifyWorkersAboutJob = async (
+  jobId: string, 
+  jobTitle: string, 
+  skills: string[]
+) => {
+  try {
+    // Get workers with matching skills
+    const { data: workers, error } = await supabase
+      .from('workers')
+      .select('id, user_id, skills, profession')
+      .filter('is_available', 'eq', true);
+    
+    if (error) {
+      console.error('Error fetching workers for job notification:', error);
+      throw error;
+    }
+    
+    if (!workers || workers.length === 0) {
+      return [];
+    }
+    
+    const notifications: Notification[] = [];
+    const skillsLower = skills.map(s => s.toLowerCase());
+    
+    // Filter workers with matching skills and send notifications
+    for (const worker of workers) {
+      if (!worker.user_id) continue;
+      
+      const workerSkillsLower = worker.skills.map((s: string) => s.toLowerCase());
+      const hasMatchingSkill = workerSkillsLower.some((skill: string) => 
+        skillsLower.some(jobSkill => skill.includes(jobSkill) || jobSkill.includes(skill))
+      );
+      
+      if (hasMatchingSkill) {
+        try {
+          const notification = await createNotification(
+            worker.user_id,
+            `New job posted that matches your skills: ${jobTitle}`,
+            'new_job',
+            jobId
+          );
+          notifications.push(notification);
+        } catch (notifyError) {
+          console.error(`Error creating notification for worker ${worker.id}:`, notifyError);
+        }
+      }
+    }
+    
+    return notifications;
+  } catch (error) {
+    console.error('Error notifying workers about job:', error);
+    throw error;
+  }
+};

@@ -9,53 +9,56 @@ export const ensureStorageBuckets = async () => {
     
     if (error) {
       console.error('Error listing buckets:', error);
-      // Continue execution even if we can't list buckets
-      return true;
+      return false;
     }
     
-    if (!buckets?.find(bucket => bucket.name === 'worker-profiles')) {
+    const workerProfilesBucket = buckets?.find(bucket => bucket.name === 'worker-profiles');
+    const resumesBucket = buckets?.find(bucket => bucket.name === 'resumes');
+    
+    console.log('Existing buckets:', buckets?.map(b => b.name));
+    
+    // Create worker-profiles bucket if it doesn't exist
+    if (!workerProfilesBucket) {
       try {
-        // Create worker-profiles bucket
         const { error: createError } = await supabase.storage.createBucket('worker-profiles', {
           public: true,
         });
         
         if (createError) {
           console.error('Error creating worker-profiles bucket:', createError);
-          // Continue execution even if we can't create the bucket
         } else {
           console.log('Successfully created worker-profiles bucket');
-          
-          // Set bucket to public
-          try {
-            // Since createPolicy isn't available directly, we'll use a different approach
-            // to make the bucket publicly accessible by using the public flag when creating
-            // the bucket and verifying it's accessible
-            console.log('Bucket is set to public during creation');
-            
-            // Verify the bucket is accessible
-            const { data } = supabase.storage.from('worker-profiles').getPublicUrl('dummy.txt');
-            console.log('Public access confirmed:', data.publicUrl);
-          } catch (policyErr) {
-            console.error('Error verifying bucket public access:', policyErr);
-            // Continue execution even if we can't verify public access
-          }
         }
       } catch (createErr) {
-        console.error('Exception when creating bucket:', createErr);
-        // Continue execution even if we hit an exception
+        console.error('Exception when creating worker-profiles bucket:', createErr);
       }
     } else {
       console.log('worker-profiles bucket already exists');
     }
     
-    // Add more bucket checks if needed for resumes, etc.
+    // Create resumes bucket if it doesn't exist
+    if (!resumesBucket) {
+      try {
+        const { error: createError } = await supabase.storage.createBucket('resumes', {
+          public: true,
+        });
+        
+        if (createError) {
+          console.error('Error creating resumes bucket:', createError);
+        } else {
+          console.log('Successfully created resumes bucket');
+        }
+      } catch (createErr) {
+        console.error('Exception when creating resumes bucket:', createErr);
+      }
+    } else {
+      console.log('resumes bucket already exists');
+    }
     
     return true;
   } catch (error) {
     console.error('Error ensuring storage buckets:', error);
-    // Continue execution even if we hit an exception
-    return true;
+    return false;
   }
 };
 

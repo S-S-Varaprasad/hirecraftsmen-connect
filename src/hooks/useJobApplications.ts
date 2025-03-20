@@ -106,7 +106,16 @@ export const useJobApplications = () => {
       console.log(`Accepting application: ${applicationId} for job: ${jobId} and worker: ${workerId}`);
       
       // Update application status to 'accepted'
-      // This part would connect to your applicationService
+      const { data, error } = await supabase
+        .from('applications')
+        .update({ status: 'accepted' })
+        .eq('id', applicationId)
+        .select();
+        
+      if (error) {
+        console.error('Error updating application status:', error);
+        throw error;
+      }
       
       // Get job and employer details
       const job = await getJobById(jobId);
@@ -130,7 +139,7 @@ export const useJobApplications = () => {
         // Continue even if notification fails
       }
       
-      return { success: true };
+      return data?.[0] || { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['applications'] });

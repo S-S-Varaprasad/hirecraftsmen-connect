@@ -4,8 +4,14 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { addSampleWorkers } from './utils/sampleWorkers.ts'
+import { ensureStorageBuckets } from './services/storageService.ts'
 
-// Add sample workers if needed (this is separate from storage bucket initialization)
+// Ensure storage buckets exist
+ensureStorageBuckets().catch(error => {
+  console.error('Error ensuring storage buckets:', error);
+});
+
+// Add sample workers if needed
 addSampleWorkers().catch(error => {
   console.error('Error adding sample workers:', error);
 });
