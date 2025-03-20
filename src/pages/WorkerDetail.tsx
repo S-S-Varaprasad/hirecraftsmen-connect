@@ -35,6 +35,8 @@ const WorkerDetail = () => {
         <div className="container mx-auto px-4 py-8">
           {isLoading ? (
             <LoadingState />
+          ) : error ? (
+            <ErrorState message="Error loading worker profile." />
           ) : worker ? (
             <div className="space-y-8">
               {/* Worker Profile Information Section */}
@@ -86,15 +88,33 @@ const WorkerDetail = () => {
                     <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Skills</h3>
                     <div className="flex flex-wrap gap-2">
                       {worker.skills.map((skill, index) => (
-                        <Badge key={index} variant="secondary">{skill}</Badge>
+                        <Badge key={index} variant="secondary" className="dark:bg-gray-700 dark:text-gray-200">{skill}</Badge>
                       ))}
                     </div>
                   </div>
+
+                  {worker.languages && worker.languages.length > 0 && (
+                    <div className="mt-4">
+                      <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Languages</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {worker.languages.map((language, index) => (
+                          <Badge key={index} variant="outline" className="dark:border-gray-600 dark:text-gray-300">{language}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {worker.about && (
+                    <div className="mt-4">
+                      <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">About</h3>
+                      <p className="text-gray-600 dark:text-gray-400">{worker.about}</p>
+                    </div>
+                  )}
                 </div>
               </div>
               
               {/* Worker Profile Content Tabs */}
-              <Tabs defaultValue="availability">
+              <Tabs defaultValue="availability" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-4">
                   <TabsTrigger value="availability">Availability</TabsTrigger>
                   {isOwnProfile && <TabsTrigger value="history">Job History</TabsTrigger>}
@@ -115,7 +135,7 @@ const WorkerDetail = () => {
                 {isOwnProfile && (
                   <TabsContent value="history" className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
                     <div className="p-6">
-                      <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">
+                      <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
                         <History className="inline-block mr-2 h-6 w-6" />
                         Job Application History
                       </h2>

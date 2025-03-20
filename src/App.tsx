@@ -40,24 +40,49 @@ function App() {
     // Simulate loading
     setTimeout(() => setLoading(false), 1000);
     
-    // Check and apply the theme from localStorage
-    const theme = localStorage.getItem('vite-ui-theme');
-    if (theme) {
+    // Get the saved theme from localStorage
+    const savedTheme = localStorage.getItem('vite-ui-theme');
+    
+    // Apply the theme to the document
+    if (savedTheme) {
       document.documentElement.classList.remove('light', 'dark');
-      if (theme === 'system') {
+      
+      if (savedTheme === 'system') {
         const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.classList.add(systemTheme);
       } else {
-        document.documentElement.classList.add(theme);
+        document.documentElement.classList.add(savedTheme);
       }
+    } else {
+      // If no theme is saved, set a default
+      document.documentElement.classList.add('light');
     }
+    
+    // Listen for system preference changes if theme is set to 'system'
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    const handleChange = () => {
+      const currentTheme = localStorage.getItem('vite-ui-theme');
+      if (currentTheme === 'system') {
+        document.documentElement.classList.remove('light', 'dark');
+        document.documentElement.classList.add(
+          mediaQuery.matches ? 'dark' : 'light'
+        );
+      }
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
   }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <div className="app">
-          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+          <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
             <Toaster position="top-right" />
             <AuthProvider>
               <Routes>
