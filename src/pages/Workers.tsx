@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -155,6 +154,7 @@ const Workers = () => {
               initialLocation={initialLocation}
             />
           </div>
+          
           
           {isLoading ? (
             <div className="flex justify-center items-center py-20">
