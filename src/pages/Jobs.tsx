@@ -81,10 +81,10 @@ const Jobs = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col app-page-background">
       <Navbar />
       
-      <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
+      <main className="flex-grow pt-24">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-3xl mx-auto text-center mb-10">
             <div className="inline-block p-2 px-4 bg-primary/10 text-primary rounded-full text-sm font-medium mb-3">

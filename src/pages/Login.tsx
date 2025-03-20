@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { User, Lock, Eye, EyeOff } from 'lucide-react';
@@ -16,7 +15,6 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, isAuthenticated } = useAuth();
 
-  // Redirect if already logged in
   if (isAuthenticated) {
     return <Navigate to="/" />;
   }
@@ -41,10 +39,10 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col app-page-background">
       <Navbar />
       
-      <main className="flex-grow bg-gray-50 dark:bg-gray-900 pt-24 flex items-center justify-center">
+      <main className="flex-grow pt-24 flex items-center justify-center">
         <div className="container max-w-md mx-auto px-4 py-8">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
             <div className="p-8">

@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 const Contact = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col app-page-background">
       <Navbar />
       
       <main className="flex-grow pt-32 pb-16">

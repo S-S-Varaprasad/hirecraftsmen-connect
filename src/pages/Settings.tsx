@@ -49,6 +49,11 @@ const Settings = () => {
     }
   }, []);
 
+  // Apply saved dark mode setting on load
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', appearance.darkMode);
+  }, []);
+
   // Save settings when they change
   useEffect(() => {
     localStorage.setItem('userSettings', JSON.stringify({
@@ -108,10 +113,10 @@ const Settings = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col app-page-background">
       <Navbar />
       
-      <main className="flex-grow bg-gray-50 dark:bg-gray-900 pt-32 pb-16">
+      <main className="flex-grow pt-32 pb-16">
         <div className="container mx-auto px-4">
           <h1 className="text-2xl font-bold mb-8 text-gray-900 dark:text-white">Settings</h1>
           

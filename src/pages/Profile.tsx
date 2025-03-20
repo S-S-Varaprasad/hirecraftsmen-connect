@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Mail, MapPin, Phone, Briefcase, Clock, FileEdit, Building, Upload, X } from 'lucide-react';
+import { User, Mail, MapPin, Phone, Briefcase, Clock, FileEdit, Building, Upload, X, Check, Save, Camera } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { getWorkerByUserId, updateWorker, updateWorkerProfilePicture } from '@/services/workerService';
 import { Worker } from '@/services/workerService';
@@ -157,10 +157,10 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col app-page-background">
       <Navbar />
       
-      <main className="flex-grow bg-gray-50 dark:bg-gray-900 pt-32 pb-16">
+      <main className="flex-grow pt-32 pb-16">
         <div className="container mx-auto px-4">
           <h1 className="text-2xl font-bold mb-8 text-gray-900 dark:text-white">Your Profile</h1>
           
@@ -251,7 +251,7 @@ const Profile = () => {
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <div>
                       <CardTitle className="flex items-center">
-                        <Briefcase className="mr-2 h-5 w-5 text-orange-500" />
+                        <Briefcase className="mr-2 h-5 w-5 text-app-orange" />
                         Work Profile
                       </CardTitle>
                       <CardDescription>
@@ -259,31 +259,47 @@ const Profile = () => {
                       </CardDescription>
                     </div>
                     <Button 
-                      variant="outline" 
+                      variant={editing ? "outline" : "orange"}
                       size="sm" 
                       onClick={() => setEditing(!editing)}
                       className="flex items-center gap-1"
                     >
-                      <FileEdit className="h-4 w-4" />
-                      {editing ? 'Cancel' : 'Edit'}
+                      {editing ? (
+                        <>
+                          <X className="h-4 w-4" />
+                          Cancel
+                        </>
+                      ) : (
+                        <>
+                          <FileEdit className="h-4 w-4" />
+                          Edit Profile
+                        </>
+                      )}
                     </Button>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     {editing ? (
                       <div className="space-y-4">
-                        <div className="relative">
+                        <div className="relative mx-auto w-fit">
                           <Avatar 
                             className="w-24 h-24 mx-auto mb-4 border-4 border-white shadow cursor-pointer hover:opacity-90"
                             onClick={handleProfilePictureClick}
                           >
                             <AvatarImage src={worker.image_url || ''} />
-                            <AvatarFallback className="bg-orange-100 text-orange-800 text-xl">
+                            <AvatarFallback className="bg-app-orange/10 text-app-orange text-xl">
                               {getInitials(worker.name)}
                             </AvatarFallback>
                             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 hover:opacity-100 transition-opacity">
-                              <Upload className="h-8 w-8 text-white" />
+                              <Camera className="h-8 w-8 text-white" />
                             </div>
                           </Avatar>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleFileChange}
+                          />
                           {worker.image_url && (
                             <Button
                               variant="outline"
@@ -298,6 +314,12 @@ const Profile = () => {
                               <X className="h-4 w-4" />
                             </Button>
                           )}
+                          {uploading && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                              <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
+                            </div>
+                          )}
+                          <p className="text-center text-sm text-gray-500 mt-2">Click to change photo</p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -378,12 +400,6 @@ const Profile = () => {
                           />
                           <Label htmlFor="is_available">Available for work</Label>
                         </div>
-                        
-                        <div className="flex justify-end">
-                          <Button onClick={handleSave} className="bg-orange-500 hover:bg-orange-600">
-                            Save Changes
-                          </Button>
-                        </div>
                       </div>
                     ) : (
                       <div className="space-y-6">
@@ -461,6 +477,24 @@ const Profile = () => {
                       </div>
                     )}
                   </CardContent>
+                  {editing && (
+                    <CardFooter className="flex justify-end pt-4 gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setEditing(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        variant="orange" 
+                        onClick={handleSave}
+                        className="flex items-center gap-1"
+                      >
+                        <Save className="h-4 w-4" />
+                        Save Changes
+                      </Button>
+                    </CardFooter>
+                  )}
                 </Card>
               ) : (
                 <Card>
