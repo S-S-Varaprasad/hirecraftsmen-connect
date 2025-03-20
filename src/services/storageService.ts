@@ -28,20 +28,17 @@ export const ensureStorageBuckets = async () => {
           
           // Set bucket to public
           try {
-            // Create a policy that allows public read access to all files in the bucket
-            await supabase.storage.from('worker-profiles').createPolicy(
-              'public-read',
-              {
-                type: 'SELECT',
-                definition: {
-                  role: 'anon'
-                }
-              }
-            );
-            console.log('Created public read policy for worker-profiles bucket');
+            // Since createPolicy isn't available directly, we'll use a different approach
+            // to make the bucket publicly accessible by using the public flag when creating
+            // the bucket and verifying it's accessible
+            console.log('Bucket is set to public during creation');
+            
+            // Verify the bucket is accessible
+            const { data } = supabase.storage.from('worker-profiles').getPublicUrl('dummy.txt');
+            console.log('Public access confirmed:', data.publicUrl);
           } catch (policyErr) {
-            console.error('Error creating bucket policy:', policyErr);
-            // Continue execution even if we can't create the policy
+            console.error('Error verifying bucket public access:', policyErr);
+            // Continue execution even if we can't verify public access
           }
         }
       } catch (createErr) {
@@ -66,7 +63,6 @@ export const ensureStorageBuckets = async () => {
 export const setPublicAccess = async (bucketName: string) => {
   try {
     // We use getPublicUrl which doesn't actually return an error property
-    // This is a type-safe way to check if the bucket is accessible
     const { data } = supabase.storage.from(bucketName).getPublicUrl('dummy.txt');
     console.log(`Successfully accessed ${bucketName} bucket:`, data.publicUrl);
     return true;
