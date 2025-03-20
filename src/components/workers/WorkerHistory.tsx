@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -16,7 +17,7 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { formatDistanceToNow } from 'date-fns';
-import { CalendarClock, DollarSign, Briefcase, Check, X, Clock, Award, FileText, ExternalLink, RefreshCw, HelpCircle } from 'lucide-react';
+import { CalendarClock, DollarSign, Briefcase, Check, X, Clock, Award, FileText, ExternalLink, RefreshCw, HelpCircle, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { useJobApplications } from '@/hooks/useJobApplications';
@@ -27,6 +28,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { motion } from 'framer-motion';
 
 const StatusBadge = ({ status }: { status: string }) => {
   const statusDescription = getApplicationStatusDescription(status);
@@ -36,19 +38,19 @@ const StatusBadge = ({ status }: { status: string }) => {
       <Tooltip>
         <TooltipTrigger asChild>
           {status === 'applied' ? (
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 py-1.5">
               <Clock className="h-3 w-3 mr-1" /> Applied
             </Badge>
           ) : status === 'accepted' ? (
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800">
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800 py-1.5">
               <Check className="h-3 w-3 mr-1" /> Accepted
             </Badge>
           ) : status === 'rejected' ? (
-            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800">
+            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800 py-1.5">
               <X className="h-3 w-3 mr-1" /> Rejected
             </Badge>
           ) : status === 'completed' ? (
-            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800">
+            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800 py-1.5">
               <Award className="h-3 w-3 mr-1" /> Completed
             </Badge>
           ) : (
@@ -174,7 +176,7 @@ const WorkerHistory = ({
 
   if (error) {
     return (
-      <Card className="border-red-200 dark:border-red-800">
+      <Card className="border-red-200 dark:border-red-800 shadow-3d">
         <CardHeader>
           <CardTitle className="text-red-600 dark:text-red-400">Error</CardTitle>
         </CardHeader>
@@ -184,7 +186,7 @@ const WorkerHistory = ({
           </p>
           <Button 
             variant="outline" 
-            className="mt-4"
+            className="mt-4 hover-lift"
             onClick={() => refetch()}
           >
             <RefreshCw className="h-4 w-4 mr-1" />
@@ -197,18 +199,27 @@ const WorkerHistory = ({
 
   if (!applications || applications.length === 0) {
     return (
-      <Card className="border-gray-200 dark:border-gray-700">
+      <Card className="border-gray-200 dark:border-gray-700 shadow-3d glass">
         <CardHeader className="text-center">
-          <Briefcase className="h-12 w-12 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
-          <CardTitle>No Job History</CardTitle>
-          <CardDescription>
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="mb-4"
+          >
+            <div className="bg-blue-50 dark:bg-blue-900/20 h-24 w-24 rounded-full flex items-center justify-center mx-auto">
+              <Briefcase className="h-12 w-12 text-blue-500 dark:text-blue-400" />
+            </div>
+          </motion.div>
+          <CardTitle className="text-2xl">No Job History</CardTitle>
+          <CardDescription className="text-base mt-2">
             You haven't applied to any jobs yet or your applications are still processing.
             <Button asChild variant="link" className="p-0 h-auto">
               <a href="/jobs" className="ml-1">Browse available jobs</a>
             </Button>
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col items-center">
+        <CardContent className="flex flex-col items-center pb-8">
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 max-w-md text-center">
             When you apply for jobs, they will appear here with their current status and payment information.
           </p>
@@ -216,7 +227,7 @@ const WorkerHistory = ({
             variant="outline" 
             size="sm" 
             onClick={() => refetch()}
-            className="mt-2"
+            className="mt-2 hover-lift"
           >
             <RefreshCw className="h-4 w-4 mr-1" />
             Refresh History
@@ -227,125 +238,161 @@ const WorkerHistory = ({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg mb-4 border dark:border-gray-700">
-        <h3 className="font-medium flex items-center text-gray-700 dark:text-gray-300 mb-2">
-          <HelpCircle className="h-4 w-4 mr-2 text-blue-500" />
-          Understanding Application Status
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div className="flex items-start space-x-2">
-            <Clock className="h-4 w-4 text-blue-500 mt-0.5" />
-            <div>
-              <p className="font-medium text-blue-700 dark:text-blue-400">Applied</p>
-              <p className="text-gray-600 dark:text-gray-400">Your application is under review by the employer</p>
-            </div>
+    <motion.div 
+      className="space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="bg-gradient-to-r from-blue-50 to-blue-50/30 dark:from-blue-900/10 dark:to-blue-900/5 p-4 rounded-lg mb-6 border dark:border-gray-700/50 shadow-md">
+        <CardContent className="p-0">
+          <h3 className="font-medium flex items-center text-gray-700 dark:text-gray-300 mb-3">
+            <HelpCircle className="h-5 w-5 mr-2 text-blue-500" />
+            <span className="text-lg">Understanding Your Application Status</span>
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            <motion.div 
+              className="flex items-start space-x-3 hover-lift p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-blue-100 dark:border-blue-900/30" 
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full mt-0.5">
+                <Clock className="h-5 w-5 text-blue-500" />
+              </div>
+              <div>
+                <p className="font-medium text-blue-700 dark:text-blue-400">Applied</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">Your application is under review by the employer</p>
+              </div>
+            </motion.div>
+            <motion.div 
+              className="flex items-start space-x-3 hover-lift p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-green-100 dark:border-green-900/30" 
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-full mt-0.5">
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+              </div>
+              <div>
+                <p className="font-medium text-green-700 dark:text-green-400">Accepted</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">You're hired! You can start working on this job</p>
+              </div>
+            </motion.div>
+            <motion.div 
+              className="flex items-start space-x-3 hover-lift p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-red-100 dark:border-red-900/30" 
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full mt-0.5">
+                <X className="h-5 w-5 text-red-500" />
+              </div>
+              <div>
+                <p className="font-medium text-red-700 dark:text-red-400">Rejected</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">Your application was not accepted for this position</p>
+              </div>
+            </motion.div>
+            <motion.div 
+              className="flex items-start space-x-3 hover-lift p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-purple-100 dark:border-purple-900/30" 
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-full mt-0.5">
+                <Award className="h-5 w-5 text-purple-500" />
+              </div>
+              <div>
+                <p className="font-medium text-purple-700 dark:text-purple-400">Completed</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">Job is finished and payment has been processed</p>
+              </div>
+            </motion.div>
           </div>
-          <div className="flex items-start space-x-2">
-            <Check className="h-4 w-4 text-green-500 mt-0.5" />
-            <div>
-              <p className="font-medium text-green-700 dark:text-green-400">Accepted</p>
-              <p className="text-gray-600 dark:text-gray-400">You're hired! You can start working on this job</p>
-            </div>
-          </div>
-          <div className="flex items-start space-x-2">
-            <X className="h-4 w-4 text-red-500 mt-0.5" />
-            <div>
-              <p className="font-medium text-red-700 dark:text-red-400">Rejected</p>
-              <p className="text-gray-600 dark:text-gray-400">Your application was not accepted for this position</p>
-            </div>
-          </div>
-          <div className="flex items-start space-x-2">
-            <Award className="h-4 w-4 text-purple-500 mt-0.5" />
-            <div>
-              <p className="font-medium text-purple-700 dark:text-purple-400">Completed</p>
-              <p className="text-gray-600 dark:text-gray-400">Job is finished and payment has been processed</p>
-            </div>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
         
-      <div className="rounded-md border dark:border-gray-700">
-        <div className="flex justify-between items-center p-4 pb-2">
-          <h3 className="font-semibold">Your Applications</h3>
+      <Card className="shadow-3d rounded-xl overflow-hidden border dark:border-gray-700/50">
+        <div className="bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-800/80 px-6 py-4 border-b dark:border-gray-700/50 flex justify-between items-center">
+          <h3 className="font-bold text-lg text-gray-800 dark:text-white flex items-center gap-2">
+            <Briefcase className="h-5 w-5 text-primary" />
+            Your Applications
+          </h3>
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={() => refetch()}
-            className="h-8"
+            className="h-9 hover:bg-gray-100 dark:hover:bg-gray-700"
           >
-            <RefreshCw className="h-3 w-3 mr-1" />
+            <RefreshCw className="h-3.5 w-3.5 mr-1" />
             Refresh
           </Button>
         </div>
-        <Table>
-          <TableCaption>Job application history and payment details</TableCaption>
-          <TableHeader>
-            <TableRow className="dark:border-gray-700">
-              <TableHead className="dark:text-gray-400">Job Title</TableHead>
-              <TableHead className="dark:text-gray-400">Employer</TableHead>
-              <TableHead className="dark:text-gray-400">Applied Date</TableHead>
-              <TableHead className="dark:text-gray-400">Status</TableHead>
-              <TableHead className="dark:text-gray-400">Payment</TableHead>
-              <TableHead className="dark:text-gray-400">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {applications.map((application) => (
-              <TableRow key={application.id} className="dark:border-gray-700">
-                <TableCell className="font-medium dark:text-white">
-                  {application.job?.title || 'Unknown Job'}
-                </TableCell>
-                <TableCell className="dark:text-gray-300">
-                  {application.job?.company || 'Unknown Company'}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center text-sm text-muted-foreground dark:text-gray-400">
-                    <CalendarClock className="h-3 w-3 mr-1" />
-                    {application.created_at 
-                      ? formatDistanceToNow(new Date(application.created_at), { addSuffix: true })
-                      : 'Unknown date'}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={application.status} />
-                </TableCell>
-                <TableCell>
-                  <PaymentStatus status={application.status} rate={application.job?.rate} />
-                </TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    {application.job && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 px-2 text-blue-600 dark:text-blue-400"
-                        onClick={() => window.open(`/jobs/${application.job?.id}`, '_blank')}
-                      >
-                        <ExternalLink className="h-3 w-3 mr-1" />
-                        View Job
-                      </Button>
-                    )}
-                    
-                    {application.status === 'accepted' && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-2 text-green-600 dark:text-green-400"
-                        onClick={() => handleMarkComplete(application.id)}
-                      >
-                        <Check className="h-3 w-3 mr-1" />
-                        Mark Completed
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableCaption>Job application history and payment details</TableCaption>
+            <TableHeader>
+              <TableRow className="bg-gray-50/50 dark:bg-gray-800/50 dark:border-gray-700">
+                <TableHead className="font-semibold dark:text-gray-300">Job Title</TableHead>
+                <TableHead className="font-semibold dark:text-gray-300">Employer</TableHead>
+                <TableHead className="font-semibold dark:text-gray-300">Applied Date</TableHead>
+                <TableHead className="font-semibold dark:text-gray-300">Status</TableHead>
+                <TableHead className="font-semibold dark:text-gray-300">Payment</TableHead>
+                <TableHead className="font-semibold dark:text-gray-300">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+            </TableHeader>
+            <TableBody>
+              {applications.map((application) => (
+                <TableRow key={application.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 dark:border-gray-700 transition-colors">
+                  <TableCell className="font-medium dark:text-white">
+                    {application.job?.title || 'Unknown Job'}
+                  </TableCell>
+                  <TableCell className="dark:text-gray-300">
+                    {application.job?.company || 'Unknown Company'}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center text-sm text-muted-foreground dark:text-gray-400">
+                      <CalendarClock className="h-3.5 w-3.5 mr-1.5" />
+                      {application.created_at 
+                        ? formatDistanceToNow(new Date(application.created_at), { addSuffix: true })
+                        : 'Unknown date'}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={application.status} />
+                  </TableCell>
+                  <TableCell>
+                    <PaymentStatus status={application.status} rate={application.job?.rate} />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      {application.job && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 px-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                          onClick={() => window.open(`/jobs/${application.job?.id}`, '_blank')}
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          View Job
+                        </Button>
+                      )}
+                      
+                      {application.status === 'accepted' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
+                          onClick={() => handleMarkComplete(application.id)}
+                        >
+                          <Check className="h-3 w-3 mr-1" />
+                          Mark Completed
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
+    </motion.div>
   );
 };
 

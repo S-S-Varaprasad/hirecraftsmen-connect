@@ -32,7 +32,7 @@ const Navbar = () => {
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled 
-          ? 'glass backdrop-blur-md border-b border-white/10 dark:border-gray-800/80' 
+          ? 'glass backdrop-blur-md border-b border-white/10 dark:border-gray-800/80 shadow-md' 
           : 'bg-transparent'
       }`}
     >
@@ -43,37 +43,42 @@ const Navbar = () => {
             to="/" 
             className="flex items-center space-x-2 transition-all hover:opacity-90"
           >
-            <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent font-bold text-xl md:text-2xl tracking-tight">
+            <span className="bg-gradient-to-r from-primary via-blue-500 to-indigo-600 bg-clip-text text-transparent font-bold text-xl md:text-2xl tracking-tight">
               HireEase
             </span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
-            <Link to="/workers" className="px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100/30 dark:hover:bg-gray-800/50 transition-all">
-              Find Workers
+            <Link to="/workers" className="relative px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-gray-800/70 transition-all group">
+              <span className="relative z-10">Find Workers</span>
+              <span className="absolute inset-0 rounded-md bg-gray-100/0 dark:bg-gray-800/0 transition-colors duration-300 group-hover:bg-gray-100/50 dark:group-hover:bg-gray-800/50"></span>
             </Link>
-            <Link to="/jobs" className="px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100/30 dark:hover:bg-gray-800/50 transition-all">
-              Browse Jobs
+            <Link to="/jobs" className="relative px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-gray-800/70 transition-all group">
+              <span className="relative z-10">Browse Jobs</span>
+              <span className="absolute inset-0 rounded-md bg-gray-100/0 dark:bg-gray-800/0 transition-colors duration-300 group-hover:bg-gray-100/50 dark:group-hover:bg-gray-800/50"></span>
             </Link>
             {isAuthenticated && (
               <>
-                <Link to="/post-job" className="px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100/30 dark:hover:bg-gray-800/50 transition-all">
-                  <span className="flex items-center gap-1">
+                <Link to="/post-job" className="relative px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-gray-800/70 transition-all group">
+                  <span className="relative z-10 flex items-center gap-1">
                     <PlusCircle className="h-4 w-4" />
                     Post Job
                   </span>
+                  <span className="absolute inset-0 rounded-md bg-gray-100/0 dark:bg-gray-800/0 transition-colors duration-300 group-hover:bg-gray-100/50 dark:group-hover:bg-gray-800/50"></span>
                 </Link>
-                <Link to="/worker-job-history" className="px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100/30 dark:hover:bg-gray-800/50 transition-all">
-                  <span className="flex items-center gap-1">
+                <Link to="/worker-job-history" className="relative px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-gray-800/70 transition-all group">
+                  <span className="relative z-10 flex items-center gap-1">
                     <History className="h-4 w-4" />
                     Job History
                   </span>
+                  <span className="absolute inset-0 rounded-md bg-gray-100/0 dark:bg-gray-800/0 transition-colors duration-300 group-hover:bg-gray-100/50 dark:group-hover:bg-gray-800/50"></span>
                 </Link>
               </>
             )}
-            <Link to="/about" className="px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100/30 dark:hover:bg-gray-800/50 transition-all">
-              About
+            <Link to="/about" className="relative px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-gray-800/70 transition-all group">
+              <span className="relative z-10">About</span>
+              <span className="absolute inset-0 rounded-md bg-gray-100/0 dark:bg-gray-800/0 transition-colors duration-300 group-hover:bg-gray-100/50 dark:group-hover:bg-gray-800/50"></span>
             </Link>
           </nav>
 
@@ -82,7 +87,7 @@ const Navbar = () => {
             <Toggle 
               variant="outline" 
               size="sm" 
-              className="border-0 bg-gray-100/30 dark:bg-gray-800/50 rounded-full w-9 h-9 p-0"
+              className="border-0 bg-gray-100/50 dark:bg-gray-800/70 rounded-full w-9 h-9 p-0 hover:bg-gray-200/70 dark:hover:bg-gray-700/70 transition-colors"
               pressed={theme === 'dark'} 
               onPressedChange={toggleTheme}
             >
@@ -99,13 +104,13 @@ const Navbar = () => {
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="ghost" size="sm" className="hover:bg-gray-100/30 dark:hover:bg-gray-800/50">Login</Button>
+                  <Button variant="ghost" size="sm" className="hover:bg-gray-100/50 dark:hover:bg-gray-800/70">Login</Button>
                 </Link>
                 <Link to="/register">
                   <Button 
                     variant="default" 
                     size="sm"
-                    className="bg-gradient-to-r from-primary to-blue-500 hover:opacity-90 transition-opacity"
+                    className="bg-gradient-to-r from-primary to-blue-500 hover:opacity-90 transition-opacity shadow-sm"
                   >
                     Sign Up
                   </Button>
@@ -119,7 +124,7 @@ const Navbar = () => {
             <Toggle 
               variant="outline" 
               size="sm" 
-              className="border-0 bg-gray-100/30 dark:bg-gray-800/50 rounded-full w-8 h-8 p-0"
+              className="border-0 bg-gray-100/50 dark:bg-gray-800/70 rounded-full w-8 h-8 p-0"
               pressed={theme === 'dark'} 
               onPressedChange={toggleTheme}
             >
@@ -133,7 +138,7 @@ const Navbar = () => {
           
             <button
               type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100/30 dark:hover:bg-gray-800/50 transition-all"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100/50 dark:hover:bg-gray-800/70 transition-all"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               <span className="sr-only">{isMobileMenuOpen ? 'Close menu' : 'Open menu'}</span>

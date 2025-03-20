@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { getWorkerByUserId } from '@/services/workerService';
 import { useQueryRefresh } from '@/hooks/useQueryRefresh';
-import { AlertTriangle, FileQuestion, Briefcase } from 'lucide-react';
+import { AlertTriangle, FileQuestion, Briefcase, ClipboardCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const WorkerJobHistory = () => {
@@ -58,7 +58,7 @@ const WorkerJobHistory = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow bg-gradient-to-b from-orange-50/40 to-white dark:from-gray-900 dark:to-gray-800 pt-24 flex justify-center items-center">
+        <main className="flex-grow bg-gradient-to-b from-orange-50/40 via-orange-50/20 to-white dark:from-gray-900 dark:via-gray-900/90 dark:to-gray-800 pt-24 flex justify-center items-center">
           <motion.div 
             className="flex flex-col items-center gap-4"
             initial={{ opacity: 0 }}
@@ -67,10 +67,10 @@ const WorkerJobHistory = () => {
           >
             <div className="relative w-16 h-16">
               <div className="absolute inset-0 rounded-full border-t-2 border-b-2 border-primary animate-spin"></div>
-              <div className="absolute inset-2 rounded-full border-r-2 border-l-2 border-primary animate-spin animate-reverse"></div>
-              <Briefcase className="absolute inset-0 m-auto w-8 h-8 text-primary/70" />
+              <div className="absolute inset-2 rounded-full border-r-2 border-l-2 border-primary/70 animate-spin animate-reverse"></div>
+              <ClipboardCheck className="absolute inset-0 m-auto w-8 h-8 text-primary/70" />
             </div>
-            <p className="text-gray-500 dark:text-gray-400 animate-pulse">Loading your job history...</p>
+            <p className="text-gray-500 dark:text-gray-400 animate-pulse font-medium">Loading your job history...</p>
           </motion.div>
         </main>
         <Footer />
@@ -79,36 +79,41 @@ const WorkerJobHistory = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-orange-50/40 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-orange-50/40 via-orange-50/20 to-white dark:from-gray-900 dark:via-gray-900/90 dark:to-gray-800">
       <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-8 mt-16">
+      <main className="flex-grow container mx-auto px-4 py-12 mt-16">
         <div className="max-w-4xl mx-auto">
           {error ? (
-            <Card className="border-red-200 dark:border-red-800 backdrop-blur-sm bg-white/90 dark:bg-gray-800/90">
-              <CardHeader>
-                <div className="flex items-center justify-center mb-4">
+            <Card className="glass shadow-3d overflow-hidden border-red-200 dark:border-red-800/40">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-center mb-6">
                   {error.includes("logged in") ? (
-                    <AlertTriangle className="h-12 w-12 text-red-500" />
+                    <div className="bg-red-100 dark:bg-red-500/20 p-4 rounded-full">
+                      <AlertTriangle className="h-12 w-12 text-red-500 dark:text-red-400" />
+                    </div>
                   ) : (
-                    <FileQuestion className="h-12 w-12 text-amber-500" />
+                    <div className="bg-amber-100 dark:bg-amber-500/20 p-4 rounded-full">
+                      <FileQuestion className="h-12 w-12 text-amber-500 dark:text-amber-400" />
+                    </div>
                   )}
                 </div>
-                <CardTitle className="text-center">{error.includes("logged in") ? "Authentication Required" : "Worker Profile Required"}</CardTitle>
-                <CardDescription className="text-center">
+                <CardTitle className="text-center text-2xl">{error.includes("logged in") ? "Authentication Required" : "Worker Profile Required"}</CardTitle>
+                <CardDescription className="text-center text-base">
                   {error.includes("logged in") ? 
                     "You need to be logged in to view your job history" : 
                     "You need to create a worker profile before you can apply to jobs"}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex justify-center">
+              <CardContent className="flex justify-center gap-3 pt-2 pb-6">
                 <Button 
-                  className="mr-2"
+                  className="bg-gradient-to-r from-primary to-blue-500 hover:opacity-90 transition-opacity"
                   onClick={() => navigate(error.includes("logged in") ? "/login" : "/join-as-worker")}
                 >
                   {error.includes("logged in") ? "Log In" : "Create Worker Profile"}
                 </Button>
                 <Button 
                   variant="outline"
+                  className="hover-lift"
                   onClick={() => navigate("/")}
                 >
                   Go to Home
@@ -118,13 +123,29 @@ const WorkerJobHistory = () => {
           ) : (
             <>
               <motion.div 
-                className="mb-6"
+                className="mb-8"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <h1 className="text-3xl font-bold">Your Job History</h1>
-                <p className="text-muted-foreground">Track all your job applications and their current status</p>
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
+                  <div>
+                    <h1 className="text-3xl font-bold gradient-text bg-gradient-to-r from-primary via-blue-500 to-indigo-600">Your Job History</h1>
+                    <p className="text-muted-foreground mt-1">Track all your job applications and their current status</p>
+                  </div>
+                  <div className="mt-4 md:mt-0">
+                    <Button 
+                      variant="outline" 
+                      className="hover-lift shadow-sm"
+                      onClick={() => navigate("/jobs")}
+                    >
+                      <Briefcase className="h-4 w-4 mr-2" />
+                      Browse Jobs
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="h-1 w-32 bg-gradient-to-r from-primary to-blue-500 rounded-full my-1"></div>
               </motion.div>
               
               {workerId && <WorkerHistory workerId={workerId} />}
