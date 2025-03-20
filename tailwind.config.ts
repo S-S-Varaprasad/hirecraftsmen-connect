@@ -117,6 +117,22 @@ export default {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.8' },
 				},
+				'rotate-slow': {
+					'from': { transform: 'rotate(0deg)' },
+					'to': { transform: 'rotate(360deg)' },
+				},
+				'bounce-subtle': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-5px)' },
+				},
+				'glow': {
+					'0%, 100%': { boxShadow: '0 0 5px rgba(0, 87, 184, 0.2), 0 0 10px rgba(0, 87, 184, 0.1)' },
+					'50%': { boxShadow: '0 0 20px rgba(0, 87, 184, 0.4), 0 0 30px rgba(0, 87, 184, 0.2)' },
+				},
+				'tilt': {
+					'0%, 100%': { transform: 'rotate(-1deg)' },
+					'50%': { transform: 'rotate(1deg)' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -131,6 +147,10 @@ export default {
 				'scale-out': 'scale-out 0.2s ease-out',
 				'float': 'float 6s ease-in-out infinite',
 				'pulse-slow': 'pulse-slow 3s ease-in-out infinite',
+				'rotate-slow': 'rotate-slow 12s linear infinite',
+				'bounce-subtle': 'bounce-subtle 3s ease-in-out infinite',
+				'glow': 'glow 2s ease-in-out infinite',
+				'tilt': 'tilt 5s ease-in-out infinite',
 			},
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -140,6 +160,26 @@ export default {
 				'glass': '0 4px 30px rgba(0, 0, 0, 0.1)',
 				'card': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025)',
 				'elevated': '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.01)',
+				'3d': '0 8px 30px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06)',
+				'inner-light': 'inset 0 2px 4px 0 rgba(255, 255, 255, 0.06)',
+				'glow-blue': '0 0 15px rgba(0, 87, 184, 0.5), 0 0 30px rgba(0, 87, 184, 0.3)',
+				'neon': '0 0 5px theme(colors.primary.DEFAULT), 0 0 20px rgba(0, 87, 184, 0.5)',
+			},
+			transformStyle: {
+				'3d': 'preserve-3d',
+			},
+			perspective: {
+				'1000': '1000px',
+				'2000': '2000px',
+			},
+			backdropFilter: {
+				'none': 'none',
+				'blur': 'blur(4px)',
+				'blur-md': 'blur(8px)',
+				'blur-lg': 'blur(12px)',
+				'blur-xl': 'blur(16px)',
+				'blur-2xl': 'blur(24px)',
+				'blur-3xl': 'blur(64px)',
 			},
 		}
 	},
