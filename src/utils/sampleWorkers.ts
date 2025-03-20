@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { registerWorker } from '@/services/workerService';
 
-// Sample worker data for different professions
+// Sample worker data for different professions with Indian names and locations
 const sampleWorkers = [
   {
     name: 'Raj Kumar',

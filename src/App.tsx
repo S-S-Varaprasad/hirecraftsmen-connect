@@ -20,6 +20,8 @@ import WorkerDetail from '@/pages/WorkerDetail';
 import ApplyNow from '@/pages/ApplyNow';
 import JoinAsWorker from '@/pages/JoinAsWorker';
 import Jobs from '@/pages/Jobs';
+import JobDetail from '@/pages/JobDetail';
+import PostJob from '@/pages/PostJob';
 import NotFound from '@/pages/NotFound';
 import MessageWorker from '@/pages/MessageWorker';
 import DeactivateWorker from '@/pages/DeactivateWorker';
@@ -58,6 +60,8 @@ function App() {
               <Route path="/message/:id" element={<MessageWorker />} />
               <Route path="/join-as-worker" element={<JoinAsWorker />} />
               <Route path="/jobs" element={<Jobs />} />
+              <Route path="/jobs/:id" element={<JobDetail />} />
+              <Route path="/post-job" element={<PostJob />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
