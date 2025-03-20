@@ -1,142 +1,164 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Send, User, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
-import { useAuth } from '@/context/AuthContext';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Send, ArrowLeft } from 'lucide-react';
 import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
+import { useAuth } from '@/context/AuthContext';
+import { Worker } from '@/services/workerService';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-// Mock data for messages demonstration - in a real app, this would come from a database
-const sampleMessages = [
-  {
-    id: "1",
-    senderId: "user1",
-    text: "Hello, I'm interested in hiring you for a carpentry project.",
-    timestamp: new Date(Date.now() - 86400000).toISOString() // 1 day ago
-  },
-  {
-    id: "2",
-    senderId: "worker1",
-    text: "Hi there! I'd be happy to discuss your project. What kind of carpentry work are you looking for?",
-    timestamp: new Date(Date.now() - 82800000).toISOString() // 23 hours ago
-  },
-  {
-    id: "3",
-    senderId: "user1",
-    text: "I need custom bookshelves built for my living room. About 10 feet wide and 8 feet tall. Would you be available next week?",
-    timestamp: new Date(Date.now() - 79200000).toISOString() // 22 hours ago
-  },
-  {
-    id: "4",
-    senderId: "worker1",
-    text: "That sounds like a great project! I would need to see the space. Could you share some pictures and dimensions? I have availability starting Wednesday next week.",
-    timestamp: new Date(Date.now() - 75600000).toISOString() // 21 hours ago
-  }
-];
+interface Message {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  content: string;
+  created_at: string;
+  is_read: boolean;
+}
 
 const MessageWorker = () => {
-  const { id } = useParams<{ id: string }>();
+  const { workerId } = useParams<{ workerId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { getWorker } = useWorkerProfiles();
-  const [worker, setWorker] = useState<any>(null);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState(sampleMessages);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [sending, setSending] = useState(false);
+  const [worker, setWorker] = useState<Worker | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState('');
 
   useEffect(() => {
-    if (!user) {
-      toast.error("Please log in to send messages");
-      navigate('/login');
-      return;
-    }
-
-    if (id) {
-      getWorker(id)
-        .then(workerData => {
-          setWorker(workerData);
-          setLoading(false);
-        })
-        .catch(error => {
-          console.error('Error fetching worker details:', error);
-          toast.error('Could not find worker profile');
-          navigate('/workers');
-        });
-    }
-  }, [id, user, navigate, getWorker]);
-
-  useEffect(() => {
-    // Scroll to bottom when messages change
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!message.trim()) return;
-    
-    // In a real app, this would send the message to the backend
-    const newMessage = {
-      id: `msg-${Date.now()}`,
-      senderId: "user1", // Current user ID would be used here
-      text: message,
-      timestamp: new Date().toISOString()
+    const fetchWorker = async () => {
+      if (!workerId) return;
+      
+      try {
+        const workerData = await getWorker(workerId);
+        setWorker(workerData);
+      } catch (error) {
+        console.error("Error fetching worker:", error);
+        toast.error("Could not load worker profile");
+      } finally {
+        setLoading(false);
+      }
     };
-    
-    setMessages([...messages, newMessage]);
-    setMessage('');
-    
-    // Simulate response in demo (would not exist in real app)
-    setTimeout(() => {
-      const responseMessage = {
-        id: `msg-${Date.now() + 1}`,
-        senderId: "worker1", // Worker ID
-        text: "Thanks for your message! I'll get back to you as soon as possible.",
-        timestamp: new Date().toISOString()
-      };
-      setMessages(prev => [...prev, responseMessage]);
-    }, 1000);
-  };
 
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.round(diffMs / 60000);
-    const diffHours = Math.round(diffMs / 3600000);
-    const diffDays = Math.round(diffMs / 86400000);
-    
-    if (diffMins < 60) {
-      return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
-    } else if (diffHours < 24) {
-      return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-    } else if (diffDays < 7) {
-      return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-    } else {
-      return date.toLocaleDateString();
+    fetchWorker();
+  }, [workerId, getWorker]);
+
+  useEffect(() => {
+    if (!user || !workerId) return;
+
+    // Subscribe to messages between current user and worker
+    const fetchMessages = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('messages')
+          .select('*')
+          .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+          .or(`sender_id.eq.${worker?.user_id},receiver_id.eq.${worker?.user_id}`)
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        if (data) setMessages(data);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+
+    fetchMessages();
+
+    // Set up real-time subscription for new messages
+    const subscription = supabase
+      .channel('messages')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `sender_id=eq.${user.id},receiver_id=eq.${worker?.user_id}`
+      }, (payload) => {
+        setMessages(prev => [...prev, payload.new as Message]);
+      })
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [user, workerId, worker?.user_id]);
+
+  const handleSendMessage = async () => {
+    if (!user || !worker || !worker.user_id || !newMessage.trim()) return;
+
+    try {
+      setSending(true);
+      
+      // In a real app, you would insert the message to a messages table
+      // For now, we'll simulate sending a notification to the worker
+      const { data, error } = await supabase
+        .from('notifications')
+        .insert([
+          {
+            user_id: worker.user_id,
+            message: `New message from ${user.email}: ${newMessage.substring(0, 30)}${newMessage.length > 30 ? '...' : ''}`,
+            type: 'message',
+            related_id: user.id
+          }
+        ])
+        .select();
+
+      if (error) throw error;
+
+      // In a real app with a messages table:
+      // const { data, error } = await supabase
+      //   .from('messages')
+      //   .insert([
+      //     {
+      //       sender_id: user.id,
+      //       receiver_id: worker.user_id,
+      //       content: newMessage,
+      //       is_read: false
+      //     }
+      //   ])
+      //   .select();
+
+      toast.success("Message sent successfully");
+      setNewMessage('');
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("Failed to send message");
+    } finally {
+      setSending(false);
     }
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase();
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <main className="flex-grow pt-32 pb-16 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-app-orange"></div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!worker) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow pt-32 pb-16 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Worker Not Found</h2>
+            <Button onClick={() => navigate('/workers')}>Back to Workers</Button>
+          </div>
         </main>
         <Footer />
       </div>
@@ -147,104 +169,97 @@ const MessageWorker = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16">
+      <main className="flex-grow bg-gray-50 dark:bg-gray-900 pt-32 pb-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-            {/* Header */}
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center">
-              <Button variant="ghost" className="p-2 mr-2" onClick={() => navigate(-1)}>
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              
-              <div className="flex items-center flex-1">
-                <Avatar className="w-10 h-10 mr-3">
-                  <AvatarImage src={worker.image_url || '/placeholder.svg'} alt={worker.name} />
-                  <AvatarFallback>{getInitials(worker.name)}</AvatarFallback>
+          <Button 
+            variant="ghost" 
+            className="mb-6" 
+            onClick={() => navigate(`/workers/${workerId}`)}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Profile
+          </Button>
+          
+          <Card className="max-w-3xl mx-auto">
+            <CardHeader className="border-b">
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={worker.image_url || ''} alt={worker.name} />
+                  <AvatarFallback className="bg-app-orange text-white">
+                    {worker.name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
-                
-                <div>
-                  <h2 className="font-medium text-gray-900 dark:text-white">
-                    {worker.name}
-                  </h2>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {worker.profession}
-                  </div>
-                </div>
+                <CardTitle>Message {worker.name}</CardTitle>
               </div>
-              
-              <div>
-                <Button variant="outline" asChild>
-                  <Link to={`/workers/${id}`}>View Profile</Link>
-                </Button>
-              </div>
-            </div>
-            
-            {/* Messages Container */}
-            <div className="h-[400px] overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900">
-              {messages.map((msg, index) => {
-                const isCurrentUser = msg.senderId === "user1";
-                
-                return (
-                  <div 
-                    key={msg.id} 
-                    className={`mb-4 flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
-                  >
-                    {!isCurrentUser && (
-                      <Avatar className="w-8 h-8 mr-2 flex-shrink-0">
-                        <AvatarImage src={worker.image_url || '/placeholder.svg'} alt={worker.name} />
-                        <AvatarFallback>{getInitials(worker.name)}</AvatarFallback>
-                      </Avatar>
-                    )}
-                    
-                    <div className={`max-w-[70%] ${isCurrentUser ? 'order-1' : 'order-2'}`}>
-                      <div 
-                        className={`p-3 rounded-lg ${
-                          isCurrentUser 
-                            ? 'bg-blue-600 text-white rounded-br-none' 
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-bl-none'
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <div className="space-y-4">
+                {messages.length > 0 ? (
+                  <div className="space-y-4">
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${
+                          message.sender_id === user?.id ? 'justify-end' : 'justify-start'
                         }`}
                       >
-                        {msg.text}
+                        <div
+                          className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                            message.sender_id === user?.id
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-gray-200 dark:bg-gray-700 dark:text-white'
+                          }`}
+                        >
+                          <p>{message.content}</p>
+                          <p className="text-xs opacity-70 mt-1">
+                            {new Date(message.created_at).toLocaleTimeString()}
+                          </p>
+                        </div>
                       </div>
-                      <div className={`text-xs text-gray-500 mt-1 ${isCurrentUser ? 'text-right' : 'text-left'}`}>
-                        {formatTimestamp(msg.timestamp)}
-                      </div>
-                    </div>
-                    
-                    {isCurrentUser && (
-                      <Avatar className="w-8 h-8 ml-2 flex-shrink-0">
-                        <AvatarFallback className="bg-gray-200 dark:bg-gray-700">
-                          <User className="h-4 w-4 text-gray-500" />
-                        </AvatarFallback>
-                      </Avatar>
-                    )}
+                    ))}
                   </div>
-                );
-              })}
-              <div ref={messagesEndRef} />
-            </div>
-            
-            {/* Message Input */}
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-              <form onSubmit={handleSendMessage} className="flex">
-                <Input
-                  type="text"
-                  placeholder="Type your message..."
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="flex-1 mr-2"
-                />
-                <Button type="submit" disabled={!message.trim()}>
-                  <Send className="h-4 w-4 mr-2" />
-                  Send
-                </Button>
-              </form>
-              <div className="text-xs text-center mt-2 text-gray-500">
-                <Clock className="inline-block h-3 w-3 mr-1" />
-                Typical response time: within 2 hours
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <p>No messages yet. Start the conversation!</p>
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
+              
+              <div className="flex space-x-2">
+                <Textarea
+                  placeholder="Type your message..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  className="resize-none"
+                />
+                <Button 
+                  variant="default" 
+                  size="icon" 
+                  className="h-auto aspect-square" 
+                  onClick={handleSendMessage}
+                  disabled={sending || !newMessage.trim()}
+                >
+                  <Send className="h-5 w-5" />
+                </Button>
+              </div>
+              
+              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 mt-6">
+                <h3 className="font-medium mb-2">About {worker.name}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <span className="font-semibold">Profession:</span> {worker.profession}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <span className="font-semibold">Location:</span> {worker.location}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <span className="font-semibold">Hourly Rate:</span> {worker.hourly_rate}
+                </p>
+              </div>
+              
+              <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+                <p>This is a direct message to {worker.name}. Be respectful and clear in your communication.</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
       

@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Worker {
@@ -189,4 +190,44 @@ export const searchWorkers = async (searchTerm: string) => {
   })) || [];
   
   return workersWithLanguages as Worker[];
+};
+
+// New function to notify workers about jobs
+export const notifyWorkersAboutJob = async (
+  jobId: string,
+  jobTitle: string,
+  skills: string[],
+  category?: string,
+  sendEmail?: boolean,
+  sendSms?: boolean,
+  employerId?: string
+) => {
+  try {
+    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/notify-workers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabase.supabaseKey}`
+      },
+      body: JSON.stringify({
+        jobId,
+        jobTitle,
+        skills,
+        category,
+        sendEmail,
+        sendSms,
+        employerId
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to notify workers');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error notifying workers:', error);
+    throw error;
+  }
 };

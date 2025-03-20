@@ -138,6 +138,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_available: boolean | null
+          languages: string[]
           location: string
           name: string
           profession: string
@@ -153,6 +154,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_available?: boolean | null
+          languages?: string[]
           location: string
           name: string
           profession: string
@@ -168,6 +170,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_available?: boolean | null
+          languages?: string[]
           location?: string
           name?: string
           profession?: string

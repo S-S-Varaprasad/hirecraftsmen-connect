@@ -1,71 +1,85 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { AlertTriangle, ArrowLeft, Trash2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { AlertTriangle, ArrowLeft } from 'lucide-react';
 import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
 import { useAuth } from '@/context/AuthContext';
+import { Worker } from '@/services/workerService';
 import { toast } from 'sonner';
 
 const DeleteWorker = () => {
-  const { id } = useParams<{ id: string }>();
+  const { workerId } = useParams<{ workerId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { deleteWorkerProfile, getWorker } = useWorkerProfiles();
-  const [isLoading, setIsLoading] = useState(false);
-  const [worker, setWorker] = useState<any>(null);
-  const [confirmText, setConfirmText] = useState('');
+  const { getWorker, deleteWorkerProfile } = useWorkerProfiles();
+  const [worker, setWorker] = useState<Worker | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmation, setConfirmation] = useState('');
 
-  React.useEffect(() => {
-    if (id) {
-      getWorker(id)
-        .then(workerData => {
-          setWorker(workerData);
-          
-          // Check if current user owns this worker profile
-          if (user?.id !== workerData.user_id) {
-            toast.error("You don't have permission to delete this profile");
-            navigate('/workers');
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching worker:', error);
-          toast.error('Failed to load worker profile');
-          navigate('/workers');
-        });
-    }
-  }, [id, user?.id, navigate, getWorker]);
+  useEffect(() => {
+    const fetchWorker = async () => {
+      if (!workerId) return;
+      
+      try {
+        const workerData = await getWorker(workerId);
+        setWorker(workerData);
+        
+        // Check if worker belongs to current user
+        if (user && workerData.user_id !== user.id) {
+          toast.error("You don't have permission to delete this profile");
+          navigate('/profile');
+        }
+      } catch (error) {
+        console.error("Error fetching worker:", error);
+        toast.error("Failed to load worker profile");
+        navigate('/profile');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleDelete = async () => {
-    if (!id) return;
-    
-    if (confirmText.toLowerCase() !== 'delete') {
-      toast.error('Please type "delete" to confirm');
+    if (!user) {
+      navigate('/login');
       return;
     }
-    
-    setIsLoading(true);
+
+    fetchWorker();
+  }, [workerId, user, navigate, getWorker]);
+
+  const handleDelete = async () => {
+    if (!worker || !workerId) return;
+
+    if (confirmation.toLowerCase() !== 'delete') {
+      toast.error('Please type "DELETE" to confirm');
+      return;
+    }
+
     try {
-      await deleteWorkerProfile.mutateAsync(id);
-      toast.success('Your profile has been permanently deleted');
+      setDeleting(true);
+      await deleteWorkerProfile.mutateAsync(workerId);
+      toast.success("Your worker profile has been permanently deleted");
       navigate('/');
     } catch (error) {
-      console.error('Error deleting profile:', error);
-      toast.error('Failed to delete profile');
+      console.error("Error deleting worker:", error);
+      toast.error("Failed to delete your profile");
     } finally {
-      setIsLoading(false);
+      setDeleting(false);
     }
   };
 
-  if (!worker) {
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <main className="flex-grow pt-32 pb-16 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-app-orange"></div>
         </main>
         <Footer />
       </div>
@@ -76,75 +90,81 @@ const DeleteWorker = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16">
+      <main className="flex-grow pt-32 pb-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-            <div className="p-8">
-              <div className="flex items-center mb-6">
-                <Button variant="ghost" className="p-0 mr-4" onClick={() => navigate(-1)}>
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Delete Profile</h1>
-              </div>
-              
-              <div className="flex items-center justify-center mb-8">
-                <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-                  <Trash2 className="h-8 w-8 text-red-600 dark:text-red-400" />
-                </div>
-              </div>
-              
-              <div className="text-center mb-8">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Are you sure you want to delete your profile?</h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  This action is <span className="font-bold">permanent</span> and cannot be undone. All your profile information, 
-                  reviews, and job history will be permanently removed.
+          <Button 
+            variant="ghost" 
+            className="mb-6" 
+            onClick={() => navigate('/profile')}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Profile
+          </Button>
+          
+          <Card className="max-w-md mx-auto border-red-300 dark:border-red-700">
+            <CardHeader className="bg-red-50 dark:bg-red-900/20">
+              <CardTitle className="text-red-700 dark:text-red-400 flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Delete Worker Profile
+              </CardTitle>
+              <CardDescription className="text-red-600 dark:text-red-400">
+                This action cannot be undone
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <p className="text-gray-700 dark:text-gray-300">
+                  Are you sure you want to permanently delete your worker profile? This will:
                 </p>
-                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800 mb-6">
-                  <p className="text-red-700 dark:text-red-400 text-sm">
-                    Instead of deleting, you can temporarily deactivate your profile if you want to take a break.
+                
+                <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-400">
+                  <li>Remove all your profile information from our system</li>
+                  <li>Delete your job history and ratings</li>
+                  <li>Remove you from all current job applications</li>
+                  <li>This action cannot be reversed</li>
+                </ul>
+                
+                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-md text-sm">
+                  <p className="font-medium text-red-700 dark:text-red-400">Warning:</p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    If you just want to temporarily hide your profile, consider
+                    <Link to={`/deactivate-worker/${workerId}`} className="text-blue-600 dark:text-blue-400 underline ml-1">
+                      deactivating it
+                    </Link> instead.
                   </p>
                 </div>
                 
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Type "delete" to confirm
-                  </label>
+                <div className="mt-6">
+                  <Label htmlFor="confirmation" className="text-sm font-medium">
+                    To confirm, type "DELETE" below:
+                  </Label>
                   <Input
-                    type="text"
-                    value={confirmText}
-                    onChange={(e) => setConfirmText(e.target.value)}
-                    className="max-w-xs mx-auto text-center"
-                    placeholder="delete"
+                    id="confirmation"
+                    className="mt-1"
+                    value={confirmation}
+                    onChange={(e) => setConfirmation(e.target.value)}
+                    placeholder="Type DELETE to confirm"
                   />
                 </div>
               </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  variant="outline" 
-                  className="flex-1" 
-                  onClick={() => navigate(-1)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  variant="destructive" 
-                  className="flex-1"
-                  onClick={handleDelete}
-                  disabled={isLoading || confirmText.toLowerCase() !== 'delete'}
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-b-transparent rounded-full"></div>
-                      Deleting...
-                    </>
-                  ) : (
-                    'Permanently Delete'
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+            <CardFooter className="flex flex-col sm:flex-row gap-3">
+              <Button 
+                variant="outline" 
+                className="w-full sm:w-auto" 
+                onClick={() => navigate('/profile')}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                className="w-full sm:w-auto"
+                onClick={handleDelete}
+                disabled={deleting || confirmation.toLowerCase() !== 'delete'}
+              >
+                {deleting ? 'Deleting...' : 'Permanently Delete Profile'}
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
       </main>
       

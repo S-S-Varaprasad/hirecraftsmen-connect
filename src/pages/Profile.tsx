@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -13,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   User, Mail, MapPin, Phone, Briefcase, Clock, FileEdit, 
   Building, Upload, X, Check, Save, Camera, DollarSign, 
-  Award, Hammer, Edit, Loader2, UserCheck, Trash
+  Award, Hammer, Edit, Loader2, UserCheck, Trash, Languages
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { getWorkerByUserId, updateWorker, updateWorkerProfilePicture, Worker } from '@/services/workerService';
@@ -43,7 +42,6 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-// Define schema for validation
 const profileFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   profession: z.string().min(2, "Profession is required"),
@@ -52,6 +50,7 @@ const profileFormSchema = z.object({
   hourly_rate: z.string().min(1, "Hourly rate is required"),
   about: z.string().optional(),
   skills: z.string().optional(),
+  languages: z.string().optional(),
   is_available: z.boolean().default(true)
 });
 
@@ -85,6 +84,7 @@ const Profile = () => {
       hourly_rate: '',
       about: '',
       skills: '',
+      languages: '',
       is_available: true
     }
   });
@@ -110,6 +110,7 @@ const Profile = () => {
               hourly_rate: workerData.hourly_rate,
               about: workerData.about || '',
               skills: workerData.skills.join(', '),
+              languages: workerData.languages.join(', '),
               is_available: workerData.is_available
             });
           }
@@ -159,6 +160,7 @@ const Profile = () => {
     
     try {
       const skillsArray = data.skills?.split(',').map(skill => skill.trim()).filter(Boolean) || [];
+      const languagesArray = data.languages?.split(',').map(language => language.trim()).filter(Boolean) || [];
       
       const updatedWorker = await updateWorker(worker.id, {
         name: data.name,
@@ -168,6 +170,7 @@ const Profile = () => {
         hourly_rate: data.hourly_rate,
         about: data.about || null,
         skills: skillsArray,
+        languages: languagesArray,
         is_available: data.is_available
       });
       
@@ -229,7 +232,6 @@ const Profile = () => {
     }
   };
 
-  // Get initials for avatar fallback
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -496,6 +498,23 @@ const Profile = () => {
                                 </FormItem>
                               )}
                             />
+                            
+                            <FormField
+                              control={form.control}
+                              name="languages"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Languages (comma separated)</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormDescription>
+                                    Enter languages separated by commas
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                           </div>
                           
                           <FormField
@@ -628,12 +647,48 @@ const Profile = () => {
                           </div>
                         </div>
                         
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-500 mb-2">Languages</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {worker.languages && worker.languages.length > 0 ? (
+                              worker.languages.map((language, index) => (
+                                <span 
+                                  key={index} 
+                                  className="bg-blue-100 text-blue-700 text-xs font-medium px-3 py-1 rounded-full flex items-center"
+                                >
+                                  <Languages className="w-3 h-3 mr-1" />
+                                  {language}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-gray-500">No languages specified</span>
+                            )}
+                          </div>
+                        </div>
+                        
                         {worker.about && (
                           <div>
                             <h3 className="text-sm font-medium text-gray-500">About</h3>
                             <p className="mt-1 text-gray-600 dark:text-gray-400">{worker.about}</p>
                           </div>
                         )}
+                        
+                        <div className="flex flex-wrap gap-3 pt-4 border-t">
+                          <Button
+                            variant="outline"
+                            className="text-yellow-600 border-yellow-300 hover:bg-yellow-50"
+                            onClick={() => navigate(`/deactivate-worker/${worker.id}`)}
+                          >
+                            Deactivate Profile
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="text-red-600 border-red-300 hover:bg-red-50"
+                            onClick={() => navigate(`/delete-worker/${worker.id}`)}
+                          >
+                            Delete Profile
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </CardContent>
@@ -720,7 +775,6 @@ const Profile = () => {
       
       <Footer />
 
-      {/* Delete Skill Confirmation Dialog */}
       <AlertDialog open={showDeleteSkillModal} onOpenChange={setShowDeleteSkillModal}>
         <AlertDialogContent>
           <AlertDialogHeader>

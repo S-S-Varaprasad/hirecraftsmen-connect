@@ -1,5 +1,15 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getWorkers, registerWorker, updateWorker, deactivateWorker, deleteWorker, Worker, getWorkerById } from '@/services/workerService';
+import { 
+  getWorkers, 
+  registerWorker, 
+  updateWorker, 
+  deactivateWorker, 
+  deleteWorker, 
+  Worker, 
+  getWorkerById,
+  notifyWorkersAboutJob
+} from '@/services/workerService';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useStorage } from '@/hooks/useStorage';
@@ -34,10 +44,8 @@ export const useWorkerProfiles = () => {
   const createWorkerProfile = useMutation({
     mutationFn: async (workerData: {
       name: string;
-      email: string;
-      phone: string;
-      location: string;
       profession: string;
+      location: string;
       experience: string;
       hourlyRate: string;
       skills: string;
@@ -212,6 +220,33 @@ export const useWorkerProfiles = () => {
     }
   };
 
+  // Send notifications to matched workers about a job
+  const notifyWorkers = async (
+    jobId: string,
+    jobTitle: string,
+    skills: string[],
+    category?: string,
+    sendEmail?: boolean,
+    sendSms?: boolean,
+    employerId?: string
+  ) => {
+    try {
+      const result = await notifyWorkersAboutJob(
+        jobId,
+        jobTitle,
+        skills,
+        category,
+        sendEmail,
+        sendSms,
+        employerId
+      );
+      return result;
+    } catch (error) {
+      console.error('Error notifying workers:', error);
+      throw error;
+    }
+  };
+
   return {
     workers,
     isLoading,
@@ -223,6 +258,7 @@ export const useWorkerProfiles = () => {
     deactivateWorkerProfile,
     deleteWorkerProfile,
     getWorker,
+    notifyWorkers,
     refetch
   };
 };

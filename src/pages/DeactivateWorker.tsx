@@ -1,64 +1,77 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { AlertTriangle, ArrowLeft } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
 import { useAuth } from '@/context/AuthContext';
+import { Worker } from '@/services/workerService';
 import { toast } from 'sonner';
 
 const DeactivateWorker = () => {
-  const { id } = useParams<{ id: string }>();
+  const { workerId } = useParams<{ workerId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { deactivateWorkerProfile, getWorker } = useWorkerProfiles();
-  const [isLoading, setIsLoading] = useState(false);
-  const [worker, setWorker] = useState<any>(null);
+  const { getWorker, deactivateWorkerProfile } = useWorkerProfiles();
+  const [worker, setWorker] = useState<Worker | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [deactivating, setDeactivating] = useState(false);
 
-  React.useEffect(() => {
-    if (id) {
-      getWorker(id)
-        .then(workerData => {
-          setWorker(workerData);
-          
-          // Check if current user owns this worker profile
-          if (user?.id !== workerData.user_id) {
-            toast.error("You don't have permission to deactivate this profile");
-            navigate('/workers');
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching worker:', error);
-          toast.error('Failed to load worker profile');
-          navigate('/workers');
-        });
+  useEffect(() => {
+    const fetchWorker = async () => {
+      if (!workerId) return;
+      
+      try {
+        const workerData = await getWorker(workerId);
+        setWorker(workerData);
+        
+        // Check if worker belongs to current user
+        if (user && workerData.user_id !== user.id) {
+          toast.error("You don't have permission to deactivate this profile");
+          navigate('/profile');
+        }
+      } catch (error) {
+        console.error("Error fetching worker:", error);
+        toast.error("Failed to load worker profile");
+        navigate('/profile');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!user) {
+      navigate('/login');
+      return;
     }
-  }, [id, user?.id, navigate, getWorker]);
+
+    fetchWorker();
+  }, [workerId, user, navigate, getWorker]);
 
   const handleDeactivate = async () => {
-    if (!id) return;
-    
-    setIsLoading(true);
+    if (!worker || !workerId) return;
+
     try {
-      await deactivateWorkerProfile.mutateAsync(id);
-      toast.success('Your profile has been deactivated');
-      navigate('/workers');
+      setDeactivating(true);
+      await deactivateWorkerProfile.mutateAsync(workerId);
+      toast.success("Your worker profile has been deactivated");
+      navigate('/profile');
     } catch (error) {
-      console.error('Error deactivating profile:', error);
-      toast.error('Failed to deactivate profile');
+      console.error("Error deactivating worker:", error);
+      toast.error("Failed to deactivate your profile");
     } finally {
-      setIsLoading(false);
+      setDeactivating(false);
     }
   };
 
-  if (!worker) {
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <main className="flex-grow pt-32 pb-16 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-app-orange"></div>
         </main>
         <Footer />
       </div>
@@ -69,62 +82,66 @@ const DeactivateWorker = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16">
+      <main className="flex-grow pt-32 pb-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-            <div className="p-8">
-              <div className="flex items-center mb-6">
-                <Button variant="ghost" className="p-0 mr-4" onClick={() => navigate(-1)}>
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Deactivate Profile</h1>
-              </div>
-              
-              <div className="flex items-center justify-center mb-8">
-                <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="h-8 w-8 text-amber-600 dark:text-amber-400" />
-                </div>
-              </div>
-              
-              <div className="text-center mb-8">
-                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Are you sure you want to deactivate your profile?</h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Deactivating your profile will make it invisible to clients and you won't receive new job offers.
-                  You can reactivate your profile at any time.
+          <Button 
+            variant="ghost" 
+            className="mb-6" 
+            onClick={() => navigate('/profile')}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Profile
+          </Button>
+          
+          <Card className="max-w-md mx-auto border-yellow-300 dark:border-yellow-700">
+            <CardHeader className="bg-yellow-50 dark:bg-yellow-900/20">
+              <CardTitle className="text-yellow-700 dark:text-yellow-400 flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" />
+                Deactivate Worker Profile
+              </CardTitle>
+              <CardDescription>
+                Your profile will be hidden from job searches
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <p className="text-gray-700 dark:text-gray-300">
+                  Are you sure you want to deactivate your worker profile? While deactivated:
                 </p>
-                <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800 mb-6">
-                  <p className="text-amber-700 dark:text-amber-400 text-sm">
-                    Your profile information will be preserved but hidden from the public.
+                
+                <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-400">
+                  <li>Your profile will not appear in search results</li>
+                  <li>Employers won't be able to contact you for jobs</li>
+                  <li>You can reactivate your profile at any time from your account settings</li>
+                  <li>Your profile information will be preserved</li>
+                </ul>
+                
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-md text-sm">
+                  <p className="font-medium text-yellow-700 dark:text-yellow-400">Note:</p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    This is not permanent. If you want to permanently delete your profile,
+                    please use the <Link to={`/delete-worker/${workerId}`} className="text-blue-600 dark:text-blue-400 underline">delete option</Link> instead.
                   </p>
                 </div>
               </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  variant="outline" 
-                  className="flex-1" 
-                  onClick={() => navigate(-1)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  variant="default" 
-                  className="flex-1 bg-amber-600 hover:bg-amber-700"
-                  onClick={handleDeactivate}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-b-transparent rounded-full"></div>
-                      Deactivating...
-                    </>
-                  ) : (
-                    'Deactivate Profile'
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+            <CardFooter className="flex flex-col sm:flex-row gap-3">
+              <Button 
+                variant="outline" 
+                className="w-full sm:w-auto" 
+                onClick={() => navigate('/profile')}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                className="w-full sm:w-auto bg-yellow-600 hover:bg-yellow-700"
+                onClick={handleDeactivate}
+                disabled={deactivating}
+              >
+                {deactivating ? 'Deactivating...' : 'Deactivate Profile'}
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
       </main>
       

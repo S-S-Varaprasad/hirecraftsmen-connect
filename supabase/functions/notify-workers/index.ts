@@ -15,6 +15,7 @@ interface NotifyWorkersRequest {
   category?: string;
   sendEmail?: boolean;
   sendSms?: boolean;
+  employerId?: string;
 }
 
 serve(async (req: Request) => {
@@ -34,7 +35,7 @@ serve(async (req: Request) => {
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get request body
-    const { jobId, jobTitle, skills, category, sendEmail, sendSms } = await req.json() as NotifyWorkersRequest;
+    const { jobId, jobTitle, skills, category, sendEmail, sendSms, employerId } = await req.json() as NotifyWorkersRequest;
 
     if (!jobId || !jobTitle || !skills || skills.length === 0) {
       return new Response(
@@ -100,6 +101,33 @@ serve(async (req: Request) => {
         } catch (error) {
           console.error(`Error in notification process for worker ${worker.id}:`, error);
         }
+      }
+    }
+
+    // If employerId is provided, notify the employer about new applications
+    if (employerId) {
+      try {
+        const { data: employerNotification, error: employerNotifyError } = await supabaseClient
+          .from("notifications")
+          .insert([
+            {
+              user_id: employerId,
+              message: `A worker has applied to your job: ${jobTitle}`,
+              type: 'new_application',
+              related_id: jobId,
+            },
+          ])
+          .select()
+          .single();
+
+        if (employerNotifyError) {
+          console.error(`Error creating notification for employer ${employerId}:`, employerNotifyError);
+        } else {
+          console.log(`Created notification for employer ${employerId}:`, employerNotification);
+          notifications.push(employerNotification);
+        }
+      } catch (error) {
+        console.error(`Error in employer notification process:`, error);
       }
     }
 
