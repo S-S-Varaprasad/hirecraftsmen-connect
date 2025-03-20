@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -43,6 +43,16 @@ function App() {
     },
   });
 
+  // Check if the cookie consent is already stored
+  const [cookieConsentAccepted, setCookieConsentAccepted] = useState(() => {
+    return localStorage.getItem("handyHelpers-cookie-consent") === "true";
+  });
+
+  const handleCookieAccept = () => {
+    localStorage.setItem("handyHelpers-cookie-consent", "true");
+    setCookieConsentAccepted(true);
+  };
+
   return (
     <AuthProvider>
       <ThemeProvider defaultTheme="light">
@@ -76,26 +86,28 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </QueryClientProvider>
-        <CookieConsent
-          location="bottom"
-          buttonText="I Accept"
-          cookieName="handyHelpers-cookie-consent"
-          style={{ background: "#2B373B" }}
-          buttonStyle={{ 
-            backgroundColor: "#f97316", 
-            color: "white", 
-            fontSize: "14px", 
-            borderRadius: "4px", 
-            padding: "8px 16px"
-          }}
-          expires={150}
-          // Fix repeated display with only supported props
-          hideOnAccept={true}
-          acceptOnScroll={false}
-          // We removed the unsupported "sameSite" prop
-        >
-          This website uses cookies to enhance the user experience.
-        </CookieConsent>
+        
+        {!cookieConsentAccepted && (
+          <CookieConsent
+            location="bottom"
+            buttonText="I Accept"
+            cookieName="handyHelpers-cookie-consent"
+            style={{ background: "#2B373B" }}
+            buttonStyle={{ 
+              backgroundColor: "#f97316", 
+              color: "white", 
+              fontSize: "14px", 
+              borderRadius: "4px", 
+              padding: "8px 16px"
+            }}
+            expires={150}
+            onAccept={handleCookieAccept}
+            hideOnAccept={true}
+            acceptOnScroll={false}
+          >
+            This website uses cookies to enhance the user experience.
+          </CookieConsent>
+        )}
       </ThemeProvider>
     </AuthProvider>
   );
