@@ -1,6 +1,5 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getWorkers, registerWorker, updateWorker, Worker, getWorkerById } from '@/services/workerService';
+import { getWorkers, registerWorker, updateWorker, deactivateWorker, deleteWorker, Worker, getWorkerById } from '@/services/workerService';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useStorage } from '@/hooks/useStorage';
@@ -34,6 +33,7 @@ export const useWorkerProfiles = () => {
       experience: string;
       hourlyRate: string;
       skills: string;
+      languages: string;
       about: string;
       profileImage: File | null;
       resume: File | null;
@@ -75,10 +75,14 @@ export const useWorkerProfiles = () => {
         // Parse skills from comma-separated string to array
         const skillsArray = workerData.skills.split(',').map(skill => skill.trim());
         
+        // Parse languages from comma-separated string to array
+        const languagesArray = workerData.languages.split(',').map(language => language.trim());
+        
         console.log('Registering worker with data:', {
           name: workerData.name,
           profession: workerData.profession,
           skills: skillsArray,
+          languages: languagesArray,
           imageUrl
         });
         
@@ -90,6 +94,7 @@ export const useWorkerProfiles = () => {
           experience: workerData.experience,
           hourly_rate: workerData.hourlyRate,
           skills: skillsArray,
+          languages: languagesArray,
           is_available: true,
           image_url: imageUrl,
           about: workerData.about,
@@ -160,6 +165,34 @@ export const useWorkerProfiles = () => {
     },
   });
 
+  // Deactivate worker profile
+  const deactivateWorkerProfile = useMutation({
+    mutationFn: async (workerId: string) => {
+      return await deactivateWorker(workerId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workers'] });
+      toast.success('Worker profile deactivated. You can reactivate it anytime.');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to deactivate worker profile: ${error.message}`);
+    },
+  });
+
+  // Delete worker profile
+  const deleteWorkerProfile = useMutation({
+    mutationFn: async (workerId: string) => {
+      return await deleteWorker(workerId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workers'] });
+      toast.success('Worker profile has been permanently deleted.');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete worker profile: ${error.message}`);
+    },
+  });
+
   // Get a single worker by ID
   const getWorker = async (id: string) => {
     try {
@@ -179,6 +212,8 @@ export const useWorkerProfiles = () => {
     getWorkersByCategory,
     getWorkerCountByCategory,
     updateWorkerProfile,
+    deactivateWorkerProfile,
+    deleteWorkerProfile,
     getWorker,
     refetch
   };

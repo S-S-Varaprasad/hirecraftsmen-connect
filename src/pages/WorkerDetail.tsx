@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, MapPin, Clock, Briefcase, Mail, Phone, Calendar, MessageCircle, Send, ThumbsUp, Award } from 'lucide-react';
@@ -12,7 +11,6 @@ import { useQuery } from '@tanstack/react-query';
 import { getWorkerById } from '@/services/workerService';
 import { toast } from 'sonner';
 
-// Sample review data until we implement real reviews
 const sampleReviews = [
   {
     id: '1',
@@ -37,7 +35,6 @@ const sampleReviews = [
   }
 ];
 
-// Sample certifications until we implement real certifications
 const sampleCertifications = [
   'Professional Certification - National Skill Development Corporation',
   'Advanced Training - Vocational Training Institute'
@@ -58,7 +55,6 @@ const WorkerDetail = () => {
     }
   });
 
-  // Get the initials for the fallback avatar
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -103,7 +99,6 @@ const WorkerDetail = () => {
       
       <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16">
         <div className="container mx-auto px-4">
-          {/* Header with background design */}
           <div className="relative mb-8 rounded-xl overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-orange-600/30 backdrop-blur-sm"></div>
             <div className="relative py-6 px-8">
@@ -159,7 +154,6 @@ const WorkerDetail = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Sidebar with info */}
             <div className="md:col-span-1">
               <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md">
                 <div className="p-6 border-b border-gray-200 dark:border-gray-700">
@@ -204,11 +198,15 @@ const WorkerDetail = () => {
                     <div>
                       <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Languages</h4>
                       <div className="flex flex-wrap gap-2">
-                        {['English', 'Hindi'].map((language, i) => (
-                          <Badge key={i} variant="outline" className="bg-gray-50 dark:bg-gray-800">
-                            {language}
-                          </Badge>
-                        ))}
+                        {worker.languages && worker.languages.length > 0 ? (
+                          worker.languages.map((language, i) => (
+                            <Badge key={i} variant="outline" className="bg-gray-50 dark:bg-gray-800">
+                              {language}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-gray-500">No languages specified</span>
+                        )}
                       </div>
                     </div>
 
@@ -222,12 +220,28 @@ const WorkerDetail = () => {
                         ))}
                       </div>
                     </div>
+                    
+                    {user && user.id === worker.user_id && (
+                      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Profile Management</h4>
+                        <div className="flex flex-col space-y-2">
+                          <Button variant="outline" className="text-gray-700 hover:bg-gray-100">
+                            <Link to={`/workers/edit/${worker.id}`}>Edit Profile</Link>
+                          </Button>
+                          <Button variant="outline" className="text-amber-700 hover:bg-amber-100">
+                            <Link to={`/workers/deactivate/${worker.id}`}>Deactivate Profile</Link>
+                          </Button>
+                          <Button variant="outline" className="text-red-700 hover:bg-red-100">
+                            <Link to={`/workers/delete/${worker.id}`}>Delete Profile</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
             
-            {/* Main Content */}
             <div className="md:col-span-2">
               <Tabs defaultValue="about" className="w-full">
                 <TabsList className="mb-6 w-full bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">

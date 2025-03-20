@@ -24,6 +24,7 @@ const JoinAsWorker = () => {
     profession: '',
     experience: '',
     hourlyRate: '',
+    languages: '',
     skills: '',
     about: '',
     profileImage: null as File | null,
@@ -33,13 +34,11 @@ const JoinAsWorker = () => {
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Redirect if not logged in
   if (!isAuthenticated) {
     toast.error('Please log in to register as a worker');
     return <Navigate to="/login" />;
   }
 
-  // Prefill email if user is logged in
   useEffect(() => {
     if (user && user.email) {
       setFormData(prev => ({
@@ -59,7 +58,6 @@ const JoinAsWorker = () => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
-      // Validate file type
       if (fieldName === 'profileImage' && !file.type.startsWith('image/')) {
         toast.error('Please upload an image file (JPG, PNG, etc.)');
         return;
@@ -125,8 +123,7 @@ const JoinAsWorker = () => {
     setIsLoading(true);
 
     try {
-      // Validate required fields
-      if (!formData.name || !formData.email || !formData.phone || !formData.profession || !formData.location) {
+      if (!formData.name || !formData.email || !formData.phone || !formData.profession || !formData.location || !formData.languages || !formData.skills) {
         toast.warning('Please fill all required fields.');
         setIsLoading(false);
         return;
@@ -138,12 +135,10 @@ const JoinAsWorker = () => {
         return;
       }
       
-      // Create worker profile using the hook
       await createWorkerProfile.mutateAsync(formData);
       
       toast.success('Your profile has been created successfully!');
       
-      // Redirect to workers page
       setTimeout(() => {
         navigate('/workers');
       }, 2000);
@@ -375,6 +370,28 @@ const JoinAsWorker = () => {
                           required
                         />
                       </div>
+                    </div>
+                    
+                    <div className="space-y-1 md:col-span-2">
+                      <label htmlFor="languages" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Languages <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                          <Star className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <Input
+                          id="languages"
+                          name="languages"
+                          type="text"
+                          placeholder="e.g., English, Hindi, Tamil"
+                          className="pl-10"
+                          value={formData.languages}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Separate languages with commas</p>
                     </div>
                     
                     <div className="space-y-1 md:col-span-2">

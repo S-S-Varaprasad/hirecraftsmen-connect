@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Worker {
@@ -10,6 +9,7 @@ export interface Worker {
   experience: string;
   hourly_rate: string;
   skills: string[];
+  languages: string[];
   is_available: boolean;
   image_url: string | null;
   about: string | null;
@@ -66,7 +66,7 @@ export const getWorkerByUserId = async (userId: string) => {
     .eq('user_id', userId)
     .single();
   
-  if (error && error.code !== 'PGRST116') { // PGRST116 is the error code for "no rows returned"
+  if (error && error.code !== 'PGRST116') {
     console.error('Error fetching worker by user id:', error);
     throw error;
   }
@@ -110,6 +110,35 @@ export const updateWorker = async (id: string, workerData: Partial<Worker>) => {
 
 export const updateWorkerProfilePicture = async (id: string, imageUrl: string) => {
   return updateWorker(id, { image_url: imageUrl });
+};
+
+export const deactivateWorker = async (id: string) => {
+  const { data, error } = await supabase
+    .from('workers')
+    .update({ is_available: false })
+    .eq('id', id)
+    .select();
+  
+  if (error) {
+    console.error('Error deactivating worker:', error);
+    throw error;
+  }
+  
+  return data?.[0] as Worker;
+};
+
+export const deleteWorker = async (id: string) => {
+  const { error } = await supabase
+    .from('workers')
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error('Error deleting worker:', error);
+    throw error;
+  }
+  
+  return true;
 };
 
 export const searchWorkers = async (searchTerm: string) => {
