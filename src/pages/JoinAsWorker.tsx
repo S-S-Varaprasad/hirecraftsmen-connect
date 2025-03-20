@@ -84,7 +84,8 @@ const JoinAsWorker = () => {
       });
 
       toast.success('Profile created successfully!');
-      navigate('/profile');
+      // Navigate to workers page after creating profile to see it listed
+      navigate('/workers');
     } catch (error: any) {
       console.error('Error creating worker profile:', error);
       toast.error(error?.message || 'Failed to create worker profile');

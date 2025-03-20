@@ -141,6 +141,30 @@ export const useJobApplications = () => {
           job.title
         );
         console.log('Worker acceptance notification sent');
+        
+        // Send email notification to worker when job is accepted
+        const worker = await getWorkerById(workerId);
+        if (worker && worker.user_id) {
+          try {
+            await fetch(`${process.env.SUPABASE_URL}/functions/v1/send-notification`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+              },
+              body: JSON.stringify({
+                userId: worker.user_id,
+                message: `Your application for "${job.title}" has been accepted by ${employerName}!`,
+                type: 'job_accepted',
+                relatedId: jobId,
+                sendEmail: true
+              })
+            });
+            console.log('Worker email notification sent');
+          } catch (emailError) {
+            console.error('Error sending worker email notification:', emailError);
+          }
+        }
       } catch (notifyError) {
         console.error('Error sending acceptance notification:', notifyError);
         // Continue even if notification fails

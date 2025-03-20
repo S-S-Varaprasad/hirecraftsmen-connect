@@ -6,8 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useNotifications } from '@/hooks/useNotifications';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 export const NotificationBell = () => {
+  const navigate = useNavigate();
   const { notifications, unreadCount, loading, markAsRead, markAllAsRead } = useNotifications();
   const [open, setOpen] = useState(false);
 
@@ -19,6 +21,23 @@ export const NotificationBell = () => {
       console.error('Error marking notifications as read:', error);
       toast.error('Failed to mark notifications as read');
     }
+  };
+
+  const handleNotificationClick = (notification) => {
+    markAsRead(notification.id);
+    
+    if (notification.related_id) {
+      // Navigate based on notification type
+      if (notification.type === 'application' || notification.type === 'new_application') {
+        navigate(`/jobs/${notification.related_id}`);
+      } else if (notification.type === 'job_accepted') {
+        navigate(`/jobs/${notification.related_id}`);
+      } else if (notification.type === 'new_job' || notification.type === 'job_updated') {
+        navigate(`/jobs/${notification.related_id}`);
+      }
+    }
+    
+    setOpen(false);
   };
 
   return (
@@ -64,13 +83,8 @@ export const NotificationBell = () => {
               <div 
                 key={notification.id} 
                 className={`p-3 border-b text-sm hover:bg-gray-50 dark:hover:bg-gray-800 ${!notification.is_read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
-                onClick={() => {
-                  markAsRead(notification.id);
-                  if (notification.related_id) {
-                    // Could navigate to related content here
-                    setOpen(false);
-                  }
-                }}
+                onClick={() => handleNotificationClick(notification)}
+                style={{ cursor: 'pointer' }}
               >
                 <p className="mb-1">{notification.message}</p>
                 <p className="text-xs text-gray-500">
