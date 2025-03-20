@@ -38,38 +38,40 @@ function App() {
   }, []);
 
   return (
-    <div className="app">
-      <ThemeProvider defaultTheme="light" storageKey="ui-theme">
-        <Toaster position="top-right" />
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/jobs" element={<Jobs />} />
-            <Route path="/jobs/:id" element={<JobDetail />} />
-            <Route path="/workers" element={<Workers />} />
-            <Route path="/workers/:id" element={<WorkerDetail />} />
-            <Route path="/categories/:category" element={<WorkersByCategory />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/join-as-worker" element={<JoinAsWorker />} />
-            <Route path="/apply/:jobId" element={<ApplyNow />} />
-            <Route path="/message/:workerId" element={<MessageWorker />} />
-            <Route path="/contact-employer/:jobId" element={<ContactEmployer />} />
-            <Route path="/post-job" element={<PostJob />} />
-            <Route path="/edit-job/:id" element={<EditJob />} />
-            <Route path="/deactivate-worker/:id" element={<DeactivateWorker />} />
-            <Route path="/delete-worker/:id" element={<DeleteWorker />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </ThemeProvider>
-    </div>
+    <BrowserRouter>
+      <div className="app">
+        <ThemeProvider defaultTheme="light" storageKey="ui-theme">
+          <Toaster position="top-right" />
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/jobs" element={<Jobs />} />
+              <Route path="/jobs/:id" element={<JobDetail />} />
+              <Route path="/workers" element={<Workers />} />
+              <Route path="/workers/:id" element={<WorkerDetail />} />
+              <Route path="/categories/:category" element={<WorkersByCategory />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/join-as-worker" element={<JoinAsWorker />} />
+              <Route path="/apply/:jobId" element={<ApplyNow />} />
+              <Route path="/message/:workerId" element={<MessageWorker />} />
+              <Route path="/contact-employer/:jobId" element={<ContactEmployer />} />
+              <Route path="/post-job" element={<PostJob />} />
+              <Route path="/edit-job/:id" element={<EditJob />} />
+              <Route path="/deactivate-worker/:id" element={<DeactivateWorker />} />
+              <Route path="/delete-worker/:id" element={<DeleteWorker />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </ThemeProvider>
+      </div>
+    </BrowserRouter>
   );
 }
 
