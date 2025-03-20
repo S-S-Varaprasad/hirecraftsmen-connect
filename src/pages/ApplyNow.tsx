@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { getJobById } from '@/services/jobService';
 import { getWorkerByUserId } from '@/services/workerService';
-import { applyForJob, checkApplicationExists } from '@/services/applicationService';
+import { applyToJob, checkApplicationExists } from '@/services/applicationService';
 import { useAuth } from '@/context/AuthContext';
 import { Tables } from '@/integrations/supabase/types';
 
@@ -44,9 +45,9 @@ const ApplyNow: React.FC = () => {
         setJob(job);
 
         // Get the worker profile for the current user
-        const { data: workerData, error: workerError } = await getWorkerByUserId(user?.id);
+        const workerData = await getWorkerByUserId(user?.id || '');
 
-        if (workerError || !workerData) {
+        if (!workerData) {
           toast.error('You need to create a worker profile first');
           navigate('/join-as-worker');
           return;
@@ -92,7 +93,7 @@ const ApplyNow: React.FC = () => {
 
     try {
       // Apply for the job
-      await applyForJob(jobId, worker.id, applicationMessage);
+      await applyToJob(jobId, worker.id, applicationMessage);
       toast.success('Application submitted successfully!');
       navigate('/profile');
     } catch (err: any) {
