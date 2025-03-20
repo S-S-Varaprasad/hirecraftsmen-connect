@@ -119,7 +119,6 @@ function App() {
             onAccept={handleCookieAccept}
             hideOnAccept={true}
             acceptOnScroll={false}
-            buttonWrapperClasses="px-4"
           >
             <span style={{ fontWeight: "500" }}>This website uses cookies</span> to enhance your browsing experience and provide personalized services. By continuing to use our site, you consent to our use of cookies.
           </CookieConsent>
