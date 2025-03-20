@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import ProfileCard from '@/components/ProfileCard';
 import SearchFilters from '@/components/SearchFilters';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Briefcase } from 'lucide-react';
@@ -12,6 +11,7 @@ import { getWorkers, Worker } from '@/services/workerService';
 import WorkerGrid from '@/components/workers/WorkerGrid';
 import NoWorkersFound from '@/components/workers/NoWorkersFound';
 import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const professionMap: { [key: string]: string } = {
   'painter': 'Painter',
@@ -35,7 +35,6 @@ const WorkersByCategory = () => {
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [categoryName, setCategoryName] = useState<string>('');
-  const { toast } = useToast();
 
   const { data: workersData = [], isLoading: isLoadingWorkers } = useQuery({
     queryKey: ['workers'],
@@ -71,13 +70,9 @@ const WorkersByCategory = () => {
 
   useEffect(() => {
     if (slug && !professionMap[slug]) {
-      toast({
-        title: "Category not found",
-        description: "Showing available workers that might match your needs",
-        variant: "default"
-      });
+      toast("Category not found. Showing available workers that might match your needs.");
     }
-  }, [slug, toast]);
+  }, [slug]);
 
   const handleSearch = (filters: any) => {
     setIsLoading(true);
@@ -129,6 +124,9 @@ const WorkersByCategory = () => {
     );
   }
 
+  // Count available workers (those with is_available = true)
+  const availableWorkersCount = filteredWorkers.filter(worker => worker.is_available).length;
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -165,23 +163,7 @@ const WorkersByCategory = () => {
           ) : (
             <>
               {filteredWorkers.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredWorkers.map((worker) => (
-                    <ProfileCard 
-                      key={worker.id} 
-                      id={worker.id}
-                      name={worker.name}
-                      profession={worker.profession}
-                      location={worker.location}
-                      rating={worker.rating}
-                      experience={worker.experience}
-                      hourlyRate={worker.hourly_rate}
-                      skills={worker.skills}
-                      isAvailable={worker.is_available}
-                      imageUrl={worker.image_url || '/placeholder.svg'}
-                    />
-                  ))}
-                </div>
+                <WorkerGrid workers={filteredWorkers} />
               ) : (
                 <NoWorkersFound />
               )}
@@ -190,7 +172,8 @@ const WorkersByCategory = () => {
           
           <div className="mt-10 text-center">
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Found {filteredWorkers.length} {categoryName.toLowerCase() || 'specialized'} workers
+              Found {filteredWorkers.length} {categoryName.toLowerCase() || 'specialized'} workers 
+              ({availableWorkersCount} currently available)
             </p>
             <Button variant="outline" asChild>
               <Link to="/workers">Browse All Workers</Link>
