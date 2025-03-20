@@ -78,8 +78,11 @@ const WorkerHistory = ({
   
   // Only fetch if external applications are not provided
   const { data: fetchedApplications, isLoading: fetchLoading, error: fetchError } = useQuery({
-    queryKey: ['worker-applications', workerId],
-    queryFn: () => getApplicationsByWorkerId(workerId),
+    queryKey: ['worker-applications-component', workerId],
+    queryFn: () => {
+      console.log('Component is fetching applications for worker ID:', workerId);
+      return getApplicationsByWorkerId(workerId);
+    },
     enabled: !!workerId && externalApplications === undefined,
   });
 
@@ -87,6 +90,15 @@ const WorkerHistory = ({
   const applications = externalApplications || fetchedApplications;
   const isLoading = externalLoading !== undefined ? externalLoading : fetchLoading;
   const error = externalError || fetchError;
+
+  // Log what data is being used
+  React.useEffect(() => {
+    console.log('WorkerHistory rendering with:');
+    console.log('- Using external applications:', externalApplications !== undefined);
+    console.log('- Applications count:', applications?.length || 0);
+    console.log('- Loading state:', isLoading);
+    console.log('- Error state:', !!error);
+  }, [applications, externalApplications, isLoading, error]);
 
   const handleMarkComplete = (applicationId: string) => {
     markJobCompleted.mutate({ applicationId }, {

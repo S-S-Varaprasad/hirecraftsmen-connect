@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Job } from './jobService';
 import { Worker } from './workerService';
@@ -33,7 +34,14 @@ export const getApplicationsByWorkerId = async (workerId: string) => {
       throw error;
     }
     
+    // Force data refresh and logging of results
     console.log('Applications fetched successfully:', data?.length || 0, 'applications found');
+    if (data?.length) {
+      console.log('First application details:', JSON.stringify(data[0], null, 2));
+    } else {
+      console.log('No applications found for this worker');
+    }
+    
     return data || [] as Application[];
   } catch (err) {
     console.error('Exception fetching applications:', err);
@@ -106,7 +114,7 @@ export const updateApplicationStatus = async (
   id: string,
   status: 'applied' | 'accepted' | 'rejected' | 'completed'
 ) => {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('applications')
     .update({
       status,
@@ -126,4 +134,23 @@ export const updateApplicationStatus = async (
 // Add a new function to mark jobs as completed (for payment tracking)
 export const markApplicationCompleted = async (id: string) => {
   return updateApplicationStatus(id, 'completed');
+};
+
+// Add a direct check function to debug if a specific application exists
+export const checkApplicationExists = async (jobId: string, workerId: string) => {
+  console.log(`Checking if application exists for job ${jobId} and worker ${workerId}`);
+  
+  const { data, error, count } = await supabase
+    .from('applications')
+    .select('*', { count: 'exact' })
+    .eq('job_id', jobId)
+    .eq('worker_id', workerId);
+  
+  if (error) {
+    console.error('Error checking application existence:', error);
+    throw error;
+  }
+  
+  console.log(`Found ${count} applications for this job/worker combination`);
+  return { exists: count && count > 0, applications: data };
 };

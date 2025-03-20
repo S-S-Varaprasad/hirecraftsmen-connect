@@ -46,7 +46,7 @@ export const useJobApplications = () => {
         
         // Submit application
         const application = await applyToJob(jobId, workerId, message);
-        console.log('Application submitted:', application);
+        console.log('Application submitted successfully:', application);
         
         // Notify the employer about the application
         if (job.employer_id) {
@@ -105,8 +105,10 @@ export const useJobApplications = () => {
       }
     },
     onSuccess: () => {
+      // Invalidate multiple queries to ensure all components update
       queryClient.invalidateQueries({ queryKey: ['applications'] });
       queryClient.invalidateQueries({ queryKey: ['worker-applications'] });
+      queryClient.invalidateQueries({ queryKey: ['worker-applications-component'] });
       toast.success('Application submitted successfully!');
     },
     onError: (error: any) => {

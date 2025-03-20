@@ -16,13 +16,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useQuery } from '@tanstack/react-query';
-import { getApplicationsByWorkerId } from '@/services/applicationService';
+import { getApplicationsByWorkerId, checkApplicationExists } from '@/services/applicationService';
 import { toast } from 'sonner';
 
 const WorkerJobHistory = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  
+  // Debug information about current user
+  useEffect(() => {
+    if (user) {
+      console.log('Current authenticated user:', user.id);
+    } else {
+      console.log('No authenticated user found');
+    }
+  }, [user]);
   
   const { 
     data: applications, 
@@ -32,17 +41,36 @@ const WorkerJobHistory = () => {
     isRefetching 
   } = useQuery({
     queryKey: ['worker-applications', user?.id],
-    queryFn: () => user?.id ? getApplicationsByWorkerId(user.id) : Promise.resolve([]),
+    queryFn: () => {
+      if (!user?.id) {
+        console.log('No user ID available for fetching applications');
+        return Promise.resolve([]);
+      }
+      
+      console.log('Fetching applications for user ID:', user.id);
+      return getApplicationsByWorkerId(user.id);
+    },
     enabled: !!user?.id,
+    staleTime: 0, // Always consider data stale to force refresh
     refetchOnWindowFocus: true,
-    staleTime: 30000, // Consider data stale after 30 seconds
+    refetchOnMount: true,
   });
 
   // Force refetch on mount to ensure we have the latest data
   useEffect(() => {
     if (user?.id) {
-      console.log('Forcing refetch of job applications on page load for user:', user.id);
+      console.log('Forcing refetch of job applications on page mount for user:', user.id);
       refetch();
+      
+      // Debug: check if a specific application exists
+      // This helps verify if data exists in the database
+      checkApplicationExists('any-recent-job-id', user.id)
+        .then(result => {
+          console.log('Application existence check result:', result);
+        })
+        .catch(err => {
+          console.error('Error checking application existence:', err);
+        });
     }
   }, [user?.id, refetch]);
 
@@ -77,8 +105,12 @@ const WorkerJobHistory = () => {
   // Log applications for debugging
   useEffect(() => {
     if (applications) {
-      console.log('Applications data from query:', applications);
-      console.log('Number of applications:', applications.length);
+      console.log('Applications data loaded:', applications.length, 'applications');
+      if (applications.length === 0) {
+        console.log('No applications found for this worker');
+      } else {
+        console.log('First application:', applications[0]);
+      }
     }
   }, [applications]);
 
