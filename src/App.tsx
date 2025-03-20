@@ -28,6 +28,7 @@ import EditJob from '@/pages/EditJob';
 import DeactivateWorker from '@/pages/DeactivateWorker';
 import DeleteWorker from '@/pages/DeleteWorker';
 import ContactEmployer from '@/pages/ContactEmployer';
+import WorkerJobHistory from '@/pages/WorkerJobHistory';
 import { AuthProvider } from '@/context/AuthContext';
 
 // Create a client
@@ -61,6 +62,7 @@ function App() {
                 <Route path="/workers/category/:slug" element={<WorkersByCategory />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/job-history" element={<WorkerJobHistory />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/join-as-worker" element={<JoinAsWorker />} />

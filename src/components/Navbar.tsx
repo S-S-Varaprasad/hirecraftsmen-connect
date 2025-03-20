@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, User, Briefcase, PlusCircle } from 'lucide-react';
+import { Menu, X, User, Briefcase, PlusCircle, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import UserProfile from './UserProfile';
@@ -48,12 +48,20 @@ const Navbar = () => {
               Browse Jobs
             </Link>
             {isAuthenticated && (
-              <Link to="/post-job" className="px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
-                <span className="flex items-center gap-1">
-                  <PlusCircle className="h-4 w-4" />
-                  Post Job
-                </span>
-              </Link>
+              <>
+                <Link to="/post-job" className="px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                  <span className="flex items-center gap-1">
+                    <PlusCircle className="h-4 w-4" />
+                    Post Job
+                  </span>
+                </Link>
+                <Link to="/job-history" className="px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                  <span className="flex items-center gap-1">
+                    <History className="h-4 w-4" />
+                    Job History
+                  </span>
+                </Link>
+              </>
             )}
             <Link to="/about" className="px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
               About
@@ -113,12 +121,20 @@ const Navbar = () => {
           </div>
           
           {isAuthenticated && (
-            <Link to="/post-job" className="block w-full py-3 px-4 rounded-md text-center font-medium text-white bg-green-600 hover:bg-green-700 transition-all" onClick={() => setIsMobileMenuOpen(false)}>
-              <span className="flex items-center justify-center gap-2">
-                <PlusCircle className="h-5 w-5" />
-                Post a New Job
-              </span>
-            </Link>
+            <>
+              <Link to="/post-job" className="block w-full py-3 px-4 rounded-md text-center font-medium text-white bg-green-600 hover:bg-green-700 transition-all" onClick={() => setIsMobileMenuOpen(false)}>
+                <span className="flex items-center justify-center gap-2">
+                  <PlusCircle className="h-5 w-5" />
+                  Post a New Job
+                </span>
+              </Link>
+              <Link to="/job-history" className="block w-full py-3 px-4 rounded-md text-center font-medium text-white bg-blue-600 hover:bg-blue-700 transition-all" onClick={() => setIsMobileMenuOpen(false)}>
+                <span className="flex items-center justify-center gap-2">
+                  <History className="h-5 w-5" />
+                  View Job History
+                </span>
+              </Link>
+            </>
           )}
           
           <div className="space-y-2">

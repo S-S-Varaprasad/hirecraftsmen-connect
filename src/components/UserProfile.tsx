@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Bell, User, Settings, LogOut } from 'lucide-react';
+import { Bell, User, Settings, LogOut, History } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -148,6 +148,12 @@ const UserProfile = () => {
             <Link to="/profile" className="cursor-pointer flex w-full items-center">
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/job-history" className="cursor-pointer flex w-full items-center">
+              <History className="mr-2 h-4 w-4" />
+              <span>Job History</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
