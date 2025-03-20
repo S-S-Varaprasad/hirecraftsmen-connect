@@ -1,9 +1,11 @@
 
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { User, Lock, Eye, EyeOff, Mail, Phone } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, Mail, Phone, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
@@ -15,6 +17,7 @@ const SignUp = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('user'); // Default to general user
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,12 +39,29 @@ const SignUp = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await signUp(email, password, name, phone);
+      const { error } = await signUp(email, password, name, phone, role);
       
       if (error) {
         toast.error(error.message || 'Registration failed. Please try again.');
       } else {
         toast.success('Account created successfully! Please check your email to confirm your account.');
+        
+        // Suggest next steps based on role
+        if (role === 'worker') {
+          toast.info('Complete your worker profile to start receiving job offers', {
+            action: {
+              label: 'Create Profile',
+              onClick: () => window.location.href = '/join-as-worker'
+            }
+          });
+        } else if (role === 'employer') {
+          toast.info('Start hiring workers by posting a job', {
+            action: {
+              label: 'Post Job',
+              onClick: () => window.location.href = '/post-job'
+            }
+          });
+        }
       }
     } catch (error: any) {
       toast.error(error.message || 'An unexpected error occurred');
@@ -123,6 +143,44 @@ const SignUp = () => {
                       onChange={(e) => setPhone(e.target.value)}
                     />
                   </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    I want to join as
+                  </label>
+                  <RadioGroup value={role} onValueChange={setRole} className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <RadioGroupItem value="worker" id="worker" />
+                      <Label htmlFor="worker" className="flex items-center cursor-pointer">
+                        <Briefcase className="h-5 w-5 mr-2 text-blue-500" />
+                        <div>
+                          <span className="font-medium">Worker</span>
+                          <p className="text-xs text-gray-500">I want to find work opportunities</p>
+                        </div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <RadioGroupItem value="employer" id="employer" />
+                      <Label htmlFor="employer" className="flex items-center cursor-pointer">
+                        <User className="h-5 w-5 mr-2 text-green-500" />
+                        <div>
+                          <span className="font-medium">Employer</span>
+                          <p className="text-xs text-gray-500">I want to hire skilled workers</p>
+                        </div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <RadioGroupItem value="user" id="user" />
+                      <Label htmlFor="user" className="flex items-center cursor-pointer">
+                        <User className="h-5 w-5 mr-2 text-gray-500" />
+                        <div>
+                          <span className="font-medium">Just Browsing</span>
+                          <p className="text-xs text-gray-500">I want to explore the platform</p>
+                        </div>
+                      </Label>
+                    </div>
+                  </RadioGroup>
                 </div>
                 
                 <div className="space-y-1">

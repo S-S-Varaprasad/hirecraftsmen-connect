@@ -1,84 +1,74 @@
-
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from "@/components/ui/theme-provider"
 import { Toaster } from 'sonner';
-import { AuthProvider } from '@/context/AuthContext';
-import { addSampleWorkers } from '@/utils/sampleWorkers';
 
 import Index from '@/pages/Index';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
-import Privacy from '@/pages/Privacy';
-import Terms from '@/pages/Terms';
 import Login from '@/pages/Login';
 import SignUp from '@/pages/SignUp';
-import Profile from '@/pages/Profile';
-import Settings from '@/pages/Settings';
-import Workers from '@/pages/Workers';
-import WorkersByCategory from '@/pages/WorkersByCategory';
-import WorkerDetail from '@/pages/WorkerDetail';
-import ApplyNow from '@/pages/ApplyNow';
-import JoinAsWorker from '@/pages/JoinAsWorker';
 import Jobs from '@/pages/Jobs';
 import JobDetail from '@/pages/JobDetail';
+import Workers from '@/pages/Workers';
+import WorkerDetail from '@/pages/WorkerDetail';
+import WorkersByCategory from '@/pages/WorkersByCategory';
+import Profile from '@/pages/Profile';
+import Settings from '@/pages/Settings';
+import Privacy from '@/pages/Privacy';
+import Terms from '@/pages/Terms';
+import JoinAsWorker from '@/pages/JoinAsWorker';
+import ApplyNow from '@/pages/ApplyNow';
+import MessageWorker from '@/pages/MessageWorker';
+import NotFound from '@/pages/NotFound';
 import PostJob from '@/pages/PostJob';
 import EditJob from '@/pages/EditJob';
-import NotFound from '@/pages/NotFound';
-import MessageWorker from '@/pages/MessageWorker';
 import DeactivateWorker from '@/pages/DeactivateWorker';
 import DeleteWorker from '@/pages/DeleteWorker';
+import ContactEmployer from '@/pages/ContactEmployer';
+import { AuthProvider } from '@/context/AuthContext';
 
 function App() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 60 * 1000, // 1 minute
-      },
-    },
-  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Add sample workers when the app loads
-    addSampleWorkers();
-    console.log('App initialized - sample workers added if needed');
+    // Simulate loading
+    setTimeout(() => setLoading(false), 1000);
   }, []);
 
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <div className="min-h-screen flex flex-col">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/workers" element={<Workers />} />
-              <Route path="/workers/category/:category" element={<WorkersByCategory />} />
-              <Route path="/workers/:id" element={<WorkerDetail />} />
-              <Route path="/workers/deactivate/:id" element={<DeactivateWorker />} />
-              <Route path="/workers/delete/:id" element={<DeleteWorker />} />
-              <Route path="/apply/:id" element={<ApplyNow />} />
-              <Route path="/message/:id" element={<MessageWorker />} />
-              <Route path="/join-as-worker" element={<JoinAsWorker />} />
-              <Route path="/jobs" element={<Jobs />} />
-              <Route path="/jobs/:id" element={<JobDetail />} />
-              <Route path="/post-job" element={<PostJob />} />
-              <Route path="/edit-job/:id" element={<EditJob />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
-          
-          <Toaster richColors />
-        </QueryClientProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <div className="app">
+      <ThemeProvider defaultTheme="light" storageKey="ui-theme">
+        <Toaster position="top-right" />
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/jobs" element={<Jobs />} />
+            <Route path="/jobs/:id" element={<JobDetail />} />
+            <Route path="/workers" element={<Workers />} />
+            <Route path="/workers/:id" element={<WorkerDetail />} />
+            <Route path="/categories/:category" element={<WorkersByCategory />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/join-as-worker" element={<JoinAsWorker />} />
+            <Route path="/apply/:jobId" element={<ApplyNow />} />
+            <Route path="/message/:workerId" element={<MessageWorker />} />
+            <Route path="/contact-employer/:jobId" element={<ContactEmployer />} />
+            <Route path="/post-job" element={<PostJob />} />
+            <Route path="/edit-job/:id" element={<EditJob />} />
+            <Route path="/deactivate-worker/:id" element={<DeactivateWorker />} />
+            <Route path="/delete-worker/:id" element={<DeleteWorker />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
+      </ThemeProvider>
+    </div>
   );
 }
 

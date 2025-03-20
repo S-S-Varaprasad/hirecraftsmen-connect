@@ -1,36 +1,49 @@
-
-import React from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getJobById } from '@/services/jobService';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import {
+  MapPin,
+  Briefcase,
+  IndianRupee,
+  Calendar,
+  ArrowLeft,
+  AlertTriangle,
+  FileQuestion,
+  Mail,
+  Share,
+  SendHorizonal
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Briefcase, IndianRupee, Clock, Calendar, ArrowLeft, Send, PenLine } from 'lucide-react';
-import { toast } from 'sonner';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { getJobById } from '@/services/jobService';
 
 const JobDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const [job, setJob] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const { data: job, isLoading, error } = useQuery({
-    queryKey: ['job', id],
-    queryFn: () => id ? getJobById(id) : Promise.reject('No job ID provided'),
-    enabled: !!id,
-    retry: 1, // Only retry once to avoid too many retries for missing jobs
-  });
+  useEffect(() => {
+    const fetchJob = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        if (!id) throw new Error("Job ID is required");
+        const jobData = await getJobById(id);
+        setJob(jobData);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load job');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const handleApply = () => {
-    if (id) {
-      navigate(`/apply/${id}`);
-    } else {
-      toast.error('Job information missing');
-    }
-  };
+    fetchJob();
+  }, [id]);
 
-  // Determine badge color based on urgency
   const getBadgeColor = (urgency: string) => {
     switch (urgency) {
       case 'High':
@@ -44,153 +57,141 @@ const JobDetail = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24 flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (error || !job) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
-          <div className="container mx-auto px-4 py-8">
-            <div className="text-center py-20 bg-white/80 rounded-xl shadow-sm border border-gray-100 dark:bg-gray-800/80 dark:border-gray-700 max-w-md mx-auto px-4">
-              <h3 className="text-xl font-semibold mb-2">Job not found</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                This job listing may have been removed or doesn't exist yet.
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-3">
-                <Button onClick={() => navigate('/jobs')}>
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Browse Jobs
-                </Button>
-                <Button variant="default" onClick={() => navigate('/post-job')}>
-                  <PenLine className="mr-2 h-4 w-4" />
-                  Post a New Job
-                </Button>
-              </div>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch (error) {
+      console.error('Invalid date format:', dateString);
+      return 'Recently';
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
-        <div className="container mx-auto px-4 py-8">
+      <main className="flex-grow container mx-auto px-4 py-8 mt-16">
+        <div className="max-w-4xl mx-auto">
           <div className="mb-6">
-            <Button variant="ghost" onClick={() => navigate('/jobs')} className="mb-4">
-              <ArrowLeft className="mr-2 h-4 w-4" />
+            <Link 
+              to="/jobs" 
+              className="flex items-center text-sm text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1" />
               Back to Jobs
-            </Button>
-            
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{job.title}</h1>
-                <h2 className="text-xl font-medium text-gray-700 dark:text-gray-300">{job.company}</h2>
-              </div>
-              <Badge className={`${getBadgeColor(job.urgency)} self-start md:self-center mt-2 md:mt-0`}>
-                {job.urgency} Priority
-              </Badge>
-            </div>
+            </Link>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2">
-              <Card className="mb-6">
+          {isLoading ? (
+            <div className="flex justify-center py-20">
+              <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Job</h3>
+              <p className="text-gray-600 mb-6">We couldn't load the job details. Please try again later.</p>
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </div>
+          ) : !job ? (
+            <div className="text-center py-20">
+              <FileQuestion className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Job Not Found</h3>
+              <p className="text-gray-600 mb-6">We couldn't find the job you're looking for.</p>
+              <Button asChild>
+                <Link to="/jobs">Browse Jobs</Link>
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Card className="overflow-hidden mb-8">
+                <CardHeader className="bg-gray-50 dark:bg-gray-800">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-2xl">{job.title}</CardTitle>
+                      <CardDescription className="text-base">{job.company}</CardDescription>
+                    </div>
+                    <Badge className={getBadgeColor(job.urgency)}>
+                      {job.urgency} Priority
+                    </Badge>
+                  </div>
+                </CardHeader>
+                
                 <CardContent className="pt-6">
-                  <h3 className="text-xl font-semibold mb-4">Job Description</h3>
-                  <div className="prose dark:prose-invert max-w-none">
-                    <p className="whitespace-pre-line text-gray-700 dark:text-gray-300">
-                      {job.description}
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div className="flex items-center">
+                      <MapPin className="w-5 h-5 mr-2 text-gray-500" />
+                      <span>{job.location}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Briefcase className="w-5 h-5 mr-2 text-gray-500" />
+                      <span>{job.job_type}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <IndianRupee className="w-5 h-5 mr-2 text-gray-500" />
+                      <span>{job.rate}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar className="w-5 h-5 mr-2 text-gray-500" />
+                      <span>Posted {formatDate(job.posted_date || job.created_at)}</span>
+                    </div>
                   </div>
                   
-                  <h3 className="text-xl font-semibold mt-8 mb-4">Required Skills</h3>
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {job.skills.map((skill, index) => (
-                      <Badge key={index} variant="outline" className="bg-gray-50 dark:bg-gray-800">
-                        {skill}
-                      </Badge>
-                    ))}
+                  <Separator className="my-6" />
+                  
+                  <div className="mb-6">
+                    <h3 className="text-lg font-medium mb-3">Job Description</h3>
+                    <div className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                      {job.description}
+                    </div>
+                  </div>
+                  
+                  <div className="mb-6">
+                    <h3 className="text-lg font-medium mb-3">Skills Required</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {job.skills.map((skill, index) => (
+                        <Badge key={index} variant="outline" className="bg-gray-50 dark:bg-gray-800">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
-              </Card>
-            </div>
-            
-            <div>
-              <Card className="mb-6 sticky top-24">
-                <CardContent className="pt-6">
-                  <h3 className="text-lg font-semibold mb-4">Job Details</h3>
-                  
-                  <div className="space-y-4">
-                    <div className="flex items-start">
-                      <MapPin className="w-5 h-5 mr-3 text-gray-500 mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-gray-700 dark:text-gray-300">Location</h4>
-                        <p className="text-gray-600 dark:text-gray-400">{job.location}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start">
-                      <Briefcase className="w-5 h-5 mr-3 text-gray-500 mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-gray-700 dark:text-gray-300">Job Type</h4>
-                        <p className="text-gray-600 dark:text-gray-400">{job.job_type}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start">
-                      <IndianRupee className="w-5 h-5 mr-3 text-gray-500 mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-gray-700 dark:text-gray-300">Salary/Rate</h4>
-                        <p className="text-gray-600 dark:text-gray-400">{job.rate}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start">
-                      <Calendar className="w-5 h-5 mr-3 text-gray-500 mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-gray-700 dark:text-gray-300">Posted Date</h4>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          {new Date(job.posted_date).toLocaleDateString('en-IN', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-8 space-y-3">
-                    <Button className="w-full" onClick={handleApply}>
-                      Apply Now
-                    </Button>
-                    <Button variant="outline" className="w-full" asChild>
-                      <Link to={`/message/employer/${job.employer_id}`}>
-                        <Send className="mr-2 h-4 w-4" />
-                        Contact Employer
+                
+                <CardFooter className="bg-gray-50 dark:bg-gray-800 flex flex-col sm:flex-row justify-between gap-4">
+                  <div className="flex gap-4">
+                    <Button asChild variant="outline">
+                      <Link to={`/contact-employer/${job.id}`}>
+                        <Mail className="mr-2 h-4 w-4" /> Contact Employer
                       </Link>
                     </Button>
+                    <Button asChild variant="outline">
+                      <a href={`mailto:?subject=Job: ${job.title} at ${job.company}&body=Check out this job opportunity: ${window.location.href}`}>
+                        <Share className="mr-2 h-4 w-4" /> Share
+                      </a>
+                    </Button>
                   </div>
-                </CardContent>
+                  <Button asChild>
+                    <Link to={`/apply/${job.id}`}>
+                      <SendHorizonal className="mr-2 h-4 w-4" /> Apply Now
+                    </Link>
+                  </Button>
+                </CardFooter>
               </Card>
-            </div>
-          </div>
+              
+              <div className="mt-8">
+                <h3 className="text-xl font-semibold mb-4">Similar Jobs</h3>
+                {/* You can add similar jobs listing here, potentially using the same JobCard component */}
+              </div>
+            </>
+          )}
         </div>
       </main>
       
