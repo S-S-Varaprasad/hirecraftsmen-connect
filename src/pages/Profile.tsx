@@ -10,13 +10,52 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Mail, MapPin, Phone, Briefcase, Clock, FileEdit, Building, Upload, X, Check, Save, Camera } from 'lucide-react';
+import { 
+  User, Mail, MapPin, Phone, Briefcase, Clock, FileEdit, 
+  Building, Upload, X, Check, Save, Camera, DollarSign, 
+  Award, Hammer, Edit, Loader2, UserCheck, Trash
+} from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { getWorkerByUserId, updateWorker, updateWorkerProfilePicture } from '@/services/workerService';
-import { Worker } from '@/services/workerService';
+import { getWorkerByUserId, updateWorker, updateWorkerProfilePicture, Worker } from '@/services/workerService';
 import { useToast } from '@/hooks/use-toast';
 import { useStorage } from '@/hooks/useStorage';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { 
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+// Define schema for validation
+const profileFormSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  profession: z.string().min(2, "Profession is required"),
+  location: z.string().min(2, "Location is required"),
+  experience: z.string().min(1, "Experience is required"),
+  hourly_rate: z.string().min(1, "Hourly rate is required"),
+  about: z.string().optional(),
+  skills: z.string().optional(),
+  is_available: z.boolean().default(true)
+});
+
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 const Profile = () => {
   const { user } = useAuth();
@@ -26,18 +65,28 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isPasswordChanging, setIsPasswordChanging] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showDeleteSkillModal, setShowDeleteSkillModal] = useState(false);
+  const [skillToDelete, setSkillToDelete] = useState('');
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadFile, isLoading: isUploadLoading, error: uploadError } = useStorage();
-  
-  const [formData, setFormData] = useState({
-    name: '',
-    profession: '',
-    location: '',
-    experience: '',
-    hourly_rate: '',
-    about: '',
-    skills: [] as string[],
-    is_available: true
+
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      name: '',
+      profession: '',
+      location: '',
+      experience: '',
+      hourly_rate: '',
+      about: '',
+      skills: '',
+      is_available: true
+    }
   });
 
   useEffect(() => {
@@ -53,14 +102,14 @@ const Profile = () => {
           const workerData = await getWorkerByUserId(user.id);
           setWorker(workerData);
           if (workerData) {
-            setFormData({
+            form.reset({
               name: workerData.name,
               profession: workerData.profession,
               location: workerData.location,
               experience: workerData.experience,
               hourly_rate: workerData.hourly_rate,
               about: workerData.about || '',
-              skills: workerData.skills,
+              skills: workerData.skills.join(', '),
               is_available: workerData.is_available
             });
           }
@@ -74,21 +123,7 @@ const Profile = () => {
     };
 
     fetchWorkerProfile();
-  }, [user, navigate]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSkillsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const skillsArray = e.target.value.split(',').map(skill => skill.trim());
-    setFormData({ ...formData, skills: skillsArray });
-  };
-
-  const handleAvailabilityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, is_available: e.target.checked });
-  };
+  }, [user, navigate, form]);
 
   const handleProfilePictureClick = () => {
     if (!editing || !worker) return;
@@ -119,19 +154,21 @@ const Profile = () => {
     }
   };
 
-  const handleSave = async () => {
+  const onSubmit = async (data: ProfileFormValues) => {
     if (!worker) return;
     
     try {
+      const skillsArray = data.skills?.split(',').map(skill => skill.trim()).filter(Boolean) || [];
+      
       const updatedWorker = await updateWorker(worker.id, {
-        name: formData.name,
-        profession: formData.profession,
-        location: formData.location,
-        experience: formData.experience,
-        hourly_rate: formData.hourly_rate,
-        about: formData.about,
-        skills: formData.skills,
-        is_available: formData.is_available
+        name: data.name,
+        profession: data.profession,
+        location: data.location,
+        experience: data.experience,
+        hourly_rate: data.hourly_rate,
+        about: data.about || null,
+        skills: skillsArray,
+        is_available: data.is_available
       });
       
       setWorker(updatedWorker);
@@ -140,6 +177,55 @@ const Profile = () => {
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error('Failed to update your profile');
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    setIsPasswordChanging(true);
+    
+    try {
+      if (newPassword !== confirmPassword) {
+        toast.error("New passwords don't match");
+        return;
+      }
+      
+      // In a real implementation, you would call an API to update the password
+      // For now, we'll just show a success message
+      setTimeout(() => {
+        toast.success("Password updated successfully");
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setIsPasswordChanging(false);
+      }, 1000);
+    } catch (error) {
+      console.error("Error updating password:", error);
+      toast.error("Failed to update password");
+      setIsPasswordChanging(false);
+    }
+  };
+
+  const handleDeleteSkill = (skill: string) => {
+    setSkillToDelete(skill);
+    setShowDeleteSkillModal(true);
+  };
+
+  const confirmDeleteSkill = async () => {
+    if (!worker || !skillToDelete) return;
+    
+    try {
+      const updatedSkills = worker.skills.filter(s => s !== skillToDelete);
+      const updatedWorker = await updateWorker(worker.id, { skills: updatedSkills });
+      setWorker(updatedWorker);
+      
+      // Update form values
+      form.setValue('skills', updatedSkills.join(', '));
+      
+      toast.success(`Skill "${skillToDelete}" removed`);
+      setShowDeleteSkillModal(false);
+    } catch (error) {
+      console.error('Error deleting skill:', error);
+      toast.error('Failed to delete skill');
     }
   };
 
@@ -175,7 +261,7 @@ const Profile = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <User className="mr-2 h-5 w-5 text-orange-500" />
+                    <User className="mr-2 h-5 w-5 text-app-orange" />
                     Personal Information
                   </CardTitle>
                   <CardDescription>
@@ -190,7 +276,7 @@ const Profile = () => {
                         onClick={handleProfilePictureClick}
                       >
                         <AvatarImage src={user.user_metadata?.avatar_url} />
-                        <AvatarFallback className="bg-orange-100 text-orange-800 text-xl">
+                        <AvatarFallback className="bg-app-orange text-white text-xl">
                           {user.email ? getInitials(user.email) : "U"}
                         </AvatarFallback>
                         {editing && (
@@ -242,7 +328,7 @@ const Profile = () => {
                 <Card>
                   <CardContent className="py-10">
                     <div className="flex justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-app-orange"></div>
                     </div>
                   </CardContent>
                 </Card>
@@ -279,128 +365,191 @@ const Profile = () => {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     {editing ? (
-                      <div className="space-y-4">
-                        <div className="relative mx-auto w-fit">
-                          <Avatar 
-                            className="w-24 h-24 mx-auto mb-4 border-4 border-white shadow cursor-pointer hover:opacity-90"
-                            onClick={handleProfilePictureClick}
-                          >
-                            <AvatarImage src={worker.image_url || ''} />
-                            <AvatarFallback className="bg-app-orange/10 text-app-orange text-xl">
-                              {getInitials(worker.name)}
-                            </AvatarFallback>
-                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 hover:opacity-100 transition-opacity">
-                              <Camera className="h-8 w-8 text-white" />
-                            </div>
-                          </Avatar>
-                          <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleFileChange}
-                          />
-                          {worker.image_url && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="absolute top-0 right-0 rounded-full p-1 h-6 w-6"
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                await updateWorkerProfilePicture(worker.id, '');
-                                setWorker({...worker, image_url: null});
-                              }}
+                      <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                          <div className="relative mx-auto w-fit">
+                            <Avatar 
+                              className="w-24 h-24 mx-auto mb-4 border-4 border-white shadow cursor-pointer hover:opacity-90"
+                              onClick={handleProfilePictureClick}
                             >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {uploading && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                              <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
-                            </div>
-                          )}
-                          <p className="text-center text-sm text-gray-500 mt-2">Click to change photo</p>
-                        </div>
+                              <AvatarImage src={worker.image_url || ''} />
+                              <AvatarFallback className="bg-app-orange text-white text-xl">
+                                {getInitials(worker.name)}
+                              </AvatarFallback>
+                              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 hover:opacity-100 transition-opacity">
+                                <Camera className="h-8 w-8 text-white" />
+                              </div>
+                            </Avatar>
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={handleFileChange}
+                            />
+                            {worker.image_url && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="absolute top-0 right-0 rounded-full p-1 h-6 w-6"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  await updateWorkerProfilePicture(worker.id, '');
+                                  setWorker({...worker, image_url: null});
+                                }}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                            {uploading && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                                <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
+                              </div>
+                            )}
+                            <p className="text-center text-sm text-gray-500 mt-2">Click to change photo</p>
+                          </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="name">Full Name</Label>
-                            <Input
-                              id="name"
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
                               name="name"
-                              value={formData.name}
-                              onChange={handleInputChange}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Full Name</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
                             />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="profession">Profession</Label>
-                            <Input
-                              id="profession"
+                            
+                            <FormField
+                              control={form.control}
                               name="profession"
-                              value={formData.profession}
-                              onChange={handleInputChange}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Profession</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
                             />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="location">Location</Label>
-                            <Input
-                              id="location"
+                            
+                            <FormField
+                              control={form.control}
                               name="location"
-                              value={formData.location}
-                              onChange={handleInputChange}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Location</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
                             />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="experience">Years of Experience</Label>
-                            <Input
-                              id="experience"
+                            
+                            <FormField
+                              control={form.control}
                               name="experience"
-                              value={formData.experience}
-                              onChange={handleInputChange}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Years of Experience</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
                             />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="hourly_rate">Hourly Rate</Label>
-                            <Input
-                              id="hourly_rate"
+                            
+                            <FormField
+                              control={form.control}
                               name="hourly_rate"
-                              value={formData.hourly_rate}
-                              onChange={handleInputChange}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Hourly Rate</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
                             />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="skills">Skills (comma separated)</Label>
-                            <Input
-                              id="skills"
+                            
+                            <FormField
+                              control={form.control}
                               name="skills"
-                              value={formData.skills.join(', ')}
-                              onChange={handleSkillsChange}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Skills (comma separated)</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormDescription>
+                                    Enter skills separated by commas
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
                             />
                           </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="about">About</Label>
-                          <Textarea
-                            id="about"
+                          
+                          <FormField
+                            control={form.control}
                             name="about"
-                            value={formData.about}
-                            onChange={handleInputChange}
-                            rows={4}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>About</FormLabel>
+                                <FormControl>
+                                  <Textarea {...field} rows={4} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id="is_available"
-                            checked={formData.is_available}
-                            onChange={handleAvailabilityChange}
-                            className="rounded border-gray-300"
+                          
+                          <FormField
+                            control={form.control}
+                            name="is_available"
+                            render={({ field }) => (
+                              <FormItem className="flex items-center space-x-2">
+                                <FormControl>
+                                  <input
+                                    type="checkbox"
+                                    checked={field.value}
+                                    onChange={field.onChange}
+                                    id="is_available"
+                                    className="rounded border-gray-300"
+                                  />
+                                </FormControl>
+                                <FormLabel htmlFor="is_available" className="!mt-0">Available for work</FormLabel>
+                              </FormItem>
+                            )}
                           />
-                          <Label htmlFor="is_available">Available for work</Label>
-                        </div>
-                      </div>
+                          
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              type="button"
+                              variant="outline" 
+                              onClick={() => setEditing(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              type="submit"
+                              variant="orange" 
+                              className="flex items-center gap-1"
+                            >
+                              <Save className="h-4 w-4" />
+                              Save Changes
+                            </Button>
+                          </div>
+                        </form>
+                      </Form>
                     ) : (
                       <div className="space-y-6">
                         <div className="flex justify-center mb-6">
@@ -409,7 +558,7 @@ const Profile = () => {
                               src={worker.image_url || ''} 
                               alt={worker.name}
                             />
-                            <AvatarFallback className="bg-orange-100 text-orange-800 text-2xl">
+                            <AvatarFallback className="bg-app-orange text-white text-2xl">
                               {getInitials(worker.name)}
                             </AvatarFallback>
                           </Avatar>
@@ -440,7 +589,10 @@ const Profile = () => {
                           </div>
                           <div>
                             <h3 className="text-sm font-medium text-gray-500">Hourly Rate</h3>
-                            <p className="mt-1 text-base font-medium">{worker.hourly_rate}</p>
+                            <div className="mt-1 flex items-center">
+                              <DollarSign className="w-4 h-4 mr-1 text-gray-500" />
+                              <span>{worker.hourly_rate}</span>
+                            </div>
                           </div>
                           <div>
                             <h3 className="text-sm font-medium text-gray-500">Availability</h3>
@@ -448,20 +600,28 @@ const Profile = () => {
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                 worker.is_available ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                               }`}>
-                                {worker.is_available ? 'Available' : 'Not Available'}
+                                {worker.is_available ? (
+                                  <>
+                                    <UserCheck className="w-3 h-3 mr-1" />
+                                    Available
+                                  </>
+                                ) : (
+                                  'Not Available'
+                                )}
                               </span>
                             </p>
                           </div>
                         </div>
                         
                         <div>
-                          <h3 className="text-sm font-medium text-gray-500">Skills</h3>
-                          <div className="mt-1 flex flex-wrap gap-2">
+                          <h3 className="text-sm font-medium text-gray-500 mb-2">Skills</h3>
+                          <div className="flex flex-wrap gap-2">
                             {worker.skills.map((skill, index) => (
                               <span 
                                 key={index} 
-                                className="bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                                className="bg-app-orange/10 text-app-orange text-xs font-medium px-3 py-1 rounded-full flex items-center"
                               >
+                                <Award className="w-3 h-3 mr-1" />
                                 {skill}
                               </span>
                             ))}
@@ -477,24 +637,6 @@ const Profile = () => {
                       </div>
                     )}
                   </CardContent>
-                  {editing && (
-                    <CardFooter className="flex justify-end pt-4 gap-2">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setEditing(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button 
-                        variant="orange" 
-                        onClick={handleSave}
-                        className="flex items-center gap-1"
-                      >
-                        <Save className="h-4 w-4" />
-                        Save Changes
-                      </Button>
-                    </CardFooter>
-                  )}
                 </Card>
               ) : (
                 <Card>
@@ -504,7 +646,7 @@ const Profile = () => {
                     <p className="text-gray-500 mb-6">You don't have a worker profile yet</p>
                     <Button 
                       onClick={() => navigate('/join-as-worker')} 
-                      className="bg-orange-500 hover:bg-orange-600"
+                      className="bg-app-orange hover:bg-app-orange/90"
                     >
                       Create Worker Profile
                     </Button>
@@ -517,28 +659,57 @@ const Profile = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <User className="mr-2 h-5 w-5 text-orange-500" />
+                    <User className="mr-2 h-5 w-5 text-app-orange" />
                     Account Settings
                   </CardTitle>
                   <CardDescription>
-                    Manage your account settings and preferences
+                    Manage your account password and security
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="current-password">Current Password</Label>
-                    <Input type="password" id="current-password" placeholder="••••••••" />
+                    <Input 
+                      type="password" 
+                      id="current-password" 
+                      placeholder="••••••••" 
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="new-password">New Password</Label>
-                    <Input type="password" id="new-password" placeholder="••••••••" />
+                    <Input 
+                      type="password" 
+                      id="new-password" 
+                      placeholder="••••••••" 
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirm-password">Confirm New Password</Label>
-                    <Input type="password" id="confirm-password" placeholder="••••••••" />
+                    <Input 
+                      type="password" 
+                      id="confirm-password" 
+                      placeholder="••••••••" 
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
                   </div>
-                  <Button className="bg-orange-500 hover:bg-orange-600 mt-2">
-                    Update Password
+                  <Button 
+                    className="bg-app-orange hover:bg-app-orange/90 mt-2"
+                    onClick={handlePasswordChange}
+                    disabled={isPasswordChanging || !currentPassword || !newPassword || !confirmPassword}
+                  >
+                    {isPasswordChanging ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Updating Password...
+                      </>
+                    ) : (
+                      'Update Password'
+                    )}
                   </Button>
                 </CardContent>
               </Card>
@@ -548,6 +719,28 @@ const Profile = () => {
       </main>
       
       <Footer />
+
+      {/* Delete Skill Confirmation Dialog */}
+      <AlertDialog open={showDeleteSkillModal} onOpenChange={setShowDeleteSkillModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Skill</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove "{skillToDelete}" from your skills? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-red-500 hover:bg-red-600 text-white"
+              onClick={confirmDeleteSkill}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

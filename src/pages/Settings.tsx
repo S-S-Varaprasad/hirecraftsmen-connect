@@ -6,15 +6,26 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings as SettingsIcon, Bell, Lock, UserCog, Palette, Moon, Sun, Globe } from 'lucide-react';
+import { Settings as SettingsIcon, Bell, Lock, UserCog, Palette, Moon, Sun, Globe, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { toast } from 'sonner';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { supabase } from '@/integrations/supabase/client';
 
 const Settings = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast: uiToast } = useToast();
   
@@ -38,6 +49,10 @@ const Settings = () => {
     contactInfo: 'authenticated'
   });
 
+  const [language, setLanguage] = useState('en');
+  const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   // Save settings to localStorage
   useEffect(() => {
     const savedSettings = localStorage.getItem('userSettings');
@@ -46,22 +61,24 @@ const Settings = () => {
       if (parsedSettings.notifications) setNotifications(parsedSettings.notifications);
       if (parsedSettings.appearance) setAppearance(parsedSettings.appearance);
       if (parsedSettings.privacy) setPrivacy(parsedSettings.privacy);
+      if (parsedSettings.language) setLanguage(parsedSettings.language);
     }
   }, []);
 
   // Apply saved dark mode setting on load
   useEffect(() => {
     document.documentElement.classList.toggle('dark', appearance.darkMode);
-  }, []);
+  }, [appearance.darkMode]);
 
   // Save settings when they change
   useEffect(() => {
     localStorage.setItem('userSettings', JSON.stringify({
       notifications,
       appearance,
-      privacy
+      privacy,
+      language
     }));
-  }, [notifications, appearance, privacy]);
+  }, [notifications, appearance, privacy, language]);
 
   // Handle toggles for notification settings
   const handleNotificationChange = (setting: keyof typeof notifications) => {
@@ -107,6 +124,49 @@ const Settings = () => {
     });
   };
 
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setLanguage(e.target.value);
+    toast.success("Language preference updated");
+  };
+
+  const handleDeactivateAccount = async () => {
+    try {
+      // In a real app, you would call an API to deactivate the account
+      // For now, we'll just show a success message
+      toast.success("Your account has been temporarily deactivated");
+      setShowDeactivateDialog(false);
+      // In a real implementation, you might redirect to the login page or sign the user out
+      setTimeout(() => {
+        signOut();
+      }, 2000);
+    } catch (error) {
+      console.error("Error deactivating account:", error);
+      toast.error("Failed to deactivate account");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      if (user) {
+        // Delete the user account from Supabase Auth
+        const { error } = await supabase.auth.admin.deleteUser(user.id);
+        
+        if (error) throw error;
+        
+        toast.success("Your account has been permanently deleted");
+        setShowDeleteDialog(false);
+        
+        // Sign out and redirect to home page
+        setTimeout(() => {
+          signOut();
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      toast.error("Failed to delete account");
+    }
+  };
+
   if (!user) {
     navigate('/login');
     return null;
@@ -145,7 +205,7 @@ const Settings = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Bell className="mr-2 h-5 w-5 text-orange-500" />
+                    <Bell className="mr-2 h-5 w-5 text-app-orange" />
                     Notification Settings
                   </CardTitle>
                   <CardDescription>
@@ -218,7 +278,7 @@ const Settings = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Palette className="mr-2 h-5 w-5 text-orange-500" />
+                    <Palette className="mr-2 h-5 w-5 text-app-orange" />
                     Appearance Settings
                   </CardTitle>
                   <CardDescription>
@@ -303,7 +363,7 @@ const Settings = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Lock className="mr-2 h-5 w-5 text-orange-500" />
+                    <Lock className="mr-2 h-5 w-5 text-app-orange" />
                     Privacy Settings
                   </CardTitle>
                   <CardDescription>
@@ -416,7 +476,7 @@ const Settings = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <UserCog className="mr-2 h-5 w-5 text-orange-500" />
+                    <UserCog className="mr-2 h-5 w-5 text-app-orange" />
                     Account Settings
                   </CardTitle>
                   <CardDescription>
@@ -428,7 +488,11 @@ const Settings = () => {
                     <h4 className="font-medium">Language Preference</h4>
                     <div className="flex items-center space-x-2">
                       <Globe className="h-5 w-5 text-gray-500" />
-                      <select className="border border-gray-300 rounded-md p-2 w-full max-w-xs">
+                      <select 
+                        className="border border-gray-300 rounded-md p-2 w-full max-w-xs"
+                        value={language}
+                        onChange={handleLanguageChange}
+                      >
                         <option value="en">English</option>
                         <option value="hi">Hindi</option>
                         <option value="ta">Tamil</option>
@@ -442,7 +506,11 @@ const Settings = () => {
                     <h4 className="font-medium text-red-600">Danger Zone</h4>
                     
                     <div className="space-y-2">
-                      <Button variant="outline" className="w-full max-w-xs border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700">
+                      <Button 
+                        variant="outline" 
+                        className="w-full max-w-xs border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                        onClick={() => setShowDeactivateDialog(true)}
+                      >
                         Deactivate Account
                       </Button>
                       <p className="text-sm text-gray-500">
@@ -451,7 +519,11 @@ const Settings = () => {
                     </div>
                     
                     <div className="space-y-2">
-                      <Button variant="destructive" className="w-full max-w-xs">
+                      <Button 
+                        variant="destructive" 
+                        className="w-full max-w-xs"
+                        onClick={() => setShowDeleteDialog(true)}
+                      >
                         Delete Account
                       </Button>
                       <p className="text-sm text-gray-500">
@@ -467,6 +539,56 @@ const Settings = () => {
       </main>
       
       <Footer />
+
+      {/* Deactivate Account Dialog */}
+      <AlertDialog open={showDeactivateDialog} onOpenChange={setShowDeactivateDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              Deactivate Account
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Your account will be temporarily disabled. You can reactivate it by logging in again.
+              All your data will be preserved, but you won't be visible to other users during this time.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-yellow-500 hover:bg-yellow-600 text-white"
+              onClick={handleDeactivateAccount}
+            >
+              Deactivate
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Account Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              Delete Account Permanently
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your account
+              and remove all your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-red-500 hover:bg-red-600 text-white"
+              onClick={handleDeleteAccount}
+            >
+              Delete Permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

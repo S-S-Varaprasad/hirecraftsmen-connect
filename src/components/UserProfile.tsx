@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -46,7 +46,7 @@ const UserProfile = () => {
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
               <Badge 
-                className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.2rem] h-[1.2rem] bg-red-500 text-white text-xs flex items-center justify-center"
+                className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.2rem] h-[1.2rem] bg-app-red text-white text-xs flex items-center justify-center"
               >
                 {unreadCount > 9 ? '9+' : unreadCount}
               </Badge>
@@ -83,7 +83,11 @@ const UserProfile = () => {
                 variant="ghost" 
                 size="sm" 
                 className="w-full text-xs"
-                onClick={() => notifications.forEach(n => markAsRead(n.id))}
+                onClick={() => {
+                  notifications.forEach(n => {
+                    if (!n.is_read) markAsRead(n.id);
+                  });
+                }}
               >
                 Mark all as read
               </Button>

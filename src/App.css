@@ -6,13 +6,6 @@
   text-align: center;
 }
 
-/* 
-The following styles have been moved to index.css to apply consistently across all pages:
-.logo, .card, .read-the-docs
-
-Animation keyframes have been kept as they might be used by some components
-*/
-
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
