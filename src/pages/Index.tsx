@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Paintbrush, Wrench, Hammer, Lightbulb, Flame, Sparkles, Star, ChevronRight, Settings, Droplets, Shield, Utensils, Tractor, HardHat } from 'lucide-react';
@@ -55,63 +54,54 @@ const categories = [
     title: 'Painter',
     icon: Paintbrush,
     description: 'Expert painters for interior and exterior home decoration.',
-    availableWorkers: 124,
     slug: 'painter',
   },
   {
     title: 'Carpenter',
     icon: Hammer,
     description: 'Skilled woodworkers for furniture and custom projects.',
-    availableWorkers: 87,
     slug: 'carpenter',
   },
   {
     title: 'Plumber',
     icon: Wrench,
     description: 'Professional plumbing services and repairs.',
-    availableWorkers: 56,
     slug: 'plumber',
   },
   {
     title: 'Electrician',
     icon: Lightbulb,
     description: 'Licensed electricians for all electrical work.',
-    availableWorkers: 93,
     slug: 'electrician',
   },
   {
     title: 'Mechanic',
     icon: Settings,
     description: 'Expert vehicle and machinery repair services.',
-    availableWorkers: 45,
     slug: 'mechanic',
   },
   {
     title: 'Security Guard',
     icon: Shield,
     description: 'Professional security services for events and properties.',
-    availableWorkers: 78,
     slug: 'security',
   },
   {
     title: 'Chef',
     icon: Utensils,
     description: 'Experienced chefs for restaurants and private events.',
-    availableWorkers: 34,
     slug: 'chef',
   },
   {
     title: 'House Cleaner',
     icon: Droplets,
     description: 'Professional cleaning services for homes and offices.',
-    availableWorkers: 112,
     slug: 'cleaner',
   },
   {
     title: 'Construction Worker',
     icon: HardHat,
     description: 'Skilled construction workers for building projects.',
-    availableWorkers: 65,
     slug: 'construction',
   },
 ];
