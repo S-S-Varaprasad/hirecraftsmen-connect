@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from "@/components/ui/theme-provider"
+import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from 'sonner';
 
 import Index from '@/pages/Index';
