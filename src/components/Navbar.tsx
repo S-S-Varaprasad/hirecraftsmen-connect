@@ -106,7 +106,7 @@ const Navbar = () => {
                 <Link to="/login">
                   <Button variant="ghost" size="sm" className="hover:bg-gray-100/50 dark:hover:bg-gray-800/70">Login</Button>
                 </Link>
-                <Link to="/register">
+                <Link to="/signup">
                   <Button 
                     variant="default" 
                     size="sm"
@@ -204,7 +204,7 @@ const Navbar = () => {
                   Log In
                 </Link>
                 <Link 
-                  to="/register" 
+                  to="/signup" 
                   className="block w-full py-3 px-4 rounded-md text-center font-medium text-white bg-gradient-to-r from-primary to-blue-500 hover:opacity-90 transition-opacity"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
