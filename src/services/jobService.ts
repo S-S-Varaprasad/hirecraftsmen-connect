@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Job {
@@ -88,20 +87,31 @@ export const getJobsBySearch = async (searchParams: {
   return (data || []).map(convertToJob) as Job[];
 };
 
-export const getJobById = async (id: string) => {
-  const { data, error } = await supabase
-    .from('jobs')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) {
-    console.error('Error fetching job:', error);
+export const getJobById = async (jobId: string) => {
+  try {
+    console.log(`Getting job by ID: ${jobId}`);
+    const { data, error } = await supabase
+      .from('jobs')
+      .select('*')
+      .eq('id', jobId)
+      .single();
+
+    if (error) {
+      console.error('Error in getJobById:', error);
+      throw new Error(error.message);
+    }
+
+    if (!data) {
+      console.error('No job found with ID:', jobId);
+      throw new Error('Job not found');
+    }
+
+    console.log('Job found:', data);
+    return data;
+  } catch (error) {
+    console.error('Error in getJobById:', error);
     throw error;
   }
-  
-  // Convert data to ensure correct typing
-  return convertToJob(data) as Job;
 };
 
 export const createJob = async (jobData: Omit<Job, 'id' | 'posted_date' | 'created_at'>) => {

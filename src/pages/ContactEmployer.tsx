@@ -102,7 +102,7 @@ const ContactEmployer = () => {
     setIsSending(true);
     
     try {
-      // Store the message in a messages table
+      // Insert message into the messages table
       const { error: messageError } = await supabase
         .from('messages')
         .insert({

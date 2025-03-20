@@ -35,9 +35,16 @@ const ApplyNow = () => {
   // Fetch job details
   const { data: job, isLoading: isLoadingJob, error: jobError } = useQuery({
     queryKey: ['job', jobId],
-    queryFn: () => getJobById(jobId!),
+    queryFn: async () => {
+      console.log(`Fetching job with ID: ${jobId}`);
+      if (!jobId) throw new Error('Job ID is missing');
+      const result = await getJobById(jobId);
+      console.log('Job fetch result:', result);
+      return result;
+    },
     enabled: !!jobId && isAuthenticated,
-    retry: 2
+    retry: 3,
+    retryDelay: 1000
   });
 
   // Fetch worker profile for current user

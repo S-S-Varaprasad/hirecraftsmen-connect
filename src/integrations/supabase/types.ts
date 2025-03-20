@@ -99,6 +99,53 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          job_id: string | null
+          message: string
+          recipient_id: string | null
+          sender_email: string
+          sender_id: string | null
+          sender_name: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          job_id?: string | null
+          message: string
+          recipient_id?: string | null
+          sender_email: string
+          sender_id?: string | null
+          sender_name: string
+          subject: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          job_id?: string | null
+          message?: string
+          recipient_id?: string | null
+          sender_email?: string
+          sender_id?: string | null
+          sender_name?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null
