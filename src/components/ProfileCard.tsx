@@ -1,5 +1,6 @@
+
 import React, { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Star, MapPin, Clock, Briefcase, Eye, BriefcaseBusiness, Upload, Check, X, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +38,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   userId,
 }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [uploading, setUploading] = useState(false);
   const [editingImage, setEditingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -88,6 +90,18 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
   const cancelImageEdit = () => {
     setEditingImage(false);
+  };
+
+  const handleHireMe = () => {
+    // Navigate to post job page with worker info pre-filled
+    navigate('/post-job', { 
+      state: { 
+        workerId: id,
+        workerName: name,
+        workerProfession: profession,
+        workerSkills: skills
+      } 
+    });
   };
 
   return (
@@ -219,8 +233,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <Button className="bg-primary hover:bg-primary/90" asChild>
               <Link to={`/workers/${id}`}><Eye className="w-4 h-4 mr-1" />View Profile</Link>
             </Button>
-            <Button variant="default" className="col-span-2 mt-2 btn-hire-me" asChild>
-              <Link to={`/apply/${id}`}><BriefcaseBusiness className="w-4 h-4 mr-1" />Hire Me</Link>
+            <Button 
+              variant="default" 
+              className="col-span-2 mt-2 btn-hire-me"
+              onClick={handleHireMe}
+            >
+              <BriefcaseBusiness className="w-4 h-4 mr-1" />Hire Me
             </Button>
             {isOwner && (
               <>
@@ -240,4 +258,3 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 };
 
 export default ProfileCard;
-

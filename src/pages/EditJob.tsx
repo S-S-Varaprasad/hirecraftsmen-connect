@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { createJob } from '@/services/jobService';
+import { getJobById, updateJob } from '@/services/jobService';
 import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -36,7 +37,7 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Loader2, CheckCircle } from 'lucide-react';
+import { Loader2, CheckCircle, ArrowLeft } from 'lucide-react';
 
 // Form validation schema
 const formSchema = z.object({
@@ -53,74 +54,94 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const PostJob = () => {
+const EditJob = () => {
+  const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const { notifyWorkers } = useWorkerProfiles();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  
-  // Get worker info from location state if coming from "Hire Me" button
-  const workerInfo = location.state || {};
-  const { workerId, workerName, workerProfession, workerSkills } = workerInfo;
+
+  const { data: job, isLoading: isLoadingJob } = useQuery({
+    queryKey: ['job', id],
+    queryFn: () => id ? getJobById(id) : Promise.reject('No job ID provided'),
+    enabled: !!id,
+    retry: 1,
+    onError: () => {
+      toast.error("Couldn't load job details");
+      navigate('/jobs');
+    },
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: workerProfession ? `Need a ${workerProfession}` : '',
+      title: '',
       company: '',
       location: '',
-      job_type: 'One-time',
+      job_type: '',
       rate: '',
       urgency: 'Medium',
-      skills: workerSkills ? workerSkills.join(', ') : '',
-      description: workerName ? 
-        `I am looking to hire ${workerName} who is a ${workerProfession}. Please provide details about your requirements and expectations for this job.` : 
-        '',
+      skills: '',
+      description: '',
       notifyWorkers: true,
     },
   });
 
+  // Update form when job data is loaded
+  useEffect(() => {
+    if (job) {
+      form.reset({
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        job_type: job.job_type,
+        rate: job.rate,
+        urgency: job.urgency,
+        skills: job.skills.join(', '),
+        description: job.description,
+        notifyWorkers: true,
+      });
+    }
+  }, [job, form]);
+
   const onSubmit = async (data: FormValues) => {
     if (!user) {
-      toast.error('You must be logged in to post a job');
+      toast.error('You must be logged in to update a job');
       navigate('/login');
       return;
     }
 
-    setIsSubmitting(true);
-    console.log('Submitting job with data:', data);
+    if (!id) {
+      toast.error('Job ID is missing');
+      return;
+    }
 
+    setIsSubmitting(true);
+    
     try {
       // Convert skills string to array
       const skillsArray = data.skills.split(',').map(skill => skill.trim());
       
-      console.log('Creating job with skills:', skillsArray);
-      
-      // Create job
-      const newJob = await createJob({
+      // Update job
+      const updatedJob = await updateJob(id, {
         title: data.title,
         company: data.company,
         location: data.location,
         job_type: data.job_type,
         rate: data.rate,
-        urgency: data.urgency as 'Low' | 'Medium' | 'High',
+        urgency: data.urgency,
         skills: skillsArray,
         description: data.description,
-        employer_id: user.id,
       });
       
-      console.log('Job created successfully:', newJob);
-      
       // Notify matched workers if option is selected
-      if (data.notifyWorkers && newJob) {
-        console.log('Notifying workers about new job');
+      if (data.notifyWorkers && updatedJob) {
         await notifyWorkers(
-          newJob.id, 
-          newJob.title, 
+          updatedJob.id, 
+          updatedJob.title, 
           skillsArray,
-          workerId, // If we have a specific worker ID, prioritize them
+          undefined,
           true, // send email
           false, // don't send SMS
           user.id
@@ -128,23 +149,32 @@ const PostJob = () => {
       }
       
       setIsSuccess(true);
-      toast.success('Job posted successfully!');
-      
-      // Reset form
-      form.reset();
+      toast.success('Job updated successfully!');
       
       // Redirect after a short delay
       setTimeout(() => {
-        navigate(`/jobs/${newJob.id}`);
+        navigate(`/jobs/${updatedJob.id}`);
       }, 2000);
       
     } catch (error) {
-      console.error('Error posting job:', error);
-      toast.error('Failed to post job. Please try again.');
+      console.error('Error updating job:', error);
+      toast.error('Failed to update job. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoadingJob) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -153,14 +183,21 @@ const PostJob = () => {
       <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-3xl mx-auto">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate(-1)} 
+              className="mb-6"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                {workerId ? `Hire ${workerName}` : 'Post a New Job'}
+                Edit Job
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                {workerId 
-                  ? `Create a job listing for ${workerName}` 
-                  : 'Reach skilled professionals and find the perfect match for your requirements'}
+                Update your job listing with the latest requirements
               </p>
             </div>
             
@@ -168,7 +205,7 @@ const PostJob = () => {
               <CardHeader>
                 <CardTitle>Job Details</CardTitle>
                 <CardDescription>
-                  Fill in the details below to create your job listing
+                  Update the job details below
                 </CardDescription>
               </CardHeader>
               
@@ -176,9 +213,9 @@ const PostJob = () => {
                 {isSuccess ? (
                   <div className="py-12 text-center">
                     <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">Job Posted Successfully!</h3>
+                    <h3 className="text-xl font-semibold mb-2">Job Updated Successfully!</h3>
                     <p className="text-gray-600 dark:text-gray-400 mb-4">
-                      Your job has been posted and is now live.
+                      Your job has been updated and is now live.
                     </p>
                     <p className="text-gray-600 dark:text-gray-400">
                       Redirecting you to view your job...
@@ -337,7 +374,7 @@ const PostJob = () => {
                           <Button
                             type="button"
                             variant="outline"
-                            onClick={() => navigate('/jobs')}
+                            onClick={() => navigate(`/jobs/${id}`)}
                             disabled={isSubmitting}
                           >
                             Cancel
@@ -350,10 +387,10 @@ const PostJob = () => {
                             {isSubmitting ? (
                               <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Posting Job...
+                                Updating Job...
                               </>
                             ) : (
-                              'Post Job'
+                              'Update Job'
                             )}
                           </Button>
                         </div>
@@ -372,4 +409,4 @@ const PostJob = () => {
   );
 };
 
-export default PostJob;
+export default EditJob;

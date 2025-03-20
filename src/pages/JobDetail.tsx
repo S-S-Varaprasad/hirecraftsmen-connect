@@ -8,7 +8,7 @@ import Footer from '@/components/Footer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Briefcase, IndianRupee, Clock, Calendar, ArrowLeft, Send } from 'lucide-react';
+import { MapPin, Briefcase, IndianRupee, Clock, Calendar, ArrowLeft, Send, PenLine } from 'lucide-react';
 import { toast } from 'sonner';
 
 const JobDetail = () => {
@@ -19,6 +19,7 @@ const JobDetail = () => {
     queryKey: ['job', id],
     queryFn: () => id ? getJobById(id) : Promise.reject('No job ID provided'),
     enabled: !!id,
+    retry: 1, // Only retry once to avoid too many retries for missing jobs
   });
 
   const handleApply = () => {
@@ -62,14 +63,20 @@ const JobDetail = () => {
         <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
           <div className="container mx-auto px-4 py-8">
             <div className="text-center py-20 bg-white/80 rounded-xl shadow-sm border border-gray-100 dark:bg-gray-800/80 dark:border-gray-700 max-w-md mx-auto px-4">
-              <h3 className="text-xl font-semibold mb-2">Error loading job</h3>
+              <h3 className="text-xl font-semibold mb-2">Job not found</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                The job you're looking for could not be found or is no longer available.
+                This job listing may have been removed or doesn't exist yet.
               </p>
-              <Button onClick={() => navigate('/jobs')}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Jobs
-              </Button>
+              <div className="flex flex-col sm:flex-row justify-center gap-3">
+                <Button onClick={() => navigate('/jobs')}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Browse Jobs
+                </Button>
+                <Button variant="default" onClick={() => navigate('/post-job')}>
+                  <PenLine className="mr-2 h-4 w-4" />
+                  Post a New Job
+                </Button>
+              </div>
             </div>
           </div>
         </main>
