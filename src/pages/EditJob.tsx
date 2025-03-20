@@ -67,11 +67,21 @@ const EditJob = () => {
     queryFn: () => id ? getJobById(id) : Promise.reject('No job ID provided'),
     enabled: !!id,
     retry: 1,
-    onError: () => {
-      toast.error("Couldn't load job details");
-      navigate('/jobs');
+    meta: {
+      onError: () => {
+        toast.error("Couldn't load job details");
+        navigate('/jobs');
+      }
     },
   });
+
+  // Handle job loading error separately using the onError meta
+  useEffect(() => {
+    if (!id) {
+      toast.error("Job ID is missing");
+      navigate('/jobs');
+    }
+  }, [id, navigate]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
