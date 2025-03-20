@@ -101,7 +101,7 @@ const WorkerDetail = () => {
             </div>
           ) : (
             <div className="flex justify-center items-center h-full">
-              <ErrorState>Worker not found.</ErrorState>
+              <ErrorState message="Worker not found." />
             </div>
           )}
         </div>
