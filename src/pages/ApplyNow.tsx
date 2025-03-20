@@ -27,13 +27,21 @@ import {
   User, 
   Award, 
   CheckCheck, 
-  FileText
+  FileText,
+  Lightbulb
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 // Define the Application interface
 interface Application extends Tables<'applications'> {
@@ -52,6 +60,15 @@ const ApplyNow: React.FC = () => {
   const [alreadyApplied, setAlreadyApplied] = useState(false);
   const [existingApplication, setExistingApplication] = useState<Application | null>(null);
   const [characterCount, setCharacterCount] = useState(0);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+
+  // Application message templates
+  const messageTemplates = {
+    general: `I am very interested in this ${job?.job_type} position at ${job?.company}. With my experience in ${job?.skills?.join(', ')}, I believe I would be a great fit for this role. I am available to start immediately and look forward to discussing this opportunity further.`,
+    experience: `I have extensive experience in ${job?.skills?.join(', ')} which makes me well-suited for this position. I have worked on similar projects before and can deliver high-quality results efficiently. I am excited about the opportunity to work with ${job?.company}.`,
+    enthusiasm: `I am extremely enthusiastic about this opportunity at ${job?.company}! This position aligns perfectly with my career goals and skill set. I am particularly drawn to this role because it allows me to utilize my expertise in ${job?.skills?.join(', ')}. I would bring energy and dedication to this position.`,
+    availability: `I am immediately available to start working on this ${job?.job_type} position. I can commit to the schedule required and am flexible to accommodate your needs. I have all the necessary tools and skills related to ${job?.skills?.join(', ')} to begin contributing right away.`
+  };
 
   useEffect(() => {
     if (!jobId) {
@@ -145,6 +162,14 @@ const ApplyNow: React.FC = () => {
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setApplicationMessage(e.target.value);
     setCharacterCount(e.target.value.length);
+  };
+
+  const handleTemplateSelect = (templateKey: string) => {
+    if (templateKey && messageTemplates[templateKey as keyof typeof messageTemplates]) {
+      setSelectedTemplate(templateKey);
+      setApplicationMessage(messageTemplates[templateKey as keyof typeof messageTemplates]);
+      setCharacterCount(messageTemplates[templateKey as keyof typeof messageTemplates].length);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -309,6 +334,27 @@ const ApplyNow: React.FC = () => {
                         <p className="text-sm text-gray-700 dark:text-gray-300">
                           Tell the employer why you're the perfect fit for this job. Highlight your relevant skills and experience.
                         </p>
+                      </div>
+                      
+                      <div className="bg-amber-50 dark:bg-amber-900/10 p-4 rounded-md border border-amber-200 dark:border-amber-800/40 flex items-start gap-3 mb-2">
+                        <Lightbulb className="w-5 h-5 text-amber-500 flex-shrink-0 mt-1" />
+                        <div>
+                          <h4 className="text-sm font-medium text-amber-800 dark:text-amber-300 mb-1">Use a Message Template</h4>
+                          <p className="text-xs text-amber-700 dark:text-amber-400 mb-3">
+                            Select a template below to get started, then customize it to match your experience.
+                          </p>
+                          <Select onValueChange={handleTemplateSelect} value={selectedTemplate}>
+                            <SelectTrigger className="w-full bg-white dark:bg-gray-800">
+                              <SelectValue placeholder="Select a template" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="general">General Interest</SelectItem>
+                              <SelectItem value="experience">Highlight Experience</SelectItem>
+                              <SelectItem value="enthusiasm">Show Enthusiasm</SelectItem>
+                              <SelectItem value="availability">Emphasize Availability</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                       
                       <div className="space-y-2">

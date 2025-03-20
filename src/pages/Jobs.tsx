@@ -5,13 +5,12 @@ import Footer from '@/components/Footer';
 import SearchFilters from '@/components/SearchFilters';
 import JobCard from '@/components/JobCard';
 import { Briefcase, Filter, SearchX } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { getJobs, Job, getJobsBySearch } from '@/services/jobService';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Canvas } from '@react-three/fiber';
 import { Stars, PerspectiveCamera } from '@react-three/drei';
 import { useMediaQuery } from '@/hooks/use-mobile';
+import { useJobs } from '@/hooks/useJobs';
 
 // 3D floating particles background component
 const Background3D = () => {
@@ -28,49 +27,15 @@ const Background3D = () => {
 };
 
 const Jobs = () => {
-  const { data: jobsData = [], isLoading: isLoadingJobs, error } = useQuery({
-    queryKey: ['jobs'],
-    queryFn: getJobs,
-  });
-  
-  const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { jobs, isLoading, error, handleSearch, refreshJobs } = useJobs();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
+  // Refresh jobs on component mount
   useEffect(() => {
-    if (jobsData) {
-      setFilteredJobs(jobsData);
-      setIsLoading(false);
-    }
-  }, [jobsData]);
+    refreshJobs();
+  }, []);
 
-  const handleSearch = async (filters: any) => {
-    setIsLoading(true);
-    
-    try {
-      // Convert filter format for our service
-      const searchParams = {
-        searchTerm: filters.searchTerm,
-        location: filters.location,
-        jobTypes: filters.jobTypes,
-        urgency: filters.urgency
-      };
-      
-      // Use real search function instead of setTimeout
-      const results = await getJobsBySearch(searchParams);
-      setFilteredJobs(results);
-      
-      // Show toast notification for search results
-      toast.info(`Found ${results.length} job${results.length !== 1 ? 's' : ''} matching your search criteria`);
-    } catch (error) {
-      console.error('Error searching jobs:', error);
-      toast.error('Error searching for jobs. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (isLoadingJobs) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -169,14 +134,14 @@ const Jobs = () => {
             </div>
           ) : (
             <>
-              {filteredJobs.length > 0 ? (
+              {jobs.length > 0 ? (
                 <motion.div 
                   className="grid grid-cols-1 lg:grid-cols-2 gap-6"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.3 }}
                 >
-                  {filteredJobs.map((job, index) => (
+                  {jobs.map((job, index) => (
                     <motion.div
                       key={job.id}
                       initial={{ opacity: 0, y: 20 }}
