@@ -16,6 +16,24 @@ export interface Job {
   created_at: string;
 }
 
+// Helper function to ensure urgency is one of the allowed values
+const validateUrgency = (urgency: string): 'Low' | 'Medium' | 'High' => {
+  if (urgency === 'Low' || urgency === 'Medium' || urgency === 'High') {
+    return urgency;
+  }
+  // Default to Medium if value doesn't match expected values
+  console.warn(`Invalid urgency value: ${urgency}, defaulting to Medium`);
+  return 'Medium';
+};
+
+// Helper function to convert database job records to Job type
+const convertToJob = (job: any): Job => {
+  return {
+    ...job,
+    urgency: validateUrgency(job.urgency)
+  };
+};
+
 export const getJobs = async () => {
   const { data, error } = await supabase
     .from('jobs')
@@ -27,7 +45,8 @@ export const getJobs = async () => {
     throw error;
   }
   
-  return data || [] as Job[];
+  // Convert data to ensure correct typing
+  return (data || []).map(convertToJob) as Job[];
 };
 
 export const getJobsBySearch = async (searchParams: {
@@ -65,7 +84,8 @@ export const getJobsBySearch = async (searchParams: {
     throw error;
   }
   
-  return data || [] as Job[];
+  // Convert data to ensure correct typing
+  return (data || []).map(convertToJob) as Job[];
 };
 
 export const getJobById = async (id: string) => {
@@ -80,13 +100,20 @@ export const getJobById = async (id: string) => {
     throw error;
   }
   
-  return data as Job;
+  // Convert data to ensure correct typing
+  return convertToJob(data) as Job;
 };
 
 export const createJob = async (jobData: Omit<Job, 'id' | 'posted_date' | 'created_at'>) => {
+  // Validate urgency field before inserting
+  const validatedJobData = {
+    ...jobData,
+    urgency: validateUrgency(jobData.urgency)
+  };
+
   const { data, error } = await supabase
     .from('jobs')
-    .insert([jobData])
+    .insert([validatedJobData])
     .select();
   
   if (error) {
@@ -94,13 +121,19 @@ export const createJob = async (jobData: Omit<Job, 'id' | 'posted_date' | 'creat
     throw error;
   }
   
-  return data?.[0] as Job;
+  return convertToJob(data?.[0]) as Job;
 };
 
 export const updateJob = async (id: string, jobData: Partial<Job>) => {
+  // Validate urgency field if it's being updated
+  const dataToUpdate = { ...jobData };
+  if (dataToUpdate.urgency) {
+    dataToUpdate.urgency = validateUrgency(dataToUpdate.urgency);
+  }
+
   const { data, error } = await supabase
     .from('jobs')
-    .update(jobData)
+    .update(dataToUpdate)
     .eq('id', id)
     .select();
   
@@ -109,7 +142,7 @@ export const updateJob = async (id: string, jobData: Partial<Job>) => {
     throw error;
   }
   
-  return data?.[0] as Job;
+  return convertToJob(data?.[0]) as Job;
 };
 
 export const deleteJob = async (id: string) => {
