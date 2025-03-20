@@ -34,6 +34,9 @@ import WorkerJobHistory from '@/pages/WorkerJobHistory';
 import MessageWorker from '@/pages/MessageWorker';
 import ContactWorker from '@/pages/ContactWorker';
 
+// Import CSS
+import './App.css';
+
 function App() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -57,34 +60,48 @@ function App() {
     <AuthProvider>
       <ThemeProvider defaultTheme="light">
         <QueryClientProvider client={queryClient}>
-          <Toaster position="top-right" richColors />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
-            <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
-            <Route path="/contact-employer/:employerId" element={<RequireAuth><ContactEmployer /></RequireAuth>} />
-            <Route path="/contact/:workerId" element={<RequireAuth><ContactWorker /></RequireAuth>} />
-            <Route path="/message/:workerId" element={<RequireAuth><MessageWorker /></RequireAuth>} />
-            <Route path="/workers" element={<Workers />} />
-            <Route path="/workers/by-category/:category" element={<WorkersByCategory />} />
-            <Route path="/workers/:id" element={<WorkerDetail />} />
-            <Route path="/workers/deactivate/:id" element={<RequireAuth><DeactivateWorker /></RequireAuth>} />
-            <Route path="/workers/delete/:id" element={<RequireAuth><DeleteWorker /></RequireAuth>} />
-            <Route path="/worker-job-history" element={<RequireAuth><WorkerJobHistory /></RequireAuth>} />
-            <Route path="/jobs" element={<Jobs />} />
-            <Route path="/jobs/:id" element={<JobDetail />} />
-            <Route path="/post-job" element={<RequireAuth><PostJob /></RequireAuth>} />
-            <Route path="/edit-job/:id" element={<RequireAuth><EditJob /></RequireAuth>} />
-            <Route path="/apply-now/:jobId" element={<RequireAuth><ApplyNow /></RequireAuth>} />
-            <Route path="/join-as-worker" element={<JoinAsWorker />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Toaster 
+            position="top-right" 
+            richColors 
+            toastOptions={{
+              style: {
+                background: 'var(--background)',
+                color: 'var(--foreground)',
+                border: '1px solid var(--border)',
+                borderRadius: '0.5rem',
+              },
+              className: 'toast-animation',
+            }}
+          />
+          <div className="transition-colors duration-300">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+              <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
+              <Route path="/contact-employer/:employerId" element={<RequireAuth><ContactEmployer /></RequireAuth>} />
+              <Route path="/contact/:workerId" element={<RequireAuth><ContactWorker /></RequireAuth>} />
+              <Route path="/message/:workerId" element={<RequireAuth><MessageWorker /></RequireAuth>} />
+              <Route path="/workers" element={<Workers />} />
+              <Route path="/workers/by-category/:category" element={<WorkersByCategory />} />
+              <Route path="/workers/:id" element={<WorkerDetail />} />
+              <Route path="/workers/deactivate/:id" element={<RequireAuth><DeactivateWorker /></RequireAuth>} />
+              <Route path="/workers/delete/:id" element={<RequireAuth><DeleteWorker /></RequireAuth>} />
+              <Route path="/worker-job-history" element={<RequireAuth><WorkerJobHistory /></RequireAuth>} />
+              <Route path="/jobs" element={<Jobs />} />
+              <Route path="/jobs/:id" element={<JobDetail />} />
+              <Route path="/post-job" element={<RequireAuth><PostJob /></RequireAuth>} />
+              <Route path="/edit-job/:id" element={<RequireAuth><EditJob /></RequireAuth>} />
+              <Route path="/apply-now/:jobId" element={<RequireAuth><ApplyNow /></RequireAuth>} />
+              <Route path="/join-as-worker" element={<JoinAsWorker />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
         </QueryClientProvider>
         
         {!cookieConsentAccepted && (
@@ -92,20 +109,33 @@ function App() {
             location="bottom"
             buttonText="I Accept"
             cookieName="handyHelpers-cookie-consent"
-            style={{ background: "#2B373B" }}
+            style={{ 
+              background: "rgba(43, 55, 59, 0.95)",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 -5px 30px rgba(0, 0, 0, 0.15)",
+              borderTop: "1px solid rgba(255, 255, 255, 0.1)"
+            }}
             buttonStyle={{ 
               backgroundColor: "#f97316", 
               color: "white", 
               fontSize: "14px", 
               borderRadius: "4px", 
-              padding: "8px 16px"
+              padding: "8px 16px",
+              fontWeight: "500",
+              cursor: "pointer"
+            }}
+            contentStyle={{
+              flex: "1",
+              margin: "15px"
             }}
             expires={150}
             onAccept={handleCookieAccept}
             hideOnAccept={true}
             acceptOnScroll={false}
           >
-            This website uses cookies to enhance the user experience.
+            <p className="text-white text-sm sm:text-base">
+              This website uses cookies to enhance your browsing experience and provide personalized services.
+            </p>
           </CookieConsent>
         )}
       </ThemeProvider>

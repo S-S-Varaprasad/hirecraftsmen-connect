@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SearchFilters from '@/components/SearchFilters';
 import JobCard from '@/components/JobCard';
-import { Briefcase, Filter, SearchX } from 'lucide-react';
+import { Briefcase, Filter, SearchX, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Canvas } from '@react-three/fiber';
@@ -15,12 +15,12 @@ import { useJobs } from '@/hooks/useJobs';
 // 3D floating particles background component
 const Background3D = () => {
   return (
-    <div className="absolute inset-0 -z-10 h-full w-full overflow-hidden opacity-70">
+    <div className="absolute inset-0 -z-10 h-full w-full overflow-hidden opacity-50">
       <Canvas>
         <PerspectiveCamera makeDefault position={[0, 0, 30]} />
         <ambientLight intensity={0.3} />
         <directionalLight position={[10, 10, 5]} intensity={0.3} />
-        <Stars radius={100} depth={50} count={1000} factor={4} saturation={0} fade speed={0.5} />
+        <Stars radius={100} depth={50} count={1500} factor={5} saturation={0.5} fade speed={0.5} />
       </Canvas>
     </div>
   );
@@ -64,11 +64,18 @@ const Jobs = () => {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-grow bg-gradient-to-b from-orange-50/40 to-white dark:from-gray-900 dark:to-gray-800 pt-24 flex justify-center items-center">
-          <div className="text-center py-20 bg-white/80 rounded-xl shadow-sm border border-gray-100 dark:bg-gray-800/80 dark:border-gray-700 max-w-md mx-auto px-4 backdrop-blur-sm">
-            <h3 className="text-xl font-semibold mb-2">Error loading jobs</h3>
-            <p className="text-gray-600 dark:text-gray-400">
+          <div className="text-center py-20 glass dark:glass-dark rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 max-w-md mx-auto px-8 backdrop-blur-sm">
+            <h3 className="text-xl font-semibold mb-4 text-red-500">Error loading jobs</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               There was a problem fetching the job data. Please try again later.
             </p>
+            <button
+              onClick={refreshJobs}
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all flex items-center gap-2 mx-auto"
+            >
+              <CheckCircle className="w-4 h-4" />
+              Try Again
+            </button>
           </div>
         </main>
         <Footer />
@@ -99,10 +106,10 @@ const Jobs = () => {
               <span>Job Opportunities</span>
             </motion.div>
             
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-5 tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-5 tracking-tight gradient-text">
               Browse Available Jobs
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
+            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10">
               Find opportunities that match your skills and availability
             </p>
           </motion.div>
@@ -113,7 +120,9 @@ const Jobs = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <SearchFilters onSearch={handleSearch} />
+            <div className="glass dark:glass-dark p-6 rounded-xl">
+              <SearchFilters onSearch={handleSearch} />
+            </div>
           </motion.div>
           
           {isLoading ? (
@@ -169,7 +178,7 @@ const Jobs = () => {
                 </motion.div>
               ) : (
                 <motion.div 
-                  className="text-center py-20 bg-white/80 rounded-xl shadow-lg border border-gray-200 dark:bg-gray-800/80 dark:border-gray-700 backdrop-blur-sm"
+                  className="text-center py-20 glass dark:glass-dark rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 backdrop-blur-sm"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.3 }}
