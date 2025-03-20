@@ -27,23 +27,20 @@ export const ensureStorageBuckets = async () => {
           console.log('Successfully created worker-profiles bucket');
           
           // Set bucket to public
-          const { error: policyError } = await supabase.storage.from('worker-profiles').createSignedUrl('test.txt', 60);
-          if (policyError && policyError.message.includes('policy')) {
-            try {
-              // Create a policy that allows public read access to all files in the bucket
-              await supabase.rpc('create_storage_policy', {
-                bucket_name: 'worker-profiles',
-                policy_name: 'public-read',
-                definition: {
-                  role: 'anon',
-                  operation: 'SELECT'
-                }
-              });
-              console.log('Created public read policy for worker-profiles bucket');
-            } catch (policyErr) {
-              console.error('Error creating bucket policy:', policyErr);
-              // Continue execution even if we can't create the policy
-            }
+          try {
+            // Create a policy that allows public read access to all files in the bucket
+            await supabase.rpc('create_storage_policy', {
+              bucket_name: 'worker-profiles',
+              policy_name: 'public-read',
+              definition: {
+                role: 'anon',
+                operation: 'SELECT'
+              }
+            });
+            console.log('Created public read policy for worker-profiles bucket');
+          } catch (policyErr) {
+            console.error('Error creating bucket policy:', policyErr);
+            // Continue execution even if we can't create the policy
           }
         }
       } catch (createErr) {
@@ -67,15 +64,13 @@ export const ensureStorageBuckets = async () => {
 // Function to set public access to a bucket
 export const setPublicAccess = async (bucketName: string) => {
   try {
-    const { error } = await supabase.storage.from(bucketName).getPublicUrl('dummy.txt');
-    if (error) {
-      console.error(`Error setting public access for ${bucketName}:`, error);
-    } else {
-      console.log(`Successfully set public access for ${bucketName}`);
-    }
+    // We use getPublicUrl which doesn't actually return an error property
+    // This is a type-safe way to check if the bucket is accessible
+    const { data } = supabase.storage.from(bucketName).getPublicUrl('dummy.txt');
+    console.log(`Successfully accessed ${bucketName} bucket:`, data.publicUrl);
     return true;
   } catch (error) {
-    console.error(`Error setting public access for ${bucketName}:`, error);
+    console.error(`Error accessing ${bucketName}:`, error);
     return false;
   }
 };

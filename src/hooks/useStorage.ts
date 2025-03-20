@@ -23,8 +23,12 @@ export function useStorage() {
         const { data: buckets } = await supabase.storage.listBuckets();
         if (!buckets?.find(b => b.name === bucket)) {
           console.log(`Bucket ${bucket} does not exist, creating it...`);
-          await supabase.storage.createBucket(bucket, { public: true });
-          console.log(`Created bucket: ${bucket}`);
+          const { error } = await supabase.storage.createBucket(bucket, { public: true });
+          if (error) {
+            console.error(`Error creating bucket: ${error.message}`);
+          } else {
+            console.log(`Created bucket: ${bucket}`);
+          }
         }
       } catch (err) {
         console.log(`Error checking/creating bucket: ${err}`);
