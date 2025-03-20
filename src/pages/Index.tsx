@@ -118,7 +118,7 @@ const categories = [
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col app-page-background">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       
       <main className="flex-grow">

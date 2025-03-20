@@ -14,7 +14,7 @@ import { Worker } from '@/services/workerService';
 import { toast } from 'sonner';
 
 const DeleteWorker = () => {
-  const { id } = useParams<{ id: string }>();
+  const { workerId } = useParams<{ workerId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { getWorker, deleteWorkerProfile } = useWorkerProfiles();
@@ -25,10 +25,10 @@ const DeleteWorker = () => {
 
   useEffect(() => {
     const fetchWorker = async () => {
-      if (!id) return;
+      if (!workerId) return;
       
       try {
-        const workerData = await getWorker(id);
+        const workerData = await getWorker(workerId);
         setWorker(workerData);
         
         // Check if worker belongs to current user
@@ -51,10 +51,10 @@ const DeleteWorker = () => {
     }
 
     fetchWorker();
-  }, [id, user, navigate, getWorker]);
+  }, [workerId, user, navigate, getWorker]);
 
   const handleDelete = async () => {
-    if (!worker || !id) return;
+    if (!worker || !workerId) return;
 
     if (confirmation.toLowerCase() !== 'delete') {
       toast.error('Please type "DELETE" to confirm');
@@ -63,7 +63,7 @@ const DeleteWorker = () => {
 
     try {
       setDeleting(true);
-      await deleteWorkerProfile.mutateAsync(id);
+      await deleteWorkerProfile.mutateAsync(workerId);
       toast.success("Your worker profile has been permanently deleted");
       navigate('/');
     } catch (error) {
@@ -76,10 +76,10 @@ const DeleteWorker = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col app-page-background">
+      <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-grow pt-32 pb-16 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-app-orange"></div>
         </main>
         <Footer />
       </div>
@@ -87,7 +87,7 @@ const DeleteWorker = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col app-page-background">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       
       <main className="flex-grow pt-32 pb-16">
@@ -127,7 +127,7 @@ const DeleteWorker = () => {
                   <p className="font-medium text-red-700 dark:text-red-400">Warning:</p>
                   <p className="text-gray-600 dark:text-gray-400">
                     If you just want to temporarily hide your profile, consider
-                    <Link to={`/workers/deactivate/${id}`} className="text-blue-600 dark:text-blue-400 underline ml-1">
+                    <Link to={`/deactivate-worker/${workerId}`} className="text-blue-600 dark:text-blue-400 underline ml-1">
                       deactivating it
                     </Link> instead.
                   </p>

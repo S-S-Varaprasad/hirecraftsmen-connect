@@ -28,7 +28,7 @@ const professionMap: { [key: string]: string } = {
 };
 
 const WorkersByCategory = () => {
-  const { category } = useParams<{ category: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [categoryName, setCategoryName] = useState<string>('');
@@ -39,8 +39,8 @@ const WorkersByCategory = () => {
   });
 
   useEffect(() => {
-    if (category && workersData.length > 0) {
-      const profession = professionMap[category] || '';
+    if (slug && workersData.length > 0) {
+      const profession = professionMap[slug] || '';
       setCategoryName(profession || 'Specialized');
       
       setIsLoading(true);
@@ -63,12 +63,12 @@ const WorkersByCategory = () => {
       setFilteredWorkers(results);
       setIsLoading(false);
     }
-  }, [category, workersData]);
+  }, [slug, workersData]);
 
   const handleSearch = (filters: any) => {
     setIsLoading(true);
     
-    const profession = professionMap[category || ''] || '';
+    const profession = professionMap[slug || ''] || '';
     
     let results = workersData.filter(worker => {
       const workerProfession = worker.profession.toLowerCase();
@@ -108,7 +108,7 @@ const WorkersByCategory = () => {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24 flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </main>
         <Footer />
       </div>
@@ -122,13 +122,13 @@ const WorkersByCategory = () => {
       <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
-            <Link to="/" className="inline-flex items-center text-blue-600 hover:underline mb-4">
+            <Link to="/" className="inline-flex items-center text-primary hover:underline mb-4">
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back to Home
             </Link>
             
             <div className="max-w-3xl mx-auto text-center mb-10">
-              <div className="inline-block p-2 px-4 bg-blue-600/10 text-blue-600 rounded-full text-sm font-medium mb-3">
+              <div className="inline-block p-2 px-4 bg-primary/10 text-primary rounded-full text-sm font-medium mb-3">
                 {categoryName || 'Specialized'} Professionals
               </div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
@@ -146,7 +146,7 @@ const WorkersByCategory = () => {
           
           {isLoading ? (
             <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
             </div>
           ) : (
             <>
@@ -171,14 +171,14 @@ const WorkersByCategory = () => {
                 </div>
               ) : (
                 <div className="text-center py-20 bg-white/80 rounded-xl shadow-sm border border-gray-100 dark:bg-gray-800/80 dark:border-gray-700">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-blue-600/10 dark:bg-blue-600/20 text-blue-600 dark:text-blue-500 rounded-full flex items-center justify-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary/90 rounded-full flex items-center justify-center">
                     <Briefcase className="w-8 h-8" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">No workers found</h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
                     We couldn't find any {categoryName.toLowerCase()} professionals matching your criteria. Try adjusting your filters or browse all workers.
                   </p>
-                  <Button variant="default" asChild className="bg-blue-600 hover:bg-blue-700">
+                  <Button variant="default" asChild>
                     <Link to="/workers">Browse All Workers</Link>
                   </Button>
                 </div>

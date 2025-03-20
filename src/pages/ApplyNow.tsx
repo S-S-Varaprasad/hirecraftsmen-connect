@@ -23,6 +23,7 @@ const ApplyNow = () => {
   
   const { applyForJob, isSubmitting } = useJobApplications();
 
+  // Redirect to login if user is not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       toast.error('Please log in to apply for jobs');
@@ -30,12 +31,14 @@ const ApplyNow = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  // Fetch job details
   const { data: job, isLoading: isLoadingJob, error: jobError } = useQuery({
     queryKey: ['job', id],
     queryFn: () => getJobById(id!),
     enabled: !!id && isAuthenticated,
   });
 
+  // Fetch worker profile for current user
   const { data: workerProfile, isLoading: isLoadingWorker } = useQuery({
     queryKey: ['worker', user?.id],
     queryFn: () => getWorkerByUserId(user!.id),
@@ -68,19 +71,21 @@ const ApplyNow = () => {
         message: message
       });
       
+      // Redirect after successful application
       setTimeout(() => {
         navigate('/jobs');
       }, 1000);
     } catch (error) {
+      // Error is handled in the mutation
       console.error('Application error:', error);
     }
   };
 
   if (isLoadingJob || isLoadingWorker) {
     return (
-      <div className="min-h-screen flex flex-col app-page-background">
+      <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow pt-24 flex justify-center items-center">
+        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24 flex justify-center items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
         </main>
         <Footer />
@@ -90,9 +95,9 @@ const ApplyNow = () => {
 
   if (jobError || !job) {
     return (
-      <div className="min-h-screen flex flex-col app-page-background">
+      <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow pt-24">
+        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center">
               <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
@@ -113,9 +118,9 @@ const ApplyNow = () => {
 
   if (!workerProfile) {
     return (
-      <div className="min-h-screen flex flex-col app-page-background">
+      <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow pt-24">
+        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center">
               <AlertCircle className="mx-auto h-12 w-12 text-yellow-500 mb-4" />
@@ -135,7 +140,7 @@ const ApplyNow = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col app-page-background">
+    <div className="min-h-screen flex flex-col bg-orange-50/40 dark:bg-gray-900">
       <Navbar />
       
       <main className="flex-grow pt-24">
@@ -146,6 +151,7 @@ const ApplyNow = () => {
           </Link>
           
           <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {/* Job Details Card */}
             <div className="md:col-span-2">
               <Card>
                 <CardHeader>
@@ -201,6 +207,7 @@ const ApplyNow = () => {
               </Card>
             </div>
 
+            {/* Application Form */}
             <div className="md:col-span-1">
               <Card>
                 <CardHeader>

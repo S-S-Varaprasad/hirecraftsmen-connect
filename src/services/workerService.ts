@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Worker {
@@ -27,19 +28,10 @@ export const getWorkers = async () => {
     throw error;
   }
   
-  const workersWithLanguages = data?.map(worker => {
-    // Ensure hourly rate is in Indian Rupees format
-    let hourlyRate = worker.hourly_rate || '';
-    if (!hourlyRate.includes('₹')) {
-      hourlyRate = `₹${hourlyRate.replace(/^\$/, '')}`;
-    }
-    
-    return {
-      ...worker,
-      languages: (worker as any).languages || [],
-      hourly_rate: hourlyRate
-    };
-  }) || [];
+  const workersWithLanguages = data?.map(worker => ({
+    ...worker,
+    languages: (worker as any).languages || []
+  })) || [];
   
   return workersWithLanguages as Worker[];
 };
@@ -104,15 +96,8 @@ export const getWorkerByUserId = async (userId: string) => {
 };
 
 export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating' | 'created_at'>) => {
-  // Ensure hourly rate is in Indian Rupees format
-  let hourlyRate = workerData.hourly_rate || '';
-  if (!hourlyRate.includes('₹')) {
-    hourlyRate = `₹${hourlyRate.replace(/^\$/, '')}`;
-  }
-
   const dataToSend = {
     ...workerData,
-    hourly_rate: hourlyRate,
     languages: workerData.languages || [],
     rating: 0
   };
