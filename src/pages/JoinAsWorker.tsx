@@ -92,10 +92,10 @@ const JoinAsWorker = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col app-page-background">
       <Navbar />
 
-      <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16">
+      <main className="flex-grow pt-32 pb-16">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
             <div className="px-8 py-12">
