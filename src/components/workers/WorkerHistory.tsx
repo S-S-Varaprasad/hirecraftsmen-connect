@@ -17,7 +17,20 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { formatDistanceToNow } from 'date-fns';
-import { CalendarClock, DollarSign, Briefcase, Check, X, Clock, Award, ExternalLink, RefreshCw, HelpCircle, CheckCircle2 } from 'lucide-react';
+import { 
+  CalendarClock, 
+  DollarSign, 
+  Briefcase, 
+  Check, 
+  X, 
+  Clock, 
+  Award, 
+  ExternalLink, 
+  RefreshCw, 
+  HelpCircle, 
+  CheckCircle2,
+  AlertTriangle
+} from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { useJobApplications } from '@/hooks/useJobApplications';
