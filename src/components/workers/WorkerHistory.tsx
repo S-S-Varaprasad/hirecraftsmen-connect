@@ -17,7 +17,7 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { formatDistanceToNow } from 'date-fns';
-import { CalendarClock, DollarSign, Briefcase, Check, X, Clock, Award, FileText, ExternalLink, RefreshCw, HelpCircle, CheckCircle2 } from 'lucide-react';
+import { CalendarClock, DollarSign, Briefcase, Check, X, Clock, Award, ExternalLink, RefreshCw, HelpCircle, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { useJobApplications } from '@/hooks/useJobApplications';
@@ -38,27 +38,27 @@ const StatusBadge = ({ status }: { status: string }) => {
       <Tooltip>
         <TooltipTrigger asChild>
           {status === 'applied' ? (
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 py-1.5">
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 py-1.5 shadow-sm">
               <Clock className="h-3 w-3 mr-1" /> Applied
             </Badge>
           ) : status === 'accepted' ? (
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800 py-1.5">
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800 py-1.5 shadow-sm">
               <Check className="h-3 w-3 mr-1" /> Accepted
             </Badge>
           ) : status === 'rejected' ? (
-            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800 py-1.5">
+            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800 py-1.5 shadow-sm">
               <X className="h-3 w-3 mr-1" /> Rejected
             </Badge>
           ) : status === 'completed' ? (
-            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800 py-1.5">
+            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800 py-1.5 shadow-sm">
               <Award className="h-3 w-3 mr-1" /> Completed
             </Badge>
           ) : (
             <Badge variant="outline">{status}</Badge>
           )}
         </TooltipTrigger>
-        <TooltipContent>
-          <p className="max-w-xs">{statusDescription}</p>
+        <TooltipContent className="max-w-[200px] shadow-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 rounded-md border border-gray-200 dark:border-gray-700">
+          <p className="text-sm">{statusDescription}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -165,11 +165,13 @@ const WorkerHistory = ({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-4">
-        <div className="animate-spin">
-          <RefreshCw className="h-8 w-8 text-primary" />
+      <div className="flex flex-col items-center justify-center p-12 space-y-6 bg-white/20 dark:bg-gray-800/20 rounded-xl backdrop-blur-sm border border-gray-100 dark:border-gray-700 shadow-sm">
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 rounded-full border-t-2 border-b-2 border-primary animate-spin"></div>
+          <div className="absolute inset-3 rounded-full border-r-2 border-l-2 border-primary/70 animate-spin animate-reverse"></div>
+          <RefreshCw className="absolute inset-0 m-auto w-8 h-8 text-primary/70" />
         </div>
-        <p className="text-muted-foreground">Loading your job applications...</p>
+        <p className="text-gray-600 dark:text-gray-300 font-medium">Loading your job applications...</p>
       </div>
     );
   }
@@ -178,7 +180,10 @@ const WorkerHistory = ({
     return (
       <Card className="border-red-200 dark:border-red-800 shadow-3d">
         <CardHeader>
-          <CardTitle className="text-red-600 dark:text-red-400">Error</CardTitle>
+          <CardTitle className="text-red-600 dark:text-red-400 flex items-center">
+            <AlertTriangle className="mr-2 h-5 w-5" />
+            Error
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-red-500 dark:text-red-400">
@@ -186,7 +191,7 @@ const WorkerHistory = ({
           </p>
           <Button 
             variant="outline" 
-            className="mt-4 hover-lift"
+            className="mt-6 hover-lift"
             onClick={() => refetch()}
           >
             <RefreshCw className="h-4 w-4 mr-1" />
@@ -205,13 +210,13 @@ const WorkerHistory = ({
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="mb-4"
+            className="mb-6"
           >
-            <div className="bg-blue-50 dark:bg-blue-900/20 h-24 w-24 rounded-full flex items-center justify-center mx-auto">
-              <Briefcase className="h-12 w-12 text-blue-500 dark:text-blue-400" />
+            <div className="bg-blue-50 dark:bg-blue-900/20 h-28 w-28 rounded-full flex items-center justify-center mx-auto shadow-inner">
+              <Briefcase className="h-14 w-14 text-blue-500 dark:text-blue-400" />
             </div>
           </motion.div>
-          <CardTitle className="text-2xl">No Job History</CardTitle>
+          <CardTitle className="text-2xl mb-2">No Job History</CardTitle>
           <CardDescription className="text-base mt-2">
             You haven't applied to any jobs yet or your applications are still processing.
             <Button asChild variant="link" className="p-0 h-auto">
@@ -219,7 +224,7 @@ const WorkerHistory = ({
             </Button>
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col items-center pb-8">
+        <CardContent className="flex flex-col items-center pb-10">
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 max-w-md text-center">
             When you apply for jobs, they will appear here with their current status and payment information.
           </p>
@@ -239,20 +244,20 @@ const WorkerHistory = ({
 
   return (
     <motion.div 
-      className="space-y-6"
+      className="space-y-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="bg-gradient-to-r from-blue-50 to-blue-50/30 dark:from-blue-900/10 dark:to-blue-900/5 p-4 rounded-lg mb-6 border dark:border-gray-700/50 shadow-md">
+      <Card className="bg-gradient-to-r from-blue-50 to-blue-50/30 dark:from-blue-900/10 dark:to-blue-900/5 p-5 rounded-xl mb-6 border dark:border-gray-700/50 shadow-md">
         <CardContent className="p-0">
-          <h3 className="font-medium flex items-center text-gray-700 dark:text-gray-300 mb-3">
+          <h3 className="font-medium flex items-center text-gray-700 dark:text-gray-300 mb-4">
             <HelpCircle className="h-5 w-5 mr-2 text-blue-500" />
             <span className="text-lg">Understanding Your Application Status</span>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
             <motion.div 
-              className="flex items-start space-x-3 hover-lift p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-blue-100 dark:border-blue-900/30" 
+              className="flex items-start space-x-3 hover-lift p-4 bg-white/70 dark:bg-gray-800/50 rounded-lg border border-blue-100 dark:border-blue-900/30 shadow-sm transition-all" 
               whileHover={{ y: -5 }}
               transition={{ duration: 0.2 }}
             >
@@ -265,7 +270,7 @@ const WorkerHistory = ({
               </div>
             </motion.div>
             <motion.div 
-              className="flex items-start space-x-3 hover-lift p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-green-100 dark:border-green-900/30" 
+              className="flex items-start space-x-3 hover-lift p-4 bg-white/70 dark:bg-gray-800/50 rounded-lg border border-green-100 dark:border-green-900/30 shadow-sm transition-all" 
               whileHover={{ y: -5 }}
               transition={{ duration: 0.2 }}
             >
@@ -278,7 +283,7 @@ const WorkerHistory = ({
               </div>
             </motion.div>
             <motion.div 
-              className="flex items-start space-x-3 hover-lift p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-red-100 dark:border-red-900/30" 
+              className="flex items-start space-x-3 hover-lift p-4 bg-white/70 dark:bg-gray-800/50 rounded-lg border border-red-100 dark:border-red-900/30 shadow-sm transition-all" 
               whileHover={{ y: -5 }}
               transition={{ duration: 0.2 }}
             >
@@ -291,7 +296,7 @@ const WorkerHistory = ({
               </div>
             </motion.div>
             <motion.div 
-              className="flex items-start space-x-3 hover-lift p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-purple-100 dark:border-purple-900/30" 
+              className="flex items-start space-x-3 hover-lift p-4 bg-white/70 dark:bg-gray-800/50 rounded-lg border border-purple-100 dark:border-purple-900/30 shadow-sm transition-all" 
               whileHover={{ y: -5 }}
               transition={{ duration: 0.2 }}
             >
@@ -327,22 +332,22 @@ const WorkerHistory = ({
           <Table>
             <TableCaption>Job application history and payment details</TableCaption>
             <TableHeader>
-              <TableRow className="bg-gray-50/50 dark:bg-gray-800/50 dark:border-gray-700">
-                <TableHead className="font-semibold dark:text-gray-300">Job Title</TableHead>
-                <TableHead className="font-semibold dark:text-gray-300">Employer</TableHead>
-                <TableHead className="font-semibold dark:text-gray-300">Applied Date</TableHead>
-                <TableHead className="font-semibold dark:text-gray-300">Status</TableHead>
-                <TableHead className="font-semibold dark:text-gray-300">Payment</TableHead>
-                <TableHead className="font-semibold dark:text-gray-300">Actions</TableHead>
+              <TableRow className="bg-gray-50/70 dark:bg-gray-800/70 dark:border-gray-700">
+                <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Job Title</TableHead>
+                <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Employer</TableHead>
+                <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Applied Date</TableHead>
+                <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Status</TableHead>
+                <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Payment</TableHead>
+                <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {applications.map((application) => (
-                <TableRow key={application.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 dark:border-gray-700 transition-colors">
-                  <TableCell className="font-medium dark:text-white">
+                <TableRow key={application.id} className="hover:bg-gray-50/80 dark:hover:bg-gray-800/60 dark:border-gray-700 transition-colors">
+                  <TableCell className="font-medium text-gray-800 dark:text-white">
                     {application.job?.title || 'Unknown Job'}
                   </TableCell>
-                  <TableCell className="dark:text-gray-300">
+                  <TableCell className="text-gray-700 dark:text-gray-300">
                     {application.job?.company || 'Unknown Company'}
                   </TableCell>
                   <TableCell>
