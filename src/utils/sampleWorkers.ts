@@ -2,28 +2,17 @@
 import { supabase } from '@/integrations/supabase/client';
 import { registerWorker } from '@/services/workerService';
 
-// Sample worker data for different professions with Indian names and locations
+// Sample worker data with authentic Indian names and locations
 const sampleWorkers = [
-  {
-    name: 'Rajesh Kumar',
-    profession: 'Electrician',
-    location: 'Mumbai, Maharashtra',
-    experience: '8 years',
-    hourly_rate: '₹450',
-    skills: ['Wiring', 'Installation', 'Repairs', 'Lighting'],
-    languages: ['Hindi', 'English', 'Marathi'],
-    about: 'Experienced electrician with expertise in residential and commercial projects.',
-    image_url: 'https://randomuser.me/api/portraits/men/32.jpg'
-  },
   {
     name: 'Priya Sharma',
     profession: 'Plumber',
-    location: 'Delhi, NCR',
+    location: 'Mumbai, Maharashtra',
     experience: '5 years',
     hourly_rate: '₹400',
-    skills: ['Pipe Fitting', 'Repairs', 'Drainage', 'Installation'],
-    languages: ['Hindi', 'English', 'Punjabi'],
-    about: 'Professional plumber specializing in residential plumbing solutions.',
+    skills: ['Pipe Fitting', 'Drain Cleaning', 'Leak Repair', 'Installation'],
+    languages: ['Hindi', 'English', 'Marathi'],
+    about: 'Professional plumber specializing in residential plumbing solutions with expertise in leak detection and repair.',
     image_url: 'https://randomuser.me/api/portraits/women/44.jpg'
   },
   {
@@ -32,98 +21,109 @@ const sampleWorkers = [
     location: 'Ahmedabad, Gujarat',
     experience: '12 years',
     hourly_rate: '₹500',
-    skills: ['Furniture Making', 'Woodworking', 'Cabinet Installation', 'Repairs'],
+    skills: ['Furniture Making', 'Cabinet Installation', 'Framing', 'Repairs'],
     languages: ['Gujarati', 'Hindi', 'English'],
-    about: 'Master carpenter with extensive experience in custom furniture and cabinetry.',
+    about: 'Master carpenter with extensive experience in custom furniture and cabinetry. Specialized in traditional Gujarati woodworking techniques.',
     image_url: 'https://randomuser.me/api/portraits/men/22.jpg'
   },
   {
-    name: 'Lakshmi Reddy',
-    profession: 'Cleaner',
-    location: 'Hyderabad, Telangana',
-    experience: '4 years',
-    hourly_rate: '₹300',
-    skills: ['Deep Cleaning', 'Sanitization', 'House Keeping', 'Office Cleaning'],
-    languages: ['Telugu', 'Hindi', 'English'],
-    about: 'Experienced cleaner providing thorough and reliable cleaning services.',
-    image_url: 'https://randomuser.me/api/portraits/women/29.jpg'
-  },
-  {
-    name: 'Vikram Singh',
+    name: 'Divya Reddy',
     profession: 'Painter',
-    location: 'Jaipur, Rajasthan',
-    experience: '7 years',
-    hourly_rate: '₹350',
-    skills: ['Interior Painting', 'Exterior Painting', 'Wall Texturing', 'Refinishing'],
-    languages: ['Hindi', 'English', 'Rajasthani'],
-    about: 'Professional painter with attention to detail and quality finishes.',
-    image_url: 'https://randomuser.me/api/portraits/men/62.jpg'
-  },
-  {
-    name: 'Ananya Deshmukh',
-    profession: 'Gardener',
-    location: 'Pune, Maharashtra',
+    location: 'Hyderabad, Telangana',
     experience: '6 years',
-    hourly_rate: '₹320',
-    skills: ['Landscaping', 'Plant Care', 'Garden Design', 'Maintenance'],
-    languages: ['Marathi', 'Hindi', 'English'],
-    about: 'Passionate gardener with expertise in creating and maintaining beautiful gardens.',
+    hourly_rate: '₹350',
+    skills: ['Interior Painting', 'Exterior Painting', 'Color Consultation', 'Wall Texturing'],
+    languages: ['Telugu', 'Hindi', 'English'],
+    about: 'Professional painter with attention to detail and quality finishes. Experienced in both modern and traditional painting styles.',
     image_url: 'https://randomuser.me/api/portraits/women/52.jpg'
   },
   {
-    name: 'Deepak Banerjee',
-    profession: 'Security Guard',
-    location: 'Kolkata, West Bengal',
-    experience: '9 years',
-    hourly_rate: '₹280',
-    skills: ['Surveillance', 'Access Control', 'Security Protocols', 'Emergency Response'],
-    languages: ['Bengali', 'Hindi', 'English'],
-    about: 'Professional security guard with background in military service.',
+    name: 'Vikram Singh',
+    profession: 'HVAC Technician',
+    location: 'Delhi, NCR',
+    experience: '10 years',
+    hourly_rate: '₹550',
+    skills: ['AC Installation', 'Heating Systems', 'Ventilation', 'Repairs'],
+    languages: ['Hindi', 'English', 'Punjabi'],
+    about: 'Expert HVAC technician with specialization in climate control solutions for residential and commercial buildings.',
+    image_url: 'https://randomuser.me/api/portraits/men/62.jpg'
+  },
+  {
+    name: 'Lakshmi Iyer',
+    profession: 'House Cleaner',
+    location: 'Chennai, Tamil Nadu',
+    experience: '4 years',
+    hourly_rate: '₹300',
+    skills: ['Deep Cleaning', 'Move-in/Move-out', 'Regular Maintenance', 'Sanitization'],
+    languages: ['Tamil', 'English', 'Malayalam'],
+    about: 'Reliable house cleaner offering thorough and detailed cleaning services for homes and apartments. Specializes in eco-friendly cleaning solutions.',
+    image_url: 'https://randomuser.me/api/portraits/women/33.jpg'
+  },
+  {
+    name: 'Rajesh Kumar',
+    profession: 'Landscaper',
+    location: 'Bengaluru, Karnataka',
+    experience: '7 years',
+    hourly_rate: '₹400',
+    skills: ['Garden Design', 'Lawn Maintenance', 'Irrigation Systems', 'Plant Care'],
+    languages: ['Kannada', 'Hindi', 'English'],
+    about: 'Passionate landscaper with expertise in creating and maintaining beautiful gardens suited to local climate conditions.',
     image_url: 'https://randomuser.me/api/portraits/men/41.jpg'
   },
   {
-    name: 'Kavita Iyer',
-    profession: 'Tailor',
-    location: 'Chennai, Tamil Nadu',
-    experience: '15 years',
-    hourly_rate: '₹400',
-    skills: ['Garment Construction', 'Alterations', 'Custom Designs', 'Embroidery'],
-    languages: ['Tamil', 'Hindi', 'English'],
-    about: 'Expert tailor specializing in custom clothing and alterations.',
+    name: 'Ananya Deshmukh',
+    profession: 'Electrician',
+    location: 'Pune, Maharashtra',
+    experience: '8 years',
+    hourly_rate: '₹450',
+    skills: ['Wiring', 'Installation', 'Repairs', 'Lighting'],
+    languages: ['Marathi', 'Hindi', 'English'],
+    about: 'Experienced electrician with expertise in residential and commercial projects. Specializes in energy-efficient solutions.',
     image_url: 'https://randomuser.me/api/portraits/women/68.jpg'
-  },
-  {
-    name: 'Ravi Verma',
-    profession: 'Driver',
-    location: 'Bengaluru, Karnataka',
-    experience: '10 years',
-    hourly_rate: '₹350',
-    skills: ['Safe Driving', 'Route Planning', 'Vehicle Maintenance', 'Customer Service'],
-    languages: ['Kannada', 'Hindi', 'English'],
-    about: 'Professional driver with clean record and excellent customer service skills.',
-    image_url: 'https://randomuser.me/api/portraits/men/72.jpg'
-  },
-  {
-    name: 'Neha Gupta',
-    profession: 'House Cleaning',
-    location: 'Chandigarh, Punjab',
-    experience: '3 years',
-    hourly_rate: '₹250',
-    skills: ['Dusting', 'Mopping', 'Bathroom Cleaning', 'Kitchen Cleaning'],
-    languages: ['Punjabi', 'Hindi', 'English'],
-    about: 'Reliable house cleaner offering thorough cleaning services for homes and apartments.',
-    image_url: 'https://randomuser.me/api/portraits/women/33.jpg'
   },
   {
     name: 'Suresh Nair',
     profession: 'Cook',
     location: 'Kochi, Kerala',
-    experience: '8 years',
+    experience: '9 years',
     hourly_rate: '₹500',
     skills: ['Indian Cuisine', 'Baking', 'Meal Planning', 'Catering'],
     languages: ['Malayalam', 'English', 'Tamil', 'Hindi'],
-    about: 'Experienced cook specializing in traditional and fusion Indian cuisine.',
+    about: 'Experienced chef specializing in traditional and fusion Indian cuisine. Expert in authentic Kerala dishes and seafood specialties.',
     image_url: 'https://randomuser.me/api/portraits/men/55.jpg'
+  },
+  {
+    name: 'Ravi Verma',
+    profession: 'Driver',
+    location: 'Jaipur, Rajasthan',
+    experience: '10 years',
+    hourly_rate: '₹350',
+    skills: ['Safe Driving', 'Route Planning', 'Vehicle Maintenance', 'Customer Service'],
+    languages: ['Hindi', 'English', 'Rajasthani'],
+    about: 'Professional driver with clean record and excellent customer service skills. Familiar with all major routes throughout Rajasthan.',
+    image_url: 'https://randomuser.me/api/portraits/men/72.jpg'
+  },
+  {
+    name: 'Kavita Gupta',
+    profession: 'Tailor',
+    location: 'Chandigarh, Punjab',
+    experience: '14 years',
+    hourly_rate: '₹400',
+    skills: ['Garment Construction', 'Alterations', 'Custom Designs', 'Embroidery'],
+    languages: ['Punjabi', 'Hindi', 'English'],
+    about: 'Expert tailor specializing in custom clothing and alterations. Specializes in traditional Punjabi attire and bridal wear.',
+    image_url: 'https://randomuser.me/api/portraits/women/38.jpg'
+  },
+  {
+    name: 'Deepak Banerjee',
+    profession: 'Security Guard',
+    location: 'Kolkata, West Bengal',
+    experience: '8 years',
+    hourly_rate: '₹280',
+    skills: ['Surveillance', 'Access Control', 'Security Protocols', 'Emergency Response'],
+    languages: ['Bengali', 'Hindi', 'English'],
+    about: 'Professional security guard with background in military service. Trained in modern security techniques and crisis management.',
+    image_url: 'https://randomuser.me/api/portraits/men/32.jpg'
   },
   {
     name: 'Meera Pillai',
@@ -133,8 +133,8 @@ const sampleWorkers = [
     hourly_rate: '₹300',
     skills: ['Childcare', 'First Aid', 'Meal Preparation', 'Educational Activities'],
     languages: ['Malayalam', 'English', 'Hindi'],
-    about: 'Caring and reliable babysitter with experience in early childhood education.',
-    image_url: 'https://randomuser.me/api/portraits/women/38.jpg'
+    about: 'Caring and reliable babysitter with experience in early childhood education. Creates a nurturing environment for children of all ages.',
+    image_url: 'https://randomuser.me/api/portraits/women/29.jpg'
   }
 ];
 

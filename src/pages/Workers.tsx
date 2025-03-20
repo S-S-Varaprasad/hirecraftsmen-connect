@@ -9,6 +9,7 @@ import { Briefcase, Filter } from 'lucide-react';
 import { getWorkers, Worker, searchWorkers } from '@/services/workerService';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { addSampleWorkers } from '@/utils/sampleWorkers';
 
 const Workers = () => {
   const location = useLocation();
@@ -16,13 +17,33 @@ const Workers = () => {
   const initialSearch = searchParams.get('search') || '';
   const initialLocation = searchParams.get('location') || '';
 
-  const { data: workersData = [], isLoading: isLoadingWorkers, error } = useQuery({
+  // Query to fetch workers with refetch option
+  const { data: workersData = [], isLoading: isLoadingWorkers, error, refetch } = useQuery({
     queryKey: ['workers'],
     queryFn: getWorkers,
   });
   
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Load sample workers if none exist
+  useEffect(() => {
+    const loadSampleWorkersIfNeeded = async () => {
+      if (workersData && workersData.length < 3) {
+        try {
+          const added = await addSampleWorkers();
+          if (added) {
+            toast.success('Sample workers added for demonstration');
+            refetch(); // Refetch the workers data
+          }
+        } catch (error) {
+          console.error('Error adding sample workers:', error);
+        }
+      }
+    };
+    
+    loadSampleWorkersIfNeeded();
+  }, [workersData, refetch]);
 
   useEffect(() => {
     if (workersData) {
@@ -142,7 +163,7 @@ const Workers = () => {
             <div className="inline-block p-2 px-4 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-3">
               Professional Directory
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Find Skilled Professionals</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Find Skilled Professionals in India</h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">
               Browse our directory of qualified workers ready to help with your next project
             </p>
@@ -171,12 +192,13 @@ const Workers = () => {
                       name={worker.name}
                       profession={worker.profession}
                       location={worker.location}
-                      rating={worker.rating}
+                      rating={worker.rating || 4.5}
                       experience={worker.experience}
                       hourlyRate={worker.hourly_rate}
                       skills={worker.skills}
                       isAvailable={worker.is_available}
-                      imageUrl={worker.image_url || '/placeholder.svg'}
+                      imageUrl={worker.image_url}
+                      userId={worker.user_id}
                     />
                   ))}
                 </div>

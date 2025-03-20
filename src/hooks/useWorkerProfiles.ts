@@ -15,6 +15,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useStorage } from '@/hooks/useStorage';
 import { createNotification } from '@/services/notificationService';
 import { ensureStorageBuckets } from '@/services/storageService';
+import { addSampleWorkers } from '@/utils/sampleWorkers';
 
 export const useWorkerProfiles = () => {
   const queryClient = useQueryClient();
@@ -39,6 +40,25 @@ export const useWorkerProfiles = () => {
     queryKey: ['workers'],
     queryFn: getWorkers,
   });
+
+  // Add sample workers function
+  const addSampleWorkersIfNeeded = async () => {
+    try {
+      if (workers.length < 3) {
+        const added = await addSampleWorkers();
+        if (added) {
+          toast.success('Sample workers added successfully');
+          queryClient.invalidateQueries({ queryKey: ['workers'] });
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error('Error adding sample workers:', error);
+      toast.error('Failed to add sample workers');
+      return false;
+    }
+  };
 
   // Create a new worker profile
   const createWorkerProfile = useMutation({
@@ -259,6 +279,7 @@ export const useWorkerProfiles = () => {
     deleteWorkerProfile,
     getWorker,
     notifyWorkers,
-    refetch
+    refetch,
+    addSampleWorkersIfNeeded
   };
 };

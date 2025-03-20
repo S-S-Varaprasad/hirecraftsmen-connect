@@ -53,6 +53,36 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       .toUpperCase();
   };
 
+  // Get professional profile image based on profession if none exists
+  const getDefaultProfileImage = () => {
+    // Map of professions to specific profile images (using randomuser.me consistent IDs)
+    const professionImages: Record<string, string> = {
+      'Plumber': 'https://randomuser.me/api/portraits/women/44.jpg',
+      'Electrician': 'https://randomuser.me/api/portraits/women/68.jpg',
+      'Carpenter': 'https://randomuser.me/api/portraits/men/22.jpg',
+      'Painter': 'https://randomuser.me/api/portraits/women/52.jpg',
+      'HVAC Technician': 'https://randomuser.me/api/portraits/men/62.jpg',
+      'Gardener': 'https://randomuser.me/api/portraits/men/41.jpg',
+      'Landscaper': 'https://randomuser.me/api/portraits/men/41.jpg',
+      'Cleaner': 'https://randomuser.me/api/portraits/women/29.jpg',
+      'House Cleaner': 'https://randomuser.me/api/portraits/women/33.jpg',
+      'Security Guard': 'https://randomuser.me/api/portraits/men/32.jpg',
+      'Driver': 'https://randomuser.me/api/portraits/men/72.jpg',
+      'Cook': 'https://randomuser.me/api/portraits/men/55.jpg',
+      'Tailor': 'https://randomuser.me/api/portraits/women/38.jpg',
+      'Babysitter': 'https://randomuser.me/api/portraits/women/29.jpg',
+    };
+
+    // Return profession-specific image or a generic one based on gender inference from name
+    // This is a simplistic approach and might not work for all names
+    return professionImages[profession] || 
+           (name.endsWith('a') || name.includes('Priya') || name.includes('Ananya') || 
+            name.includes('Lakshmi') || name.includes('Meera') || name.includes('Divya') || 
+            name.includes('Kavita') ? 
+            `https://randomuser.me/api/portraits/women/${Math.floor(Math.random() * 70)}.jpg` : 
+            `https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 70)}.jpg`);
+  };
+
   // Check if the current user owns this worker profile
   const isOwner = user && user.id === userId;
 
@@ -147,7 +177,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               onClick={isOwner ? handleProfilePictureClick : undefined}
             >
               <AvatarImage 
-                src={imageUrl || `https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 99)}.jpg`}
+                src={imageUrl || getDefaultProfileImage()}
                 alt={name}
                 className="object-cover"
               />
