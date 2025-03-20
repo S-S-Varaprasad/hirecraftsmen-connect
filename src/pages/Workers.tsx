@@ -1,14 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SearchFilters from '@/components/SearchFilters';
 import ProfileCard from '@/components/ProfileCard';
-import { Briefcase, Filter } from 'lucide-react';
+import { Briefcase } from 'lucide-react';
 import { getWorkers, Worker } from '@/services/workerService';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { forceAddSampleWorkers } from '@/utils/sampleWorkers';
 
 const Workers = () => {
   const location = useLocation();
@@ -16,36 +16,14 @@ const Workers = () => {
   const initialSearch = searchParams.get('search') || '';
   const initialLocation = searchParams.get('location') || '';
 
-  // Query to fetch workers with refetch option
-  const { data: workersData = [], isLoading: isLoadingWorkers, error, refetch } = useQuery({
+  // Query to fetch workers 
+  const { data: workersData = [], isLoading: isLoadingWorkers, error } = useQuery({
     queryKey: ['workers'],
     queryFn: getWorkers,
   });
   
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Always force refresh the workers data to ensure only Indian profiles are displayed
-  useEffect(() => {
-    const refreshWorkerProfiles = async () => {
-      try {
-        setIsLoading(true);
-        // Force reset and add only the Indian sample workers
-        const added = await forceAddSampleWorkers();
-        if (added) {
-          toast.success('Worker profiles have been refreshed');
-          await refetch(); // Refetch after the database has been updated
-        }
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error refreshing worker profiles:', error);
-        toast.error('Failed to refresh worker profiles');
-        setIsLoading(false);
-      }
-    };
-    
-    refreshWorkerProfiles();
-  }, [refetch]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (workersData) {
@@ -79,7 +57,6 @@ const Workers = () => {
       } else {
         setFilteredWorkers(workersData);
       }
-      setIsLoading(false);
     }
   }, [workersData, initialSearch, initialLocation]);
 
@@ -126,7 +103,7 @@ const Workers = () => {
     }, 500);
   };
 
-  if (isLoadingWorkers || isLoading) {
+  if (isLoadingWorkers) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
