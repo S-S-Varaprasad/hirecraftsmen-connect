@@ -1,12 +1,13 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { applyToJob, getApplicationsByWorkerId, getApplicationsByJobId } from '@/services/applicationService';
+import { applyToJob, getApplicationsByWorkerId, getApplicationsByJobId, updateApplicationStatus } from '@/services/applicationService';
 import { getJobById } from '@/services/jobService';
 import { createWorkerApplicationNotification, createJobAcceptedNotification, createNotification } from '@/services/notificationService';
 import { getWorkerById } from '@/services/workerService';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useJobApplications = () => {
   const { user } = useAuth();
