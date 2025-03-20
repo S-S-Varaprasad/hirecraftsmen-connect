@@ -89,10 +89,10 @@ function App() {
             padding: "8px 16px"
           }}
           expires={150}
-          // Add these props to fix the repeated display
+          // Fix repeated display with only supported props
           hideOnAccept={true}
           acceptOnScroll={false}
-          sameSite="strict"
+          // We removed the unsupported "sameSite" prop
         >
           This website uses cookies to enhance the user experience.
         </CookieConsent>
