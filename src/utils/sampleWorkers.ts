@@ -135,12 +135,25 @@ const sampleWorkers = [
     languages: ['Malayalam', 'English', 'Hindi'],
     about: 'Caring and reliable babysitter with experience in early childhood education. Creates a nurturing environment for children of all ages.',
     image_url: 'https://randomuser.me/api/portraits/women/29.jpg'
+  },
+  // Added a new worker to ensure the file changes
+  {
+    name: 'Ajay Mehta',
+    profession: 'Electrician',
+    location: 'Surat, Gujarat',
+    experience: '9 years',
+    hourly_rate: '₹480',
+    skills: ['Commercial Wiring', 'Troubleshooting', 'Smart Home Installation', 'Electrical Maintenance'],
+    languages: ['Gujarati', 'Hindi', 'English'],
+    about: 'Skilled electrician with expertise in both residential and commercial settings. Specializing in smart home technology integration.',
+    image_url: 'https://randomuser.me/api/portraits/men/36.jpg'
   }
 ];
 
 // Function to add sample workers to the database
 export const addSampleWorkers = async () => {
   try {
+    console.log('Checking for existing workers...');
     // Check if we already have workers
     const { count, error } = await supabase
       .from('workers')
@@ -185,6 +198,40 @@ export const addSampleWorkers = async () => {
     return false;
   } catch (error) {
     console.error('Error adding sample workers:', error);
+    return false;
+  }
+};
+
+// Export a function to force add sample workers regardless of existing count
+export const forceAddSampleWorkers = async () => {
+  try {
+    console.log('Force adding sample workers...');
+    
+    for (const worker of sampleWorkers) {
+      try {
+        await registerWorker({
+          name: worker.name,
+          profession: worker.profession,
+          location: worker.location,
+          experience: worker.experience,
+          hourly_rate: worker.hourly_rate,
+          skills: worker.skills,
+          languages: worker.languages,
+          is_available: true,
+          image_url: worker.image_url,
+          about: worker.about,
+          user_id: null,
+        });
+        console.log(`Added sample worker: ${worker.name}`);
+      } catch (workerError) {
+        console.error(`Error adding sample worker ${worker.name}:`, workerError);
+      }
+    }
+    
+    console.log('Sample workers force-added successfully');
+    return true;
+  } catch (error) {
+    console.error('Error force-adding sample workers:', error);
     return false;
   }
 };

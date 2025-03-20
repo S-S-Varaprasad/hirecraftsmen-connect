@@ -15,7 +15,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useStorage } from '@/hooks/useStorage';
 import { createNotification } from '@/services/notificationService';
 import { ensureStorageBuckets } from '@/services/storageService';
-import { addSampleWorkers } from '@/utils/sampleWorkers';
+import { addSampleWorkers, forceAddSampleWorkers } from '@/utils/sampleWorkers';
 
 export const useWorkerProfiles = () => {
   const queryClient = useQueryClient();
@@ -56,6 +56,23 @@ export const useWorkerProfiles = () => {
     } catch (error) {
       console.error('Error adding sample workers:', error);
       toast.error('Failed to add sample workers');
+      return false;
+    }
+  };
+
+  // Force add sample workers function
+  const forceSampleWorkers = async () => {
+    try {
+      const added = await forceAddSampleWorkers();
+      if (added) {
+        toast.success('Sample workers force-added successfully');
+        queryClient.invalidateQueries({ queryKey: ['workers'] });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error force-adding sample workers:', error);
+      toast.error('Failed to force-add sample workers');
       return false;
     }
   };
@@ -280,6 +297,7 @@ export const useWorkerProfiles = () => {
     getWorker,
     notifyWorkers,
     refetch,
-    addSampleWorkersIfNeeded
+    addSampleWorkersIfNeeded,
+    forceSampleWorkers
   };
 };
