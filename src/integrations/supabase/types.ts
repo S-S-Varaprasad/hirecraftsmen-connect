@@ -54,6 +54,33 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          id: string
+          page_id: string
+          rating: number
+          user_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          page_id: string
+          rating: number
+          user_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          page_id?: string
+          rating?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           company: string
@@ -173,6 +200,27 @@ export type Database = {
           related_id?: string | null
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          role?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

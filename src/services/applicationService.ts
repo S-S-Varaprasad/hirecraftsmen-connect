@@ -239,12 +239,6 @@ export const markApplicationCompleted = async (id: string) => {
 export const checkApplicationExists = async (jobId: string, workerId: string) => {
   console.log(`Checking if application exists for job ${jobId} and worker ${workerId}`);
   
-  // Validate inputs
-  if (!jobId || !workerId) {
-    console.error('Invalid job or worker ID for application check:', { jobId, workerId });
-    return { exists: false, applications: [] };
-  }
-  
   try {
     const { data, error, count } = await supabase
       .from('applications')
@@ -253,7 +247,13 @@ export const checkApplicationExists = async (jobId: string, workerId: string) =>
       .eq('worker_id', workerId);
     
     if (error) {
-      console.error('Error checking application existence:', error);
+      console.error('Error checking if application exists:', error);
+      
+      // Special handling for no records found
+      if (error.code === 'PGRST116') {
+        return { exists: false, applications: [] };
+      }
+      
       throw error;
     }
     
