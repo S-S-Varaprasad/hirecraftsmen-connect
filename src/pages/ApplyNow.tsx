@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,7 @@ import { useJobApplications } from '@/hooks/useJobApplications';
 import { toast } from 'sonner';
 
 const ApplyNow = () => {
-  const { id } = useParams<{ id: string }>();
+  const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const [message, setMessage] = useState('');
@@ -33,9 +34,10 @@ const ApplyNow = () => {
 
   // Fetch job details
   const { data: job, isLoading: isLoadingJob, error: jobError } = useQuery({
-    queryKey: ['job', id],
-    queryFn: () => getJobById(id!),
-    enabled: !!id && isAuthenticated,
+    queryKey: ['job', jobId],
+    queryFn: () => getJobById(jobId!),
+    enabled: !!jobId && isAuthenticated,
+    retry: 2
   });
 
   // Fetch worker profile for current user
@@ -43,7 +45,14 @@ const ApplyNow = () => {
     queryKey: ['worker', user?.id],
     queryFn: () => getWorkerByUserId(user!.id),
     enabled: !!user?.id && isAuthenticated,
+    retry: 2
   });
+
+  console.log("Current job ID:", jobId);
+  console.log("Job data:", job);
+  console.log("Worker profile:", workerProfile);
+  console.log("Loading states:", { isLoadingJob, isLoadingWorker });
+  console.log("Job error:", jobError);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +103,7 @@ const ApplyNow = () => {
   }
 
   if (jobError || !job) {
+    console.error("Job error details:", jobError);
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -187,7 +197,7 @@ const ApplyNow = () => {
                       </div>
                       <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                         <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                        <span>Posted {new Date(job.posted_date).toLocaleDateString()}</span>
+                        <span>Posted {new Date(job.posted_date || job.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
                     

@@ -102,25 +102,44 @@ const ContactEmployer = () => {
     setIsSending(true);
     
     try {
+      // Store the message in a messages table
+      const { error: messageError } = await supabase
+        .from('messages')
+        .insert({
+          job_id: jobId,
+          sender_name: data.name,
+          sender_email: data.email,
+          subject: data.subject,
+          message: data.message,
+          recipient_id: jobDetails.employer_id || null,
+          sender_id: user?.id || null,
+        });
+        
+      if (messageError) throw messageError;
+      
       // Create a notification for the employer
       if (jobDetails.employer_id) {
-        await supabase.from('notifications').insert({
-          user_id: jobDetails.employer_id,
-          message: `New message regarding "${jobDetails.title}" from ${data.name}`,
-          type: 'contact',
-          related_id: jobId,
-        });
+        const { error: notificationError } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: jobDetails.employer_id,
+            message: `New message regarding "${jobDetails.title}" from ${data.name}`,
+            type: 'contact',
+            related_id: jobId,
+            is_read: false
+          });
+          
+        if (notificationError) {
+          console.error('Error creating notification:', notificationError);
+          // Continue even if notification fails
+        }
       }
-      
-      // In a real app, you might want to:
-      // 1. Send an actual email via a Supabase Edge Function
-      // 2. Store the message in a "messages" table
 
       toast.success('Message sent successfully!');
       navigate(`/jobs/${jobId}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
-      toast.error('Failed to send message. Please try again.');
+      toast.error(error.message || 'Failed to send message. Please try again.');
     } finally {
       setIsSending(false);
     }
