@@ -5,7 +5,7 @@ import { registerWorker } from '@/services/workerService';
 // Sample worker data for different professions with Indian names and locations
 const sampleWorkers = [
   {
-    name: 'Raj Kumar',
+    name: 'Rajesh Kumar',
     profession: 'Electrician',
     location: 'Mumbai, Maharashtra',
     experience: '8 years',
@@ -16,7 +16,7 @@ const sampleWorkers = [
     image_url: 'https://randomuser.me/api/portraits/men/32.jpg'
   },
   {
-    name: 'Priya Singh',
+    name: 'Priya Sharma',
     profession: 'Plumber',
     location: 'Delhi, NCR',
     experience: '5 years',
@@ -27,40 +27,40 @@ const sampleWorkers = [
     image_url: 'https://randomuser.me/api/portraits/women/44.jpg'
   },
   {
-    name: 'Mohammad Ali',
+    name: 'Arjun Patel',
     profession: 'Carpenter',
-    location: 'Bengaluru, Karnataka',
+    location: 'Ahmedabad, Gujarat',
     experience: '12 years',
     hourly_rate: '₹500',
     skills: ['Furniture Making', 'Woodworking', 'Cabinet Installation', 'Repairs'],
-    languages: ['Hindi', 'English', 'Kannada', 'Urdu'],
+    languages: ['Gujarati', 'Hindi', 'English'],
     about: 'Master carpenter with extensive experience in custom furniture and cabinetry.',
     image_url: 'https://randomuser.me/api/portraits/men/22.jpg'
   },
   {
-    name: 'Lakshmi Devi',
+    name: 'Lakshmi Reddy',
     profession: 'Cleaner',
-    location: 'Chennai, Tamil Nadu',
+    location: 'Hyderabad, Telangana',
     experience: '4 years',
     hourly_rate: '₹300',
     skills: ['Deep Cleaning', 'Sanitization', 'House Keeping', 'Office Cleaning'],
-    languages: ['Tamil', 'English', 'Telugu'],
+    languages: ['Telugu', 'Hindi', 'English'],
     about: 'Experienced cleaner providing thorough and reliable cleaning services.',
     image_url: 'https://randomuser.me/api/portraits/women/29.jpg'
   },
   {
-    name: 'Rahul Sharma',
+    name: 'Vikram Singh',
     profession: 'Painter',
-    location: 'Hyderabad, Telangana',
+    location: 'Jaipur, Rajasthan',
     experience: '7 years',
     hourly_rate: '₹350',
     skills: ['Interior Painting', 'Exterior Painting', 'Wall Texturing', 'Refinishing'],
-    languages: ['Hindi', 'English', 'Telugu'],
+    languages: ['Hindi', 'English', 'Rajasthani'],
     about: 'Professional painter with attention to detail and quality finishes.',
     image_url: 'https://randomuser.me/api/portraits/men/62.jpg'
   },
   {
-    name: 'Ananya Patel',
+    name: 'Ananya Deshmukh',
     profession: 'Gardener',
     location: 'Pune, Maharashtra',
     experience: '6 years',
@@ -71,7 +71,7 @@ const sampleWorkers = [
     image_url: 'https://randomuser.me/api/portraits/women/52.jpg'
   },
   {
-    name: 'Vikram Singh',
+    name: 'Deepak Banerjee',
     profession: 'Security Guard',
     location: 'Kolkata, West Bengal',
     experience: '9 years',
@@ -82,40 +82,40 @@ const sampleWorkers = [
     image_url: 'https://randomuser.me/api/portraits/men/41.jpg'
   },
   {
-    name: 'Kavita Reddy',
+    name: 'Kavita Iyer',
     profession: 'Tailor',
-    location: 'Ahmedabad, Gujarat',
+    location: 'Chennai, Tamil Nadu',
     experience: '15 years',
     hourly_rate: '₹400',
     skills: ['Garment Construction', 'Alterations', 'Custom Designs', 'Embroidery'],
-    languages: ['Gujarati', 'Hindi', 'English'],
+    languages: ['Tamil', 'Hindi', 'English'],
     about: 'Expert tailor specializing in custom clothing and alterations.',
     image_url: 'https://randomuser.me/api/portraits/women/68.jpg'
   },
   {
-    name: 'Aditya Mehta',
+    name: 'Ravi Verma',
     profession: 'Driver',
-    location: 'Jaipur, Rajasthan',
+    location: 'Bengaluru, Karnataka',
     experience: '10 years',
     hourly_rate: '₹350',
     skills: ['Safe Driving', 'Route Planning', 'Vehicle Maintenance', 'Customer Service'],
-    languages: ['Hindi', 'English', 'Rajasthani'],
+    languages: ['Kannada', 'Hindi', 'English'],
     about: 'Professional driver with clean record and excellent customer service skills.',
     image_url: 'https://randomuser.me/api/portraits/men/72.jpg'
   },
   {
     name: 'Neha Gupta',
     profession: 'House Cleaning',
-    location: 'Lucknow, Uttar Pradesh',
+    location: 'Chandigarh, Punjab',
     experience: '3 years',
     hourly_rate: '₹250',
     skills: ['Dusting', 'Mopping', 'Bathroom Cleaning', 'Kitchen Cleaning'],
-    languages: ['Hindi', 'English', 'Urdu'],
+    languages: ['Punjabi', 'Hindi', 'English'],
     about: 'Reliable house cleaner offering thorough cleaning services for homes and apartments.',
     image_url: 'https://randomuser.me/api/portraits/women/33.jpg'
   },
   {
-    name: 'Sanjay Kumar',
+    name: 'Suresh Nair',
     profession: 'Cook',
     location: 'Kochi, Kerala',
     experience: '8 years',
@@ -128,11 +128,11 @@ const sampleWorkers = [
   {
     name: 'Meera Pillai',
     profession: 'Babysitter',
-    location: 'Goa',
+    location: 'Thiruvananthapuram, Kerala',
     experience: '6 years',
     hourly_rate: '₹300',
     skills: ['Childcare', 'First Aid', 'Meal Preparation', 'Educational Activities'],
-    languages: ['Konkani', 'English', 'Hindi'],
+    languages: ['Malayalam', 'English', 'Hindi'],
     about: 'Caring and reliable babysitter with experience in early childhood education.',
     image_url: 'https://randomuser.me/api/portraits/women/38.jpg'
   }
