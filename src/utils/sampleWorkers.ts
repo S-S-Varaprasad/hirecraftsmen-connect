@@ -2,10 +2,10 @@
 import { supabase } from '@/integrations/supabase/client';
 import { registerWorker } from '@/services/workerService';
 
-// Sample worker data for different professions
+// Sample worker data with Indian names and locations
 const sampleWorkers = [
   {
-    name: 'Raj Kumar',
+    name: 'Rajesh Kumar',
     profession: 'Electrician',
     location: 'Mumbai, Maharashtra',
     experience: '8 years',
@@ -13,7 +13,7 @@ const sampleWorkers = [
     skills: ['Wiring', 'Installation', 'Repairs', 'Lighting'],
     languages: ['Hindi', 'English', 'Marathi'],
     about: 'Experienced electrician with expertise in residential and commercial projects.',
-    image_url: 'https://randomuser.me/api/portraits/men/32.jpg'
+    image_url: '/lovable-uploads/64d0189f-3c8e-40ab-bff4-22681eece0a3.png'
   },
   {
     name: 'Priya Singh',
@@ -24,10 +24,10 @@ const sampleWorkers = [
     skills: ['Pipe Fitting', 'Repairs', 'Drainage', 'Installation'],
     languages: ['Hindi', 'English', 'Punjabi'],
     about: 'Professional plumber specializing in residential plumbing solutions.',
-    image_url: 'https://randomuser.me/api/portraits/women/44.jpg'
+    image_url: '/lovable-uploads/903539dd-cf87-42f1-bbaa-540ff3a12361.png'
   },
   {
-    name: 'Mohammad Ali',
+    name: 'Mohammed Ali',
     profession: 'Carpenter',
     location: 'Bengaluru, Karnataka',
     experience: '12 years',
@@ -35,7 +35,7 @@ const sampleWorkers = [
     skills: ['Furniture Making', 'Woodworking', 'Cabinet Installation', 'Repairs'],
     languages: ['Hindi', 'English', 'Kannada', 'Urdu'],
     about: 'Master carpenter with extensive experience in custom furniture and cabinetry.',
-    image_url: 'https://randomuser.me/api/portraits/men/22.jpg'
+    image_url: '/lovable-uploads/026c2e14-b9de-449d-af0a-cc5ec741835f.png'
   },
   {
     name: 'Lakshmi Devi',
@@ -46,10 +46,10 @@ const sampleWorkers = [
     skills: ['Deep Cleaning', 'Sanitization', 'House Keeping', 'Office Cleaning'],
     languages: ['Tamil', 'English', 'Telugu'],
     about: 'Experienced cleaner providing thorough and reliable cleaning services.',
-    image_url: 'https://randomuser.me/api/portraits/women/29.jpg'
+    image_url: '/lovable-uploads/cce10b43-5c20-4632-b38e-4e80b05ec970.png'
   },
   {
-    name: 'Rahul Sharma',
+    name: 'Vikram Patel',
     profession: 'Painter',
     location: 'Hyderabad, Telangana',
     experience: '7 years',
@@ -57,10 +57,10 @@ const sampleWorkers = [
     skills: ['Interior Painting', 'Exterior Painting', 'Wall Texturing', 'Refinishing'],
     languages: ['Hindi', 'English', 'Telugu'],
     about: 'Professional painter with attention to detail and quality finishes.',
-    image_url: 'https://randomuser.me/api/portraits/men/62.jpg'
+    image_url: '/lovable-uploads/d44d25ae-d5e1-4f31-8ad3-4ec0791c7d48.png'
   },
   {
-    name: 'Ananya Patel',
+    name: 'Ananya Desai',
     profession: 'Gardener',
     location: 'Pune, Maharashtra',
     experience: '6 years',
@@ -68,10 +68,10 @@ const sampleWorkers = [
     skills: ['Landscaping', 'Plant Care', 'Garden Design', 'Maintenance'],
     languages: ['Marathi', 'Hindi', 'English'],
     about: 'Passionate gardener with expertise in creating and maintaining beautiful gardens.',
-    image_url: 'https://randomuser.me/api/portraits/women/52.jpg'
+    image_url: '/lovable-uploads/d1849e99-a41d-491a-bb4e-62a8b078e541.png'
   },
   {
-    name: 'Vikram Singh',
+    name: 'Sunil Verma',
     profession: 'Security Guard',
     location: 'Kolkata, West Bengal',
     experience: '9 years',
@@ -79,7 +79,7 @@ const sampleWorkers = [
     skills: ['Surveillance', 'Access Control', 'Security Protocols', 'Emergency Response'],
     languages: ['Bengali', 'Hindi', 'English'],
     about: 'Professional security guard with background in military service.',
-    image_url: 'https://randomuser.me/api/portraits/men/41.jpg'
+    image_url: '/lovable-uploads/9557d819-7ba3-4ba9-8d59-8413543bf2a5.png'
   },
   {
     name: 'Kavita Reddy',
@@ -90,10 +90,10 @@ const sampleWorkers = [
     skills: ['Garment Construction', 'Alterations', 'Custom Designs', 'Embroidery'],
     languages: ['Gujarati', 'Hindi', 'English'],
     about: 'Expert tailor specializing in custom clothing and alterations.',
-    image_url: 'https://randomuser.me/api/portraits/women/68.jpg'
+    image_url: '/lovable-uploads/fe2cee46-efb8-4381-9aac-227165b55290.png'
   },
   {
-    name: 'Aditya Mehta',
+    name: 'Amit Sharma',
     profession: 'Driver',
     location: 'Jaipur, Rajasthan',
     experience: '10 years',
@@ -101,7 +101,7 @@ const sampleWorkers = [
     skills: ['Safe Driving', 'Route Planning', 'Vehicle Maintenance', 'Customer Service'],
     languages: ['Hindi', 'English', 'Rajasthani'],
     about: 'Professional driver with clean record and excellent customer service skills.',
-    image_url: 'https://randomuser.me/api/portraits/men/72.jpg'
+    image_url: '/lovable-uploads/76cc5fb5-27e9-43a9-a5d2-ad2e67a20a47.png'
   },
   {
     name: 'Neha Gupta',
@@ -112,10 +112,10 @@ const sampleWorkers = [
     skills: ['Dusting', 'Mopping', 'Bathroom Cleaning', 'Kitchen Cleaning'],
     languages: ['Hindi', 'English', 'Urdu'],
     about: 'Reliable house cleaner offering thorough cleaning services for homes and apartments.',
-    image_url: 'https://randomuser.me/api/portraits/women/33.jpg'
+    image_url: '/lovable-uploads/1cc0fa82-3de0-4b23-84e7-c3e8d0fc3409.png'
   },
   {
-    name: 'Sanjay Kumar',
+    name: 'Rajan Iyer',
     profession: 'Cook',
     location: 'Kochi, Kerala',
     experience: '8 years',
@@ -123,7 +123,7 @@ const sampleWorkers = [
     skills: ['Indian Cuisine', 'Baking', 'Meal Planning', 'Catering'],
     languages: ['Malayalam', 'English', 'Tamil', 'Hindi'],
     about: 'Experienced cook specializing in traditional and fusion Indian cuisine.',
-    image_url: 'https://randomuser.me/api/portraits/men/55.jpg'
+    image_url: '/lovable-uploads/0c2376c7-ea00-428d-a168-09c08f40e226.png'
   },
   {
     name: 'Meera Pillai',
@@ -134,7 +134,7 @@ const sampleWorkers = [
     skills: ['Childcare', 'First Aid', 'Meal Preparation', 'Educational Activities'],
     languages: ['Konkani', 'English', 'Hindi'],
     about: 'Caring and reliable babysitter with experience in early childhood education.',
-    image_url: 'https://randomuser.me/api/portraits/women/38.jpg'
+    image_url: '/lovable-uploads/42beb1dd-6871-4291-926b-caa1a4589029.png'
   }
 ];
 

@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, MapPin, Clock, Briefcase, Eye, BriefcaseBusiness, Upload, Check, X, Trash2 } from 'lucide-react';
+import { Star, MapPin, Clock, Briefcase, Eye, BriefcaseBusiness, Upload, Check, X, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -226,7 +226,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             {isOwner && (
               <>
                 <Button variant="outline" className="col-span-1 mt-2 hover:bg-amber-100 hover:text-amber-800 hover:border-amber-300" asChild>
-                  <Link to={`/workers/deactivate/${id}`}>Deactivate</Link>
+                  <Link to={`/deactivate-worker/${id}`}><AlertCircle className="w-4 h-4 mr-1" />Deactivate</Link>
                 </Button>
                 <Button variant="outline" className="col-span-1 mt-2 hover:bg-red-100 hover:text-red-800 hover:border-red-300" asChild>
                   <Link to={`/workers/delete/${id}`}><Trash2 className="w-4 h-4 mr-1" />Delete</Link>
