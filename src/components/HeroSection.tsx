@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Search, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { SearchInput } from '@/components/ui/search-input';
+import { commonSearchTerms, popularLocations } from '@/utils/suggestions';
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -32,25 +33,24 @@ const HeroSection = () => {
             
             <form onSubmit={handleSearch} className="max-w-3xl mx-auto">
               <div className="flex flex-col md:flex-row gap-3 w-full bg-white dark:bg-gray-800 p-3 rounded-xl shadow-xl">
-                <div className="flex-1 flex items-center pl-3 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-                  <Search className="h-5 w-5 text-gray-400" />
-                  <Input 
-                    type="text" 
+                <div className="flex-1">
+                  <SearchInput 
                     placeholder="What service are you looking for?" 
-                    className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0" 
+                    suggestions={commonSearchTerms}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                   />
                 </div>
                 
-                <div className="flex items-center pl-3 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-                  <MapPin className="h-5 w-5 text-gray-400" />
-                  <Input 
-                    type="text" 
+                <div className="flex items-center">
+                  <SearchInput 
                     placeholder="Location" 
-                    className="w-full md:w-40 lg:w-56 border-0 focus-visible:ring-0 focus-visible:ring-offset-0" 
+                    suggestions={popularLocations}
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
+                    className="w-full md:w-40 lg:w-56 border-0 focus-visible:ring-0 focus-visible:ring-offset-0" 
+                    icon={<MapPin className="h-5 w-5 text-gray-400" />}
                   />
                 </div>
                 
@@ -62,15 +62,15 @@ const HeroSection = () => {
             
             <div className="mt-8 flex flex-wrap justify-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <p className="mr-1">Popular:</p>
-              <Link to="/workers/category/carpenter" className="hover:text-orange-500 hover:underline">Carpenter</Link>
+              <Link to="/workers/by-category/carpenter" className="hover:text-orange-500 hover:underline">Carpenter</Link>
               <span className="mx-1">•</span>
-              <Link to="/workers/category/plumber" className="hover:text-orange-500 hover:underline">Plumber</Link>
+              <Link to="/workers/by-category/plumber" className="hover:text-orange-500 hover:underline">Plumber</Link>
               <span className="mx-1">•</span>
-              <Link to="/workers/category/electrician" className="hover:text-orange-500 hover:underline">Electrician</Link>
+              <Link to="/workers/by-category/electrician" className="hover:text-orange-500 hover:underline">Electrician</Link>
               <span className="mx-1">•</span>
-              <Link to="/workers/category/painter" className="hover:text-orange-500 hover:underline">Painter</Link>
+              <Link to="/workers/by-category/painter" className="hover:text-orange-500 hover:underline">Painter</Link>
               <span className="mx-1">•</span>
-              <Link to="/workers/category/cleaner" className="hover:text-orange-500 hover:underline">Cleaner</Link>
+              <Link to="/workers/by-category/cleaner" className="hover:text-orange-500 hover:underline">Cleaner</Link>
             </div>
           </div>
         </div>

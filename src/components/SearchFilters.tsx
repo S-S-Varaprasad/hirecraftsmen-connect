@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Filter, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,8 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { SearchInput } from '@/components/ui/search-input';
+import { commonSearchTerms, popularLocations, professions } from '@/utils/suggestions';
 
 interface SearchFiltersProps {
   onSearch: (filters: any) => void;
@@ -26,7 +28,7 @@ const SearchFilters = ({ onSearch, initialSearchTerm = '', initialLocation = '' 
   const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [location, setLocation] = useState(initialLocation);
-  const [professions, setProfessions] = useState<string[]>([]);
+  const [selectedProfessions, setSelectedProfessions] = useState<string[]>([]);
   const [availableOnly, setAvailableOnly] = useState(false);
 
   useEffect(() => {
@@ -39,13 +41,13 @@ const SearchFilters = ({ onSearch, initialSearchTerm = '', initialLocation = '' 
     onSearch({
       searchTerm,
       location,
-      professions,
+      professions: selectedProfessions,
       availableOnly,
     });
   };
 
   const toggleProfession = (profession: string) => {
-    setProfessions(prev => 
+    setSelectedProfessions(prev => 
       prev.includes(profession)
         ? prev.filter(p => p !== profession)
         : [...prev, profession]
@@ -53,15 +55,11 @@ const SearchFilters = ({ onSearch, initialSearchTerm = '', initialLocation = '' 
   };
 
   const resetFilters = () => {
-    setProfessions([]);
+    setSelectedProfessions([]);
     setAvailableOnly(false);
   };
 
-  const availableProfessions = [
-    'Carpenter', 'Plumber', 'Electrician', 'Painter', 'Mason', 
-    'Mechanic', 'Driver', 'Chef', 'Cleaner', 'Security Guard', 
-    'Gardener', 'Tailor'
-  ];
+  const availableProfessions = professions;
 
   const filterContent = (
     <div className="space-y-6">
@@ -72,7 +70,7 @@ const SearchFilters = ({ onSearch, initialSearchTerm = '', initialLocation = '' 
             <div key={profession} className="flex items-center space-x-2">
               <Checkbox 
                 id={`profession-${profession}`}
-                checked={professions.includes(profession)}
+                checked={selectedProfessions.includes(profession)}
                 onCheckedChange={() => toggleProfession(profession)}
               />
               <Label 
@@ -100,25 +98,24 @@ const SearchFilters = ({ onSearch, initialSearchTerm = '', initialLocation = '' 
   return (
     <div className="w-full">
       <div className="flex flex-col md:flex-row gap-3 w-full">
-        <div className="flex-1 flex items-center pl-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
-          <Search className="h-5 w-5 text-gray-400" />
-          <Input 
-            type="text" 
-            placeholder="Search for skilled workers" 
-            className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0" 
+        <div className="flex-1">
+          <SearchInput
+            placeholder="Search for skilled workers"
+            suggestions={commonSearchTerms}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg"
           />
         </div>
         
-        <div className="flex items-center pl-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
-          <MapPin className="h-5 w-5 text-gray-400" />
-          <Input 
-            type="text" 
+        <div className="flex">
+          <SearchInput
             placeholder="Location" 
-            className="w-full md:w-40 lg:w-56 border-0 focus-visible:ring-0 focus-visible:ring-offset-0" 
+            suggestions={popularLocations}
             value={location}
             onChange={(e) => setLocation(e.target.value)}
+            className="w-full md:w-40 lg:w-56 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg"
+            icon={<MapPin className="h-5 w-5 text-gray-400" />}
           />
         </div>
         
