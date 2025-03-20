@@ -9,21 +9,27 @@ export const ensureStorageBuckets = async () => {
     
     if (error) {
       console.error('Error listing buckets:', error);
-      return false;
+      // Continue execution even if we can't list buckets
+      return true;
     }
     
     if (!buckets?.find(bucket => bucket.name === 'worker-profiles')) {
-      // Create worker-profiles bucket
-      const { error: createError } = await supabase.storage.createBucket('worker-profiles', {
-        public: true,
-      });
-      
-      if (createError) {
-        console.error('Error creating worker-profiles bucket:', createError);
-        return false;
+      try {
+        // Create worker-profiles bucket
+        const { error: createError } = await supabase.storage.createBucket('worker-profiles', {
+          public: true,
+        });
+        
+        if (createError) {
+          console.error('Error creating worker-profiles bucket:', createError);
+          // Continue execution even if we can't create the bucket
+        } else {
+          console.log('Successfully created worker-profiles bucket');
+        }
+      } catch (createErr) {
+        console.error('Exception when creating bucket:', createErr);
+        // Continue execution even if we hit an exception
       }
-      
-      console.log('Successfully created worker-profiles bucket');
     } else {
       console.log('worker-profiles bucket already exists');
     }
@@ -33,6 +39,7 @@ export const ensureStorageBuckets = async () => {
     return true;
   } catch (error) {
     console.error('Error ensuring storage buckets:', error);
-    return false;
+    // Continue execution even if we hit an exception
+    return true;
   }
 };

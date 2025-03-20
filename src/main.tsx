@@ -2,12 +2,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
-import { ThemeProvider } from 'next-themes'
-import { Toaster } from '@/components/ui/sonner'
-import { AuthProvider } from './context/AuthContext.tsx'
 import './index.css'
-import { addSampleWorkers } from './utils/sampleWorkers.ts'
 import { ensureStorageBuckets } from './services/storageService.ts'
+import { addSampleWorkers } from './utils/sampleWorkers.ts'
 
 // Initialize app resources
 const initializeApp = async () => {
