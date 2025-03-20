@@ -27,7 +27,12 @@ export const getWorkers = async () => {
     throw error;
   }
   
-  return data || [] as Worker[];
+  const workersWithLanguages = data?.map(worker => ({
+    ...worker,
+    languages: worker.languages || []
+  })) || [];
+  
+  return workersWithLanguages as Worker[];
 };
 
 export const getWorkersByCategory = async (category: string) => {
@@ -41,7 +46,12 @@ export const getWorkersByCategory = async (category: string) => {
     throw error;
   }
   
-  return data || [] as Worker[];
+  const workersWithLanguages = data?.map(worker => ({
+    ...worker,
+    languages: worker.languages || []
+  })) || [];
+  
+  return workersWithLanguages as Worker[];
 };
 
 export const getWorkerById = async (id: string) => {
@@ -56,7 +66,12 @@ export const getWorkerById = async (id: string) => {
     throw error;
   }
   
-  return data as Worker;
+  const workerWithLanguages = {
+    ...data,
+    languages: data.languages || []
+  };
+  
+  return workerWithLanguages as Worker;
 };
 
 export const getWorkerByUserId = async (userId: string) => {
@@ -71,18 +86,24 @@ export const getWorkerByUserId = async (userId: string) => {
     throw error;
   }
   
-  return data as Worker | null;
+  const workerWithLanguages = data ? {
+    ...data,
+    languages: data.languages || []
+  } : null;
+  
+  return workerWithLanguages as Worker | null;
 };
 
 export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating' | 'created_at'>) => {
+  const dataToSend = {
+    ...workerData,
+    languages: workerData.languages || [],
+    rating: 0
+  };
+
   const { data, error } = await supabase
     .from('workers')
-    .insert([
-      {
-        ...workerData,
-        rating: 0,
-      }
-    ])
+    .insert([dataToSend])
     .select();
   
   if (error) {
