@@ -1,85 +1,75 @@
 
-import React from 'react';
-import { Bell } from 'lucide-react';
+import React, { useState } from 'react';
+import { BellRing } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/context/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
-import { toast } from 'sonner';
 
 export const NotificationBell = () => {
-  const { notifications, markAsRead, loading, unreadCount } = useNotifications();
+  const { user } = useAuth();
+  const { notifications, unreadCount, markAsRead } = useNotifications(user?.id);
+  const [open, setOpen] = useState(false);
 
-  const handleMarkAllAsRead = async () => {
-    try {
-      if (notifications && notifications.length > 0) {
-        for (const notification of notifications) {
-          if (!notification.is_read) {
-            await markAsRead(notification.id);
-          }
-        }
-        toast.success('All notifications marked as read');
-      }
-    } catch (error) {
-      console.error('Error marking notifications as read:', error);
-      toast.error('Failed to mark notifications as read');
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen && unreadCount > 0) {
+      markAsRead();
     }
   };
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
+    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full">
+          <BellRing className="h-5 w-5 text-gray-600 dark:text-gray-400" />
           {unreadCount > 0 && (
-            <Badge 
-              className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.2rem] h-[1.2rem] bg-red-500 text-white text-xs flex items-center justify-center"
-            >
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] font-medium text-white">
               {unreadCount > 9 ? '9+' : unreadCount}
-            </Badge>
+            </span>
           )}
+          <span className="sr-only">Notifications</span>
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-0">
-        <div className="p-3 font-medium border-b flex justify-between items-center">
-          <span>Notifications</span>
-          {unreadCount > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-xs h-7 px-2"
-              onClick={handleMarkAllAsRead}
-            >
-              Mark all as read
-            </Button>
-          )}
-        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-80">
+        <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+        <DropdownMenuSeparator />
         <div className="max-h-[300px] overflow-y-auto">
-          {loading ? (
-            <div className="p-4 text-center">
-              <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-              <p className="text-sm text-gray-500">Loading notifications...</p>
-            </div>
-          ) : !notifications || notifications.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">
+          {notifications.length > 0 ? (
+            <DropdownMenuGroup>
+              {notifications.map((notification) => (
+                <DropdownMenuItem
+                  key={notification.id}
+                  className={`flex flex-col items-start gap-1 p-3 ${!notification.read ? 'bg-blue-50 dark:bg-blue-900/10' : ''}`}
+                >
+                  <p className="text-sm font-medium">{notification.message}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {new Date(notification.created_at).toLocaleString()}
+                  </p>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+          ) : (
+            <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
               No notifications yet
             </div>
-          ) : (
-            notifications.map(notification => (
-              <div 
-                key={notification.id} 
-                className={`p-3 border-b text-sm hover:bg-gray-50 dark:hover:bg-gray-800 ${!notification.is_read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
-                onClick={() => markAsRead(notification.id)}
-              >
-                <p className="mb-1">{notification.message}</p>
-                <p className="text-xs text-gray-500">
-                  {new Date(notification.created_at).toLocaleString()}
-                </p>
-              </div>
-            ))
           )}
         </div>
-      </PopoverContent>
-    </Popover>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="justify-center" asChild>
+          <a className="cursor-pointer text-xs text-blue-600 dark:text-blue-400" href="#">
+            View all notifications
+          </a>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

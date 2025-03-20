@@ -44,14 +44,11 @@ export function ThemeProvider({
         : "light";
 
       root.classList.add(systemTheme);
-      
-      // Add data-theme attribute for components that use it
       root.setAttribute('data-theme', systemTheme);
       return;
     }
 
     root.classList.add(theme);
-    // Add data-theme attribute for components that use it
     root.setAttribute('data-theme', theme);
   }, [theme]);
 

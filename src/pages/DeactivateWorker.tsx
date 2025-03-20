@@ -12,7 +12,7 @@ import { Worker } from '@/services/workerService';
 import { toast } from 'sonner';
 
 const DeactivateWorker = () => {
-  const { workerId } = useParams<{ workerId: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { getWorker, deactivateWorkerProfile } = useWorkerProfiles();
@@ -22,10 +22,10 @@ const DeactivateWorker = () => {
 
   useEffect(() => {
     const fetchWorker = async () => {
-      if (!workerId) return;
+      if (!id) return;
       
       try {
-        const workerData = await getWorker(workerId);
+        const workerData = await getWorker(id);
         setWorker(workerData);
         
         // Check if worker belongs to current user
@@ -48,14 +48,14 @@ const DeactivateWorker = () => {
     }
 
     fetchWorker();
-  }, [workerId, user, navigate, getWorker]);
+  }, [id, user, navigate, getWorker]);
 
   const handleDeactivate = async () => {
-    if (!worker || !workerId) return;
+    if (!worker || !id) return;
 
     try {
       setDeactivating(true);
-      await deactivateWorkerProfile.mutateAsync(workerId);
+      await deactivateWorkerProfile.mutateAsync(id);
       toast.success("Your worker profile has been deactivated");
       navigate('/profile');
     } catch (error) {
@@ -71,7 +71,7 @@ const DeactivateWorker = () => {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-grow pt-32 pb-16 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-app-orange"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </main>
         <Footer />
       </div>
@@ -119,7 +119,7 @@ const DeactivateWorker = () => {
                   <p className="font-medium text-yellow-700 dark:text-yellow-400">Note:</p>
                   <p className="text-gray-600 dark:text-gray-400">
                     This is not permanent. If you want to permanently delete your profile,
-                    please use the <Link to={`/workers/delete/${workerId}`} className="text-blue-600 dark:text-blue-400 underline">delete option</Link> instead.
+                    please use the <Link to={`/workers/delete/${id}`} className="text-blue-600 dark:text-blue-400 underline">delete option</Link> instead.
                   </p>
                 </div>
               </div>

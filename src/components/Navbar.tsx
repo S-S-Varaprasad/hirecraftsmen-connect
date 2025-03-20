@@ -1,9 +1,9 @@
+
 import * as React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, LogIn, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -45,8 +45,8 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <span className="text-xl font-bold text-orange-600 dark:text-orange-500">
-              KaamKhoj
+            <span className="text-xl font-bold text-blue-600 dark:text-blue-500">
+              HireEase
             </span>
           </Link>
 
@@ -54,27 +54,21 @@ const Navbar = () => {
           <nav className="hidden md:flex items-center space-x-6">
             <Link
               to="/"
-              className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
+              className="text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-500 transition-colors"
             >
               Home
             </Link>
             <Link
               to="/workers"
-              className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
+              className="text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-500 transition-colors"
             >
               Find Workers
             </Link>
             <Link
               to="/jobs"
-              className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
+              className="text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-500 transition-colors"
             >
               Browse Jobs
-            </Link>
-            <Link
-              to="/post-job"
-              className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
-            >
-              Post a Job
             </Link>
           </nav>
 
@@ -88,7 +82,7 @@ const Navbar = () => {
                 className="h-9 w-9 rounded-full"
               >
                 {theme === "dark" ? (
-                  <Sun className="h-5 w-5" />
+                  <Sun className="h-5 w-5 text-yellow-400" />
                 ) : (
                   <Moon className="h-5 w-5" />
                 )}
@@ -121,12 +115,6 @@ const Navbar = () => {
                       >
                         Profile
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => navigate("/dashboard")}
-                      >
-                        Dashboard
-                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="cursor-pointer"
@@ -141,7 +129,7 @@ const Navbar = () => {
                 <Button
                   variant="default"
                   size="sm"
-                  className="bg-orange-600 hover:bg-orange-700"
+                  className="bg-blue-600 hover:bg-blue-700"
                   onClick={() => navigate("/login")}
                 >
                   <LogIn className="mr-2 h-4 w-4" />
@@ -153,7 +141,7 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-500"
+            className="md:hidden text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-500"
             onClick={toggleMenu}
           >
             {isMenuOpen ? (
@@ -170,31 +158,24 @@ const Navbar = () => {
             <nav className="flex flex-col space-y-3">
               <Link
                 to="/"
-                className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
+                className="text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-500 transition-colors"
                 onClick={toggleMenu}
               >
                 Home
               </Link>
               <Link
                 to="/workers"
-                className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
+                className="text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-500 transition-colors"
                 onClick={toggleMenu}
               >
                 Find Workers
               </Link>
               <Link
                 to="/jobs"
-                className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
+                className="text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-500 transition-colors"
                 onClick={toggleMenu}
               >
                 Browse Jobs
-              </Link>
-              <Link
-                to="/post-job"
-                className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
-                onClick={toggleMenu}
-              >
-                Post a Job
               </Link>
               <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
                 <Button
@@ -204,7 +185,7 @@ const Navbar = () => {
                   className="h-9 w-9 rounded-full"
                 >
                   {theme === "dark" ? (
-                    <Sun className="h-5 w-5" />
+                    <Sun className="h-5 w-5 text-yellow-400" />
                   ) : (
                     <Moon className="h-5 w-5" />
                   )}
@@ -214,7 +195,7 @@ const Navbar = () => {
                     <NotificationBell />
                     <Link
                       to="/profile"
-                      className="flex items-center gap-2 text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500"
+                      className="flex items-center gap-2 text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-500"
                       onClick={toggleMenu}
                     >
                       <Avatar className="h-8 w-8">
@@ -233,7 +214,7 @@ const Navbar = () => {
                   <Button
                     variant="default"
                     size="sm"
-                    className="bg-orange-600 hover:bg-orange-700"
+                    className="bg-blue-600 hover:bg-blue-700"
                     onClick={() => {
                       navigate("/login");
                       toggleMenu();
