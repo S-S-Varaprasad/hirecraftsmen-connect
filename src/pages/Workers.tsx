@@ -10,6 +10,14 @@ import { getWorkers, Worker } from '@/services/workerService';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+// List of Indian locations to filter by
+const indianLocations = [
+  'mumbai', 'delhi', 'bangalore', 'hyderabad', 'chennai', 
+  'kolkata', 'pune', 'ahmedabad', 'jaipur', 'lucknow',
+  'india', 'new delhi', 'goa', 'kerala', 'gujarat', 'rajasthan',
+  'maharashtra', 'tamil nadu', 'karnataka', 'andhra pradesh'
+];
+
 const Workers = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -25,11 +33,23 @@ const Workers = () => {
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Filter workers to only show Indian profiles
+  const getIndianWorkers = (workers: Worker[]) => {
+    return workers.filter(worker => {
+      const workerLocation = worker.location.toLowerCase();
+      // Check if worker location contains any Indian location
+      return indianLocations.some(loc => workerLocation.includes(loc.toLowerCase()));
+    });
+  };
+
   useEffect(() => {
     if (workersData) {
+      // First filter to only get Indian workers
+      const indianWorkers = getIndianWorkers(workersData);
+      
       // Apply initial filters from URL if they exist
       if (initialSearch || initialLocation) {
-        let results = [...workersData];
+        let results = [...indianWorkers];
         
         if (initialSearch) {
           const term = initialSearch.toLowerCase();
@@ -51,11 +71,11 @@ const Workers = () => {
         if (results.length > 0) {
           toast.info(`Found ${results.length} worker${results.length !== 1 ? 's' : ''} matching your search criteria`);
         } else {
-          toast.info('No workers found matching your search criteria. Showing all workers instead.');
-          setFilteredWorkers(workersData);
+          toast.info('No workers found matching your search criteria. Showing all Indian workers instead.');
+          setFilteredWorkers(indianWorkers);
         }
       } else {
-        setFilteredWorkers(workersData);
+        setFilteredWorkers(indianWorkers);
       }
     }
   }, [workersData, initialSearch, initialLocation]);
@@ -65,7 +85,9 @@ const Workers = () => {
     
     // Apply filters
     setTimeout(() => {
-      let results = [...workersData];
+      // First filter to only get Indian workers
+      const indianWorkers = getIndianWorkers(workersData);
+      let results = [...indianWorkers];
       
       if (filters.searchTerm) {
         const term = filters.searchTerm.toLowerCase();
