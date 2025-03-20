@@ -38,7 +38,11 @@ const MessageWorker = () => {
 
   useEffect(() => {
     const fetchWorker = async () => {
-      if (!workerId) return;
+      if (!workerId || !user) {
+        toast.error("You must be logged in to send messages");
+        navigate('/login');
+        return;
+      }
       
       try {
         const workerData = await getWorker(workerId);
@@ -52,7 +56,7 @@ const MessageWorker = () => {
     };
 
     fetchWorker();
-  }, [workerId, getWorker]);
+  }, [workerId, getWorker, user, navigate]);
 
   useEffect(() => {
     if (!user || !workerId || !worker?.user_id) return;
@@ -60,30 +64,13 @@ const MessageWorker = () => {
     // Since there's no actual messages table yet, we'll just use an empty array
     // In a real implementation, you would fetch from a messages table
     setMessages([]);
-
-    // This subscription code would be used if there was a messages table
-    // We'll leave it commented out for future implementation
-    /*
-    const subscription = supabase
-      .channel('messages')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `sender_id=eq.${user.id},receiver_id=eq.${worker?.user_id}`
-      }, (payload) => {
-        setMessages(prev => [...prev, payload.new as Message]);
-      })
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-    */
   }, [user, workerId, worker?.user_id]);
 
   const handleSendMessage = async () => {
-    if (!user || !worker || !worker.user_id || !newMessage.trim()) return;
+    if (!user || !worker || !worker.user_id || !newMessage.trim()) {
+      toast.error("Please enter a message");
+      return;
+    }
 
     try {
       setSending(true);
@@ -94,14 +81,17 @@ const MessageWorker = () => {
         .insert([
           {
             user_id: worker.user_id,
-            message: `New message from ${user.email}: ${newMessage.substring(0, 30)}${newMessage.length > 30 ? '...' : ''}`,
+            message: `New message from ${user.email || user.id}: ${newMessage.substring(0, 30)}${newMessage.length > 30 ? '...' : ''}`,
             type: 'message',
             related_id: user.id
           }
         ])
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error sending notification:", error);
+        throw error;
+      }
 
       // For user experience, we'll simulate adding the message to the UI
       const newMsg: Message = {

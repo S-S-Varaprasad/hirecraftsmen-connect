@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -43,45 +43,16 @@ const WorkerDetail = () => {
     enabled: !!id,
   });
 
-  // 3D card tilt effect
-  useEffect(() => {
-    if (!profileRef.current) return;
-    
-    const handleMouseMove = (e: MouseEvent) => {
-      const card = profileRef.current;
-      if (!card) return;
-      
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      
-      const rotateY = (x - centerX) / 20;
-      const rotateX = (centerY - y) / 20;
-      
-      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
-    };
-    
-    const handleMouseLeave = () => {
-      if (profileRef.current) {
-        profileRef.current.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
-      }
-    };
-    
-    const card = profileRef.current;
-    card.addEventListener('mousemove', handleMouseMove);
-    card.addEventListener('mouseleave', handleMouseLeave);
-    
-    return () => {
-      card.removeEventListener('mousemove', handleMouseMove);
-      card.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, [worker]);
-
   // Check if the logged-in user is viewing their own profile
   const isOwnProfile = user && worker && worker.user_id === user.id;
+
+  const handleMessageClick = () => {
+    window.location.href = `/message/${id}`;
+  };
+
+  const handleContactClick = () => {
+    window.location.href = `/contact/${id}`;
+  };
 
   return (
     <div className="min-h-screen flex flex-col dark:bg-gray-900">
@@ -155,11 +126,11 @@ const WorkerDetail = () => {
                     </div>
                     
                     <div className="mt-4 md:mt-0 space-y-2 md:self-start">
-                      <Button variant="default" className="w-full sm:w-auto gap-2">
+                      <Button variant="default" className="w-full sm:w-auto gap-2" onClick={handleMessageClick}>
                         <MessageCircle className="w-4 h-4" />
                         Message
                       </Button>
-                      <Button variant="outline" className="w-full sm:w-auto gap-2">
+                      <Button variant="outline" className="w-full sm:w-auto gap-2" onClick={handleContactClick}>
                         <PhoneIcon className="w-4 h-4" />
                         Contact
                       </Button>

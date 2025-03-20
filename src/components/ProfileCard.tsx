@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Star, MapPin, Clock, Briefcase, Eye, BriefcaseBusiness, Upload, Check, X, Trash2 } from 'lucide-react';
@@ -127,6 +128,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     });
   };
 
+  const handleMessage = () => {
+    navigate(`/message/${id}`);
+  };
+
+  const handleViewProfile = () => {
+    navigate(`/workers/${id}`);
+  };
+
   return (
     <div className={`group relative rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-card hover:shadow-elevated transition-all duration-300 animate-in ${className || ''}`}>
       <div className="absolute top-4 right-4 z-10">
@@ -250,11 +259,18 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         
         <div className="pt-4 px-6 pb-6 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" className="hover:bg-primary/10 hover:text-primary hover:border-primary/20 dark:hover:bg-primary/10 dark:hover:border-primary/30" asChild>
-              <Link to={`/message/${id}`}>Message</Link>
+            <Button 
+              variant="outline" 
+              className="hover:bg-primary/10 hover:text-primary hover:border-primary/20 dark:hover:bg-primary/10 dark:hover:border-primary/30" 
+              onClick={handleMessage}
+            >
+              Message
             </Button>
-            <Button className="bg-primary hover:bg-primary/90" asChild>
-              <Link to={`/workers/${id}`}><Eye className="w-4 h-4 mr-1" />View Profile</Link>
+            <Button 
+              className="bg-primary hover:bg-primary/90" 
+              onClick={handleViewProfile}
+            >
+              <Eye className="w-4 h-4 mr-1" />View Profile
             </Button>
             <Button 
               variant="default" 
