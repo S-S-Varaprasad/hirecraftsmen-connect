@@ -153,7 +153,7 @@ const UserProfile = () => {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link to="/job-history" className="cursor-pointer flex w-full items-center">
+            <Link to="/worker-job-history" className="cursor-pointer flex w-full items-center">
               <History className="mr-2 h-4 w-4" />
               <span>Job History</span>
             </Link>
