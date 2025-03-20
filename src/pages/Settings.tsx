@@ -1,17 +1,32 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings as SettingsIcon, Bell, Lock, UserCog, Palette, Moon, Sun, Globe, AlertTriangle } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import {
+  Bell,
+  Moon,
+  Sun,
+  Globe,
+  Lock,
+  UserCog,
+  Trash2,
+  AlertTriangle,
+  LogOut,
+  User,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { toast } from 'sonner';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -21,574 +36,363 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { supabase } from '@/integrations/supabase/client';
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from 'next-themes';
 
 const Settings = () => {
+  const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { toast: uiToast } = useToast();
   
-  const [notifications, setNotifications] = useState({
-    email: true,
-    app: true,
-    jobUpdates: true,
-    messages: true,
-    marketing: false
-  });
-  
-  const [appearance, setAppearance] = useState({
-    darkMode: false,
-    highContrast: false,
-    fontSize: 'medium'
-  });
-  
-  const [privacy, setPrivacy] = useState({
-    profileVisibility: 'public',
-    activityStatus: true,
-    contactInfo: 'authenticated'
-  });
+  const [language, setLanguage] = useState('english');
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(true);
+  const [smsNotifications, setSmsNotifications] = useState(false);
+  const [profileVisibility, setProfileVisibility] = useState('public');
+  const [locationSharing, setLocationSharing] = useState(true);
+  const [activityStatus, setActivityStatus] = useState(true);
 
-  const [language, setLanguage] = useState('en');
-  const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
-  // Save settings to localStorage
-  useEffect(() => {
-    const savedSettings = localStorage.getItem('userSettings');
-    if (savedSettings) {
-      const parsedSettings = JSON.parse(savedSettings);
-      if (parsedSettings.notifications) setNotifications(parsedSettings.notifications);
-      if (parsedSettings.appearance) setAppearance(parsedSettings.appearance);
-      if (parsedSettings.privacy) setPrivacy(parsedSettings.privacy);
-      if (parsedSettings.language) setLanguage(parsedSettings.language);
-    }
-  }, []);
-
-  // Apply saved dark mode setting on load
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', appearance.darkMode);
-  }, [appearance.darkMode]);
-
-  // Save settings when they change
-  useEffect(() => {
-    localStorage.setItem('userSettings', JSON.stringify({
-      notifications,
-      appearance,
-      privacy,
-      language
-    }));
-  }, [notifications, appearance, privacy, language]);
-
-  // Handle toggles for notification settings
-  const handleNotificationChange = (setting: keyof typeof notifications) => {
-    setNotifications(prev => {
-      const updated = {
-        ...prev,
-        [setting]: !prev[setting]
-      };
-
-      toast.success("Notification settings updated");
-      return updated;
-    });
-  };
-  
-  // Handle toggles for appearance settings
-  const handleAppearanceChange = (setting: keyof typeof appearance, value: any) => {
-    setAppearance(prev => {
-      const updated = {
-        ...prev,
-        [setting]: typeof value === 'boolean' ? value : value
-      };
-
-      // Apply dark mode immediately if changed
-      if (setting === 'darkMode') {
-        document.documentElement.classList.toggle('dark', value);
-      }
-
-      toast.success("Appearance settings updated");
-      return updated;
-    });
-  };
-  
-  // Handle toggles for privacy settings
-  const handlePrivacyChange = (setting: keyof typeof privacy, value: any) => {
-    setPrivacy(prev => {
-      const updated = {
-        ...prev,
-        [setting]: value
-      };
-
-      toast.success("Privacy settings updated");
-      return updated;
+  // Handle language change
+  const handleLanguageChange = (value: string) => {
+    setLanguage(value);
+    toast({
+      title: "Language Updated",
+      description: `Your language preference has been set to ${value.charAt(0).toUpperCase() + value.slice(1)}.`,
     });
   };
 
-  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setLanguage(e.target.value);
-    toast.success("Language preference updated");
+  // Handle account deactivation
+  const handleDeactivateAccount = () => {
+    // Implement account deactivation logic here
+    toast({
+      title: "Account Deactivated",
+      description: "Your account has been temporarily deactivated. You can reactivate it by logging in again.",
+      variant: "destructive",
+    });
+    
+    setTimeout(() => {
+      signOut();
+      navigate('/');
+    }, 2000);
   };
 
-  const handleDeactivateAccount = async () => {
-    try {
-      // In a real app, you would call an API to deactivate the account
-      // For now, we'll just show a success message
-      toast.success("Your account has been temporarily deactivated");
-      setShowDeactivateDialog(false);
-      // In a real implementation, you might redirect to the login page or sign the user out
-      setTimeout(() => {
-        signOut();
-      }, 2000);
-    } catch (error) {
-      console.error("Error deactivating account:", error);
-      toast.error("Failed to deactivate account");
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    try {
-      if (user) {
-        // Delete the user account from Supabase Auth
-        const { error } = await supabase.auth.admin.deleteUser(user.id);
-        
-        if (error) throw error;
-        
-        toast.success("Your account has been permanently deleted");
-        setShowDeleteDialog(false);
-        
-        // Sign out and redirect to home page
-        setTimeout(() => {
-          signOut();
-        }, 2000);
-      }
-    } catch (error) {
-      console.error("Error deleting account:", error);
-      toast.error("Failed to delete account");
-    }
+  // Handle account deletion
+  const handleDeleteAccount = () => {
+    // Implement account deletion logic here
+    toast({
+      title: "Account Deleted",
+      description: "Your account has been permanently deleted. We're sorry to see you go.",
+      variant: "destructive",
+    });
+    
+    setTimeout(() => {
+      signOut();
+      navigate('/');
+    }, 2000);
   };
 
   if (!user) {
-    navigate('/login');
-    return null;
+    return (
+      <div className="min-h-screen flex flex-col bg-orange-50/40 dark:bg-gray-900">
+        <Navbar />
+        <main className="flex-grow container mx-auto px-4 py-8 pt-24">
+          <div className="max-w-md mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
+            <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-center mb-4">Authentication Required</h1>
+            <p className="text-gray-600 dark:text-gray-400 text-center mb-6">
+              Please log in to access your settings.
+            </p>
+            <div className="flex justify-center gap-4">
+              <Button variant="outline" asChild>
+                <Link to="/">Back to Home</Link>
+              </Button>
+              <Button asChild>
+                <Link to="/login">Log In</Link>
+              </Button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen flex flex-col app-page-background">
+    <div className="min-h-screen flex flex-col bg-orange-50/40 dark:bg-gray-900">
       <Navbar />
       
-      <main className="flex-grow pt-32 pb-16">
-        <div className="container mx-auto px-4">
-          <h1 className="text-2xl font-bold mb-8 text-gray-900 dark:text-white">Settings</h1>
-          
-          <Tabs defaultValue="notifications" className="space-y-6">
-            <TabsList className="bg-white dark:bg-gray-800 p-1 shadow-sm rounded-lg">
-              <TabsTrigger value="notifications" className="flex items-center gap-1.5">
-                <Bell className="h-4 w-4" />
-                Notifications
-              </TabsTrigger>
-              <TabsTrigger value="appearance" className="flex items-center gap-1.5">
-                <Palette className="h-4 w-4" />
-                Appearance
-              </TabsTrigger>
-              <TabsTrigger value="privacy" className="flex items-center gap-1.5">
-                <Lock className="h-4 w-4" />
-                Privacy
-              </TabsTrigger>
-              <TabsTrigger value="account" className="flex items-center gap-1.5">
-                <UserCog className="h-4 w-4" />
-                Account
-              </TabsTrigger>
-            </TabsList>
-            
-            {/* Notifications Tab */}
-            <TabsContent value="notifications" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Bell className="mr-2 h-5 w-5 text-app-orange" />
-                    Notification Settings
-                  </CardTitle>
-                  <CardDescription>
-                    Manage how you receive notifications and updates
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Email Notifications</h4>
-                        <p className="text-sm text-gray-500">Receive notifications via email</p>
-                      </div>
-                      <Switch 
-                        checked={notifications.email} 
-                        onCheckedChange={() => handleNotificationChange('email')}
-                      />
-                    </div>
+      <main className="flex-grow pt-24">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold mb-6">Settings</h1>
+              
+              <Tabs defaultValue="appearance" className="w-full">
+                <TabsList className="grid grid-cols-4 mb-8">
+                  <TabsTrigger value="appearance" className="flex items-center gap-2">
+                    <Sun className="h-4 w-4" />
+                    <span className="hidden sm:inline">Appearance</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="notifications" className="flex items-center gap-2">
+                    <Bell className="h-4 w-4" />
+                    <span className="hidden sm:inline">Notifications</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="privacy" className="flex items-center gap-2">
+                    <Lock className="h-4 w-4" />
+                    <span className="hidden sm:inline">Privacy</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="account" className="flex items-center gap-2">
+                    <UserCog className="h-4 w-4" />
+                    <span className="hidden sm:inline">Account</span>
+                  </TabsTrigger>
+                </TabsList>
+                
+                {/* Appearance Tab */}
+                <TabsContent value="appearance" className="space-y-6">
+                  <div className="bg-gray-50 dark:bg-gray-850 rounded-lg p-6 space-y-6">
+                    <h2 className="text-xl font-semibold mb-4">Theme Preferences</h2>
                     
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">App Notifications</h4>
-                        <p className="text-sm text-gray-500">Receive notifications in the app</p>
+                      <div className="flex items-center space-x-2">
+                        <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                        <Label htmlFor="dark-mode">Dark Mode</Label>
                       </div>
                       <Switch 
-                        checked={notifications.app} 
-                        onCheckedChange={() => handleNotificationChange('app')}
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Job Updates</h4>
-                        <p className="text-sm text-gray-500">Get notified about new jobs and applications</p>
-                      </div>
-                      <Switch 
-                        checked={notifications.jobUpdates} 
-                        onCheckedChange={() => handleNotificationChange('jobUpdates')}
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Messages</h4>
-                        <p className="text-sm text-gray-500">Receive notifications for new messages</p>
-                      </div>
-                      <Switch 
-                        checked={notifications.messages} 
-                        onCheckedChange={() => handleNotificationChange('messages')}
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Marketing & Promotions</h4>
-                        <p className="text-sm text-gray-500">Receive news and promotional content</p>
-                      </div>
-                      <Switch 
-                        checked={notifications.marketing} 
-                        onCheckedChange={() => handleNotificationChange('marketing')}
+                        id="dark-mode" 
+                        checked={theme === 'dark'}
+                        onCheckedChange={(checked) => {
+                          setTheme(checked ? 'dark' : 'light');
+                          toast({
+                            title: checked ? "Dark Mode Enabled" : "Light Mode Enabled",
+                            description: checked ? "The dark side welcomes you." : "Let there be light!",
+                          });
+                        }}
                       />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            {/* Appearance Tab */}
-            <TabsContent value="appearance" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Palette className="mr-2 h-5 w-5 text-app-orange" />
-                    Appearance Settings
-                  </CardTitle>
-                  <CardDescription>
-                    Customize how the app looks and feels
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
+                </TabsContent>
+                
+                {/* Notifications Tab */}
+                <TabsContent value="notifications" className="space-y-6">
+                  <div className="bg-gray-50 dark:bg-gray-850 rounded-lg p-6 space-y-6">
+                    <h2 className="text-xl font-semibold mb-4">Notification Preferences</h2>
+                    
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Moon className="h-5 w-5 text-gray-600" />
+                      <div>
+                        <p className="font-medium">Email Notifications</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Receive updates via email</p>
+                      </div>
+                      <Switch 
+                        checked={emailNotifications} 
+                        onCheckedChange={(checked) => {
+                          setEmailNotifications(checked);
+                          toast({
+                            title: checked ? "Email Notifications Enabled" : "Email Notifications Disabled",
+                            description: checked ? "You will now receive email notifications." : "You will no longer receive email notifications.",
+                          });
+                        }}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Push Notifications</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Receive notifications in browser</p>
+                      </div>
+                      <Switch 
+                        checked={pushNotifications} 
+                        onCheckedChange={(checked) => {
+                          setPushNotifications(checked);
+                          toast({
+                            title: checked ? "Push Notifications Enabled" : "Push Notifications Disabled",
+                            description: checked ? "You will now receive push notifications." : "You will no longer receive push notifications.",
+                          });
+                        }}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">SMS Notifications</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Receive text messages for urgent updates</p>
+                      </div>
+                      <Switch 
+                        checked={smsNotifications} 
+                        onCheckedChange={(checked) => {
+                          setSmsNotifications(checked);
+                          toast({
+                            title: checked ? "SMS Notifications Enabled" : "SMS Notifications Disabled",
+                            description: checked ? "You will now receive SMS notifications." : "You will no longer receive SMS notifications.",
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                {/* Privacy Tab */}
+                <TabsContent value="privacy" className="space-y-6">
+                  <div className="bg-gray-50 dark:bg-gray-850 rounded-lg p-6 space-y-6">
+                    <h2 className="text-xl font-semibold mb-4">Privacy Settings</h2>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="profile-visibility" className="block mb-2">Profile Visibility</Label>
+                        <Select 
+                          value={profileVisibility} 
+                          onValueChange={(value) => {
+                            setProfileVisibility(value);
+                            toast({
+                              title: "Privacy Setting Updated",
+                              description: `Your profile visibility is now set to ${value}.`,
+                            });
+                          }}
+                        >
+                          <SelectTrigger id="profile-visibility" className="w-full">
+                            <SelectValue placeholder="Select visibility" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="public">Public</SelectItem>
+                            <SelectItem value="contacts">Contacts Only</SelectItem>
+                            <SelectItem value="private">Private</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="flex items-center justify-between pt-4">
                         <div>
-                          <h4 className="font-medium">Dark Mode</h4>
-                          <p className="text-sm text-gray-500">Switch between light and dark themes</p>
+                          <p className="font-medium">Location Sharing</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Allow the app to access your location</p>
                         </div>
+                        <Switch 
+                          checked={locationSharing} 
+                          onCheckedChange={(checked) => {
+                            setLocationSharing(checked);
+                            toast({
+                              title: checked ? "Location Sharing Enabled" : "Location Sharing Disabled",
+                              description: checked ? "The app can now access your location." : "The app can no longer access your location.",
+                            });
+                          }}
+                        />
                       </div>
-                      <Switch 
-                        checked={appearance.darkMode} 
-                        onCheckedChange={(value) => handleAppearanceChange('darkMode', value)}
-                      />
+                      
+                      <div className="flex items-center justify-between pt-4">
+                        <div>
+                          <p className="font-medium">Activity Status</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Show when you're active on the platform</p>
+                        </div>
+                        <Switch 
+                          checked={activityStatus} 
+                          onCheckedChange={(checked) => {
+                            setActivityStatus(checked);
+                            toast({
+                              title: checked ? "Activity Status Enabled" : "Activity Status Disabled",
+                              description: checked ? "Others can now see when you're active." : "Others can no longer see when you're active.",
+                            });
+                          }}
+                        />
+                      </div>
                     </div>
+                  </div>
+                </TabsContent>
+                
+                {/* Account Tab */}
+                <TabsContent value="account" className="space-y-6">
+                  <div className="bg-gray-50 dark:bg-gray-850 rounded-lg p-6 space-y-6">
+                    <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
                     
-                    <div className="flex items-center justify-between">
+                    <div className="space-y-4">
                       <div>
-                        <h4 className="font-medium">High Contrast</h4>
-                        <p className="text-sm text-gray-500">Increase contrast for better readability</p>
+                        <Label htmlFor="language" className="block mb-2">Language Preference</Label>
+                        <Select 
+                          value={language} 
+                          onValueChange={handleLanguageChange}
+                        >
+                          <SelectTrigger id="language" className="w-full">
+                            <SelectValue placeholder="Select language" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="english">English</SelectItem>
+                            <SelectItem value="spanish">Spanish</SelectItem>
+                            <SelectItem value="french">French</SelectItem>
+                            <SelectItem value="german">German</SelectItem>
+                            <SelectItem value="hindi">Hindi</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <Switch 
-                        checked={appearance.highContrast} 
-                        onCheckedChange={(value) => handleAppearanceChange('highContrast', value)}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h4 className="font-medium">Font Size</h4>
-                      <div className="flex space-x-4">
-                        <div className="flex items-center">
-                          <input 
-                            type="radio" 
-                            id="font-small" 
-                            name="fontSize" 
-                            value="small"
-                            checked={appearance.fontSize === 'small'}
-                            onChange={() => handleAppearanceChange('fontSize', 'small')}
-                            className="mr-2"
-                          />
-                          <Label htmlFor="font-small">Small</Label>
-                        </div>
-                        <div className="flex items-center">
-                          <input 
-                            type="radio" 
-                            id="font-medium" 
-                            name="fontSize" 
-                            value="medium"
-                            checked={appearance.fontSize === 'medium'}
-                            onChange={() => handleAppearanceChange('fontSize', 'medium')}
-                            className="mr-2"
-                          />
-                          <Label htmlFor="font-medium">Medium</Label>
-                        </div>
-                        <div className="flex items-center">
-                          <input 
-                            type="radio" 
-                            id="font-large" 
-                            name="fontSize" 
-                            value="large"
-                            checked={appearance.fontSize === 'large'}
-                            onChange={() => handleAppearanceChange('fontSize', 'large')}
-                            className="mr-2"
-                          />
-                          <Label htmlFor="font-large">Large</Label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            {/* Privacy Tab */}
-            <TabsContent value="privacy" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Lock className="mr-2 h-5 w-5 text-app-orange" />
-                    Privacy Settings
-                  </CardTitle>
-                  <CardDescription>
-                    Manage your privacy and security preferences
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <h4 className="font-medium">Profile Visibility</h4>
-                      <div className="flex space-x-4">
-                        <div className="flex items-center">
-                          <input 
-                            type="radio" 
-                            id="visibility-public" 
-                            name="profileVisibility" 
-                            value="public"
-                            checked={privacy.profileVisibility === 'public'}
-                            onChange={() => handlePrivacyChange('profileVisibility', 'public')}
-                            className="mr-2"
-                          />
-                          <Label htmlFor="visibility-public">Public</Label>
-                        </div>
-                        <div className="flex items-center">
-                          <input 
-                            type="radio" 
-                            id="visibility-authenticated" 
-                            name="profileVisibility" 
-                            value="authenticated"
-                            checked={privacy.profileVisibility === 'authenticated'}
-                            onChange={() => handlePrivacyChange('profileVisibility', 'authenticated')}
-                            className="mr-2"
-                          />
-                          <Label htmlFor="visibility-authenticated">Registered Users</Label>
-                        </div>
-                        <div className="flex items-center">
-                          <input 
-                            type="radio" 
-                            id="visibility-private" 
-                            name="profileVisibility" 
-                            value="private"
-                            checked={privacy.profileVisibility === 'private'}
-                            onChange={() => handlePrivacyChange('profileVisibility', 'private')}
-                            className="mr-2"
-                          />
-                          <Label htmlFor="visibility-private">Private</Label>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Show Activity Status</h4>
-                        <p className="text-sm text-gray-500">Let others know when you're online</p>
-                      </div>
-                      <Switch 
-                        checked={privacy.activityStatus} 
-                        onCheckedChange={(value) => handlePrivacyChange('activityStatus', value)}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h4 className="font-medium">Contact Information Visibility</h4>
-                      <div className="flex space-x-4">
-                        <div className="flex items-center">
-                          <input 
-                            type="radio" 
-                            id="contact-public" 
-                            name="contactInfo" 
-                            value="public"
-                            checked={privacy.contactInfo === 'public'}
-                            onChange={() => handlePrivacyChange('contactInfo', 'public')}
-                            className="mr-2"
-                          />
-                          <Label htmlFor="contact-public">Public</Label>
-                        </div>
-                        <div className="flex items-center">
-                          <input 
-                            type="radio" 
-                            id="contact-authenticated" 
-                            name="contactInfo" 
-                            value="authenticated"
-                            checked={privacy.contactInfo === 'authenticated'}
-                            onChange={() => handlePrivacyChange('contactInfo', 'authenticated')}
-                            className="mr-2"
-                          />
-                          <Label htmlFor="contact-authenticated">Registered Users</Label>
-                        </div>
-                        <div className="flex items-center">
-                          <input 
-                            type="radio" 
-                            id="contact-private" 
-                            name="contactInfo" 
-                            value="private"
-                            checked={privacy.contactInfo === 'private'}
-                            onChange={() => handlePrivacyChange('contactInfo', 'private')}
-                            className="mr-2"
-                          />
-                          <Label htmlFor="contact-private">Private</Label>
+                      
+                      <div className="pt-6">
+                        <h3 className="text-lg font-medium mb-4 text-red-500">Danger Zone</h3>
+                        
+                        <div className="space-y-4">
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" className="border-red-200 text-red-500 hover:text-red-600 hover:bg-red-50 w-full justify-start">
+                                <LogOut className="mr-2 h-4 w-4" />
+                                Deactivate Account
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Deactivate Your Account?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Your account will be temporarily deactivated. You can reactivate it at any time by logging in again.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={handleDeactivateAccount}
+                                  className="bg-red-500 text-white hover:bg-red-600"
+                                >
+                                  Deactivate
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                          
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" className="border-red-200 text-red-500 hover:text-red-600 hover:bg-red-50 w-full justify-start">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Account
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={handleDeleteAccount}
+                                  className="bg-red-500 text-white hover:bg-red-600"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            {/* Account Tab */}
-            <TabsContent value="account" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <UserCog className="mr-2 h-5 w-5 text-app-orange" />
-                    Account Settings
-                  </CardTitle>
-                  <CardDescription>
-                    Manage your account preferences and details
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Language Preference</h4>
-                    <div className="flex items-center space-x-2">
-                      <Globe className="h-5 w-5 text-gray-500" />
-                      <select 
-                        className="border border-gray-300 rounded-md p-2 w-full max-w-xs"
-                        value={language}
-                        onChange={handleLanguageChange}
-                      >
-                        <option value="en">English</option>
-                        <option value="hi">Hindi</option>
-                        <option value="ta">Tamil</option>
-                        <option value="te">Telugu</option>
-                        <option value="kn">Kannada</option>
-                      </select>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4 space-y-4">
-                    <h4 className="font-medium text-red-600">Danger Zone</h4>
-                    
-                    <div className="space-y-2">
-                      <Button 
-                        variant="outline" 
-                        className="w-full max-w-xs border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
-                        onClick={() => setShowDeactivateDialog(true)}
-                      >
-                        Deactivate Account
-                      </Button>
-                      <p className="text-sm text-gray-500">
-                        Temporarily disable your account
-                      </p>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Button 
-                        variant="destructive" 
-                        className="w-full max-w-xs"
-                        onClick={() => setShowDeleteDialog(true)}
-                      >
-                        Delete Account
-                      </Button>
-                      <p className="text-sm text-gray-500">
-                        Permanently delete your account and all data
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
         </div>
       </main>
       
       <Footer />
-
-      {/* Deactivate Account Dialog */}
-      <AlertDialog open={showDeactivateDialog} onOpenChange={setShowDeactivateDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
-              Deactivate Account
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Your account will be temporarily disabled. You can reactivate it by logging in again.
-              All your data will be preserved, but you won't be visible to other users during this time.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              className="bg-yellow-500 hover:bg-yellow-600 text-white"
-              onClick={handleDeactivateAccount}
-            >
-              Deactivate
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Delete Account Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              Delete Account Permanently
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your account
-              and remove all your data from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              className="bg-red-500 hover:bg-red-600 text-white"
-              onClick={handleDeleteAccount}
-            >
-              Delete Permanently
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

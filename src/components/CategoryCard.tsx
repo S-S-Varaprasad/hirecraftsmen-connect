@@ -2,12 +2,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { LucideIcon } from 'lucide-react';
+import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
 
 interface CategoryCardProps {
   title: string;
   icon: LucideIcon;
   description: string;
-  availableWorkers: number;
   slug: string;
 }
 
@@ -15,9 +15,11 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   title,
   icon: Icon,
   description,
-  availableWorkers,
   slug,
 }) => {
+  const { getWorkerCountByCategory } = useWorkerProfiles();
+  const availableWorkers = getWorkerCountByCategory(title);
+
   return (
     <Link 
       to={`/workers/category/${slug}`}
@@ -39,7 +41,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
         </p>
         
         <div className="text-sm font-medium text-primary dark:text-primary/90">
-          {availableWorkers} available workers
+          {availableWorkers} available worker{availableWorkers !== 1 ? 's' : ''}
         </div>
       </div>
     </Link>

@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, MapPin, Briefcase, Clock, IndianRupee, FileText, Upload, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,11 +7,15 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import { registerWorker } from '@/services/workerService';
-import { supabase } from '@/integrations/supabase/client';
+import { useStorage } from '@/hooks/useStorage';
+import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
 
 const JoinAsWorker = () => {
+  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const { uploadFile } = useStorage();
+  const { createWorkerProfile } = useWorkerProfiles();
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -35,6 +39,17 @@ const JoinAsWorker = () => {
     return <Navigate to="/login" />;
   }
 
+  // Prefill email if user is logged in
+  useEffect(() => {
+    if (user && user.email) {
+      setFormData(prev => ({
+        ...prev,
+        email: user.email || '',
+        name: user.user_metadata?.name || ''
+      }));
+    }
+  }, [user]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -43,6 +58,18 @@ const JoinAsWorker = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'profileImage' | 'resume') => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      // Validate file type
+      if (fieldName === 'profileImage' && !file.type.startsWith('image/')) {
+        toast.error('Please upload an image file (JPG, PNG, etc.)');
+        return;
+      }
+      
+      if (fieldName === 'resume' && !['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
+        toast.error('Please upload a PDF or Word document');
+        return;
+      }
+      
       setFormData({ ...formData, [fieldName]: file });
       
       if (fieldName === 'profileImage') {
@@ -98,6 +125,7 @@ const JoinAsWorker = () => {
     setIsLoading(true);
 
     try {
+      // Validate required fields
       if (!formData.name || !formData.email || !formData.phone || !formData.profession || !formData.location) {
         toast.warning('Please fill all required fields.');
         setIsLoading(false);
@@ -109,47 +137,15 @@ const JoinAsWorker = () => {
         setIsLoading(false);
         return;
       }
-
-      // Upload profile image to Supabase Storage
-      let imageUrl = null;
-      if (formData.profileImage) {
-        const fileExt = formData.profileImage.name.split('.').pop();
-        const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
-        
-        const { error: storageError, data: storageData } = await supabase
-          .storage
-          .from('worker-profiles')
-          .upload(fileName, formData.profileImage);
-          
-        if (storageError) {
-          toast.error('Error uploading profile image');
-          console.error(storageError);
-          setIsLoading(false);
-          return;
-        }
-        
-        imageUrl = supabase.storage.from('worker-profiles').getPublicUrl(fileName).data.publicUrl;
-      }
-
-      // Register worker in database - add user_id from the authenticated user
-      await registerWorker({
-        name: formData.name,
-        profession: formData.profession,
-        location: formData.location,
-        experience: formData.experience,
-        hourly_rate: formData.hourlyRate,
-        skills: formData.skills.split(',').map(skill => skill.trim()),
-        is_available: true,
-        image_url: imageUrl,
-        about: formData.about,
-        user_id: user?.id || null,  // Add user_id from the authenticated user
-      });
-
-      toast.success('Your profile has been submitted! We will review and get back to you soon.');
+      
+      // Create worker profile using the hook
+      await createWorkerProfile.mutateAsync(formData);
+      
+      toast.success('Your profile has been created successfully!');
       
       // Redirect to workers page
       setTimeout(() => {
-        window.location.href = '/workers';
+        navigate('/workers');
       }, 2000);
       
     } catch (error: any) {

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,15 @@ import { useNotifications } from '@/hooks/useNotifications';
 const UserProfile = () => {
   const { user, signOut } = useAuth();
   const { notifications, markAsRead } = useNotifications();
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+  const [unreadCount, setUnreadCount] = useState(0);
+  
+  // Calculate unread count whenever notifications change
+  useEffect(() => {
+    if (notifications) {
+      const count = notifications.filter(n => !n.is_read).length;
+      setUnreadCount(count);
+    }
+  }, [notifications]);
 
   // Get user initials for the avatar fallback
   const getInitials = () => {
@@ -58,7 +66,7 @@ const UserProfile = () => {
             Notifications
           </div>
           <div className="max-h-[300px] overflow-y-auto">
-            {notifications.length === 0 ? (
+            {!notifications || notifications.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
                 No notifications yet
               </div>
@@ -77,7 +85,7 @@ const UserProfile = () => {
               ))
             )}
           </div>
-          {notifications.length > 0 && (
+          {notifications && notifications.length > 0 && (
             <div className="p-2 border-t">
               <Button 
                 variant="ghost" 

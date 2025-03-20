@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,20 +9,19 @@ import { ArrowLeft, Briefcase, MapPin, Calendar, Clock, IndianRupee, CheckCircle
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/context/AuthContext';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { getJobById } from '@/services/jobService';
-import { getWorkerByUserId, getWorkerById } from '@/services/workerService';
-import { applyToJob } from '@/services/applicationService';
-import { createNotification } from '@/services/notificationService';
+import { getWorkerByUserId } from '@/services/workerService';
+import { useJobApplications } from '@/hooks/useJobApplications';
 import { toast } from 'sonner';
 
 const ApplyNow = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  const queryClient = useQueryClient();
   const [message, setMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { applyForJob, isSubmitting } = useJobApplications();
 
   // Redirect to login if user is not authenticated
   useEffect(() => {
@@ -47,39 +45,6 @@ const ApplyNow = () => {
     enabled: !!user?.id && isAuthenticated,
   });
 
-  // Create application mutation
-  const applyMutation = useMutation({
-    mutationFn: async () => {
-      if (!workerProfile) {
-        throw new Error('You must create a worker profile before applying for jobs');
-      }
-      if (!job) throw new Error('Job not found');
-      
-      // Apply to job
-      const application = await applyToJob(job.id, workerProfile.id, message);
-      
-      // Create notification for employer
-      if (job.employer_id) {
-        await createNotification(
-          job.employer_id,
-          `${workerProfile.name} has applied for "${job.title}"`,
-          'application',
-          application.id
-        );
-      }
-      
-      return application;
-    },
-    onSuccess: () => {
-      toast.success('Application submitted successfully!');
-      queryClient.invalidateQueries({ queryKey: ['applications'] });
-      navigate('/jobs');
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to submit application');
-    },
-  });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -94,7 +59,26 @@ const ApplyNow = () => {
       return;
     }
     
-    applyMutation.mutate();
+    if (!job) {
+      toast.error('Job information could not be found');
+      return;
+    }
+    
+    try {
+      await applyForJob.mutateAsync({
+        jobId: job.id,
+        workerId: workerProfile.id,
+        message: message
+      });
+      
+      // Redirect after successful application
+      setTimeout(() => {
+        navigate('/jobs');
+      }, 1000);
+    } catch (error) {
+      // Error is handled in the mutation
+      console.error('Application error:', error);
+    }
   };
 
   if (isLoadingJob || isLoadingWorker) {
@@ -156,10 +140,10 @@ const ApplyNow = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-orange-50/40 dark:bg-gray-900">
       <Navbar />
       
-      <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
+      <main className="flex-grow pt-24">
         <div className="container mx-auto px-4 py-8">
           <Link to={`/jobs`} className="inline-flex items-center text-primary hover:underline mb-6">
             <ArrowLeft className="w-4 h-4 mr-1" />
@@ -173,51 +157,53 @@ const ApplyNow = () => {
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-2xl mb-1">{job.title}</CardTitle>
-                      <CardDescription className="text-base">{job.company}</CardDescription>
+                      <CardTitle className="text-2xl mb-1">{job?.title}</CardTitle>
+                      <CardDescription className="text-base">{job?.company}</CardDescription>
                     </div>
                     <Badge className={`
-                      ${job.urgency === 'High' ? 'bg-red-500 hover:bg-red-600' : 
-                        job.urgency === 'Medium' ? 'bg-yellow-500 hover:bg-yellow-600' : 
+                      ${job?.urgency === 'High' ? 'bg-red-500 hover:bg-red-600' : 
+                        job?.urgency === 'Medium' ? 'bg-yellow-500 hover:bg-yellow-600' : 
                         'bg-green-500 hover:bg-green-600'}
                     `}>
-                      {job.urgency} Priority
+                      {job?.urgency} Priority
                     </Badge>
                   </div>
                 </CardHeader>
                 
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                      <MapPin className="w-4 h-4 mr-2 text-gray-500" />
-                      <span>{job.location}</span>
+                {job && (
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                        <MapPin className="w-4 h-4 mr-2 text-gray-500" />
+                        <span>{job.location}</span>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                        <Briefcase className="w-4 h-4 mr-2 text-gray-500" />
+                        <span>{job.job_type}</span>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                        <IndianRupee className="w-4 h-4 mr-2 text-gray-500" />
+                        <span>{job.rate}</span>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                        <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+                        <span>Posted {new Date(job.posted_date).toLocaleDateString()}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                      <Briefcase className="w-4 h-4 mr-2 text-gray-500" />
-                      <span>{job.job_type}</span>
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                      <IndianRupee className="w-4 h-4 mr-2 text-gray-500" />
-                      <span>{job.rate}</span>
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                      <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                      <span>Posted {new Date(job.posted_date).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4 border-t">
-                    <h3 className="font-medium mb-2">Description</h3>
-                    <p className="text-gray-700 dark:text-gray-300 text-sm mb-4">{job.description}</p>
                     
-                    <h3 className="font-medium mb-2">Required Skills</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {job.skills.map((skill, index) => (
-                        <Badge key={index} variant="secondary">{skill}</Badge>
-                      ))}
+                    <div className="pt-4 border-t">
+                      <h3 className="font-medium mb-2">Description</h3>
+                      <p className="text-gray-700 dark:text-gray-300 text-sm mb-4">{job.description}</p>
+                      
+                      <h3 className="font-medium mb-2">Required Skills</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {job.skills.map((skill, index) => (
+                          <Badge key={index} variant="secondary">{skill}</Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
+                  </CardContent>
+                )}
               </Card>
             </div>
 
@@ -229,16 +215,18 @@ const ApplyNow = () => {
                   <CardDescription>
                     You are applying as:
                   </CardDescription>
-                  <div className="flex items-center mt-2">
-                    <Avatar className="h-10 w-10 mr-3">
-                      <AvatarImage src={workerProfile.image_url || undefined} />
-                      <AvatarFallback>{workerProfile.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{workerProfile.name}</p>
-                      <p className="text-sm text-gray-500">{workerProfile.profession}</p>
+                  {workerProfile && (
+                    <div className="flex items-center mt-2">
+                      <Avatar className="h-10 w-10 mr-3">
+                        <AvatarImage src={workerProfile.image_url || undefined} />
+                        <AvatarFallback>{workerProfile.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{workerProfile.name}</p>
+                        <p className="text-sm text-gray-500">{workerProfile.profession}</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </CardHeader>
                 
                 <CardContent>
@@ -262,9 +250,9 @@ const ApplyNow = () => {
                     <Button 
                       type="submit" 
                       className="w-full mt-6" 
-                      disabled={applyMutation.isPending}
+                      disabled={isSubmitting || !workerProfile}
                     >
-                      {applyMutation.isPending ? (
+                      {isSubmitting ? (
                         <>
                           <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-b-transparent"></div>
                           Submitting...
