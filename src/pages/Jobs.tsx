@@ -64,7 +64,7 @@ const Jobs = () => {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-grow bg-gradient-to-b from-orange-50/40 to-white dark:from-gray-900 dark:to-gray-800 pt-24 flex justify-center items-center">
-          <div className="text-center py-20 bg-white/80 rounded-xl shadow-sm border border-gray-100 dark:bg-gray-800/80 dark:border-gray-700 max-w-md mx-auto px-4 backdrop-blur-sm">
+          <div className="text-center py-20 glass dark:glass-dark rounded-xl shadow-lg max-w-md mx-auto px-4 backdrop-blur-sm">
             <h3 className="text-xl font-semibold mb-2">Error loading jobs</h3>
             <p className="text-gray-600 dark:text-gray-400">
               There was a problem fetching the job data. Please try again later.
@@ -91,7 +91,7 @@ const Jobs = () => {
             transition={{ duration: 0.5 }}
           >
             <motion.div 
-              className="inline-flex items-center px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4 gap-2"
+              className="inline-flex items-center px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4 gap-2 hover-lift"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
@@ -99,7 +99,7 @@ const Jobs = () => {
               <span>Job Opportunities</span>
             </motion.div>
             
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-5 tracking-tight">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-5 tracking-tight bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
               Browse Available Jobs
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">
@@ -108,7 +108,7 @@ const Jobs = () => {
           </motion.div>
           
           <motion.div 
-            className="mb-8"
+            className="mb-8 glass dark:glass-dark p-4 rounded-xl shadow-md"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -150,7 +150,7 @@ const Jobs = () => {
                         duration: 0.4,
                         delay: 0.3 + (index * 0.05)
                       }}
-                      className="three-d-card"
+                      className="three-d-card hover-lift"
                     >
                       <JobCard 
                         id={job.id}
@@ -169,7 +169,7 @@ const Jobs = () => {
                 </motion.div>
               ) : (
                 <motion.div 
-                  className="text-center py-20 bg-white/80 rounded-xl shadow-lg border border-gray-200 dark:bg-gray-800/80 dark:border-gray-700 backdrop-blur-sm"
+                  className="text-center py-20 glass dark:glass-dark rounded-xl shadow-3d backdrop-blur-sm"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.3 }}

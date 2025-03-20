@@ -90,22 +90,38 @@ function App() {
         {!cookieConsentAccepted && (
           <CookieConsent
             location="bottom"
-            buttonText="I Accept"
+            buttonText="Accept Cookies"
             cookieName="handyHelpers-cookie-consent"
-            style={{ background: "#2B373B" }}
+            style={{ 
+              background: "rgba(43, 55, 59, 0.95)",
+              backdropFilter: "blur(8px)",
+              borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+              maxWidth: "1200px",
+              margin: "0 auto",
+              left: "50%",
+              transform: "translateX(-50%)",
+              borderRadius: "8px 8px 0 0"
+            }}
             buttonStyle={{ 
               backgroundColor: "#f97316", 
               color: "white", 
               fontSize: "14px", 
-              borderRadius: "4px", 
-              padding: "8px 16px"
+              borderRadius: "6px", 
+              padding: "10px 16px",
+              fontWeight: "500",
+              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)"
+            }}
+            contentStyle={{
+              flex: "1",
+              margin: "15px"
             }}
             expires={150}
             onAccept={handleCookieAccept}
             hideOnAccept={true}
             acceptOnScroll={false}
+            buttonWrapperClasses="px-4"
           >
-            This website uses cookies to enhance the user experience.
+            <span style={{ fontWeight: "500" }}>This website uses cookies</span> to enhance your browsing experience and provide personalized services. By continuing to use our site, you consent to our use of cookies.
           </CookieConsent>
         )}
       </ThemeProvider>
