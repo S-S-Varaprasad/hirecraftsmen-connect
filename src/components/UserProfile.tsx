@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Bell, User, Settings, LogOut, History } from 'lucide-react';
+import { Bell, User, Settings, LogOut, History, FileText } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,17 +20,9 @@ import { toast } from 'sonner';
 
 const UserProfile = () => {
   const { user, signOut } = useAuth();
-  const { notifications, markAsRead, loading } = useNotifications();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const navigate = useNavigate();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, loading } = useNotifications();
   
-  // Calculate unread count whenever notifications change
-  useEffect(() => {
-    if (notifications) {
-      const count = notifications.filter(n => !n.is_read).length;
-      setUnreadCount(count);
-    }
-  }, [notifications]);
-
   // Get user initials for the avatar fallback
   const getInitials = () => {
     if (!user) return 'U';
@@ -54,17 +46,28 @@ const UserProfile = () => {
 
   const handleMarkAllAsRead = async () => {
     try {
-      if (notifications && notifications.length > 0) {
-        for (const notification of notifications) {
-          if (!notification.is_read) {
-            await markAsRead(notification.id);
-          }
-        }
-        toast.success('All notifications marked as read');
-      }
+      await markAllAsRead();
+      toast.success('All notifications marked as read');
     } catch (error) {
       console.error('Error marking notifications as read:', error);
       toast.error('Failed to mark notifications as read');
+    }
+  };
+
+  const handleNotificationClick = (notification) => {
+    markAsRead(notification.id);
+    
+    // Navigate based on notification type
+    if (notification.related_id) {
+      if (notification.type === 'application' || notification.type === 'new_application') {
+        navigate(`/jobs/${notification.related_id}`);
+      } else if (notification.type === 'job_accepted') {
+        navigate(`/job-history`);
+      } else if (notification.type === 'job_completed') {
+        navigate(`/job-history`);
+      } else if (notification.type === 'new_job' || notification.type === 'job_updated') {
+        navigate(`/jobs/${notification.related_id}`);
+      }
     }
   };
 
@@ -113,7 +116,8 @@ const UserProfile = () => {
                 <div 
                   key={notification.id} 
                   className={`p-3 border-b text-sm hover:bg-gray-50 dark:hover:bg-gray-800 ${!notification.is_read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
-                  onClick={() => markAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
+                  style={{ cursor: 'pointer' }}
                 >
                   <p className="mb-1">{notification.message}</p>
                   <p className="text-xs text-gray-500">

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -7,11 +7,28 @@ import WorkerHistory from '@/components/workers/WorkerHistory';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { History, ArrowLeft } from 'lucide-react';
+import { History, ArrowLeft, Bell, Filter } from 'lucide-react';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useQuery } from '@tanstack/react-query';
+import { getApplicationsByWorkerId } from '@/services/applicationService';
+import { toast } from 'sonner';
 
 const WorkerJobHistory = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  
+  const { data: applications, isLoading, error, refetch } = useQuery({
+    queryKey: ['worker-applications', user?.id],
+    queryFn: () => user?.id ? getApplicationsByWorkerId(user.id) : Promise.resolve([]),
+    enabled: !!user?.id,
+  });
 
   // Redirect if no user is logged in
   if (!user) {
@@ -36,6 +53,16 @@ const WorkerJobHistory = () => {
     );
   }
 
+  const handleRefresh = () => {
+    refetch();
+    toast.success("Job history refreshed");
+  };
+
+  const filteredApplications = applications?.filter(app => {
+    if (statusFilter === "all") return true;
+    return app.status === statusFilter;
+  });
+
   return (
     <div className="min-h-screen flex flex-col dark:bg-gray-900">
       <Navbar />
@@ -58,6 +85,33 @@ const WorkerJobHistory = () => {
                 My Job History
               </h1>
             </div>
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center">
+                <span className="text-sm mr-2">Status:</span>
+                <Select 
+                  value={statusFilter} 
+                  onValueChange={setStatusFilter}
+                >
+                  <SelectTrigger className="w-36">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="applied">Applied</SelectItem>
+                    <SelectItem value="accepted">Accepted</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh}
+              >
+                Refresh
+              </Button>
+            </div>
           </div>
 
           <Card className="shadow-md">
@@ -69,7 +123,12 @@ const WorkerJobHistory = () => {
             </CardHeader>
             <CardContent>
               {user && user.id && (
-                <WorkerHistory workerId={user.id} />
+                <WorkerHistory 
+                  workerId={user.id} 
+                  applications={filteredApplications} 
+                  isLoading={isLoading}
+                  error={error as Error}
+                />
               )}
             </CardContent>
           </Card>

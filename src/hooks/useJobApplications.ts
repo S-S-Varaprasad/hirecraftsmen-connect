@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -8,12 +9,6 @@ import {
   markApplicationCompleted 
 } from '@/services/applicationService';
 import { getJobById } from '@/services/jobService';
-import { 
-  createWorkerApplicationNotification, 
-  createJobAcceptedNotification, 
-  createNotification,
-  notifyEmployerAboutApplication
-} from '@/services/notificationService';
 import { getWorkerById } from '@/services/workerService';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
@@ -58,17 +53,24 @@ export const useJobApplications = () => {
           console.log(`Sending notification to employer: ${job.employer_id}`);
           
           try {
-            await notifyEmployerAboutApplication(
-              job.employer_id,
-              workerId,
-              worker.name,
-              jobId,
-              job.title,
-              true // Send email notification
-            );
-            console.log('Employer notification sent successfully');
+            // Call our edge function for notifications
+            const { error: notifyError } = await supabase.functions.invoke('notify-user', {
+              body: {
+                userId: job.employer_id,
+                message: `${worker.name} has applied to your job: ${job.title}`,
+                type: 'new_application',
+                relatedId: jobId,
+                sendEmail: true
+              }
+            });
+
+            if (notifyError) {
+              console.error('Error notifying employer:', notifyError);
+            } else {
+              console.log('Employer notification sent successfully');
+            }
           } catch (notifyError) {
-            console.error('Error sending employer notification:', notifyError);
+            console.error('Error in notification function:', notifyError);
             // Continue even if notification fails
           }
         } else {
@@ -78,15 +80,22 @@ export const useJobApplications = () => {
         // Create notification for the worker too
         if (user?.id) {
           try {
-            await createNotification(
-              user.id,
-              `You have successfully applied to the job: ${job.title}`,
-              'job_application',
-              jobId
-            );
-            console.log('Worker application notification created');
+            const { error: workerNotifyError } = await supabase.functions.invoke('notify-user', {
+              body: {
+                userId: user.id,
+                message: `You have successfully applied to the job: ${job.title}`,
+                type: 'job_application',
+                relatedId: jobId
+              }
+            });
+            
+            if (workerNotifyError) {
+              console.error('Error creating worker notification:', workerNotifyError);
+            } else {
+              console.log('Worker application notification created');
+            }
           } catch (workerNotifyError) {
-            console.error('Error creating worker notification:', workerNotifyError);
+            console.error('Error with worker notification:', workerNotifyError);
           }
         }
         
@@ -97,6 +106,7 @@ export const useJobApplications = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['applications'] });
+      queryClient.invalidateQueries({ queryKey: ['worker-applications'] });
       toast.success('Application submitted successfully!');
     },
     onError: (error: any) => {
@@ -134,44 +144,29 @@ export const useJobApplications = () => {
       if (!job) throw new Error('Job not found');
       console.log('Job details for acceptance:', job);
       
-      // Get employer name (this is placeholder logic - adjust based on your user data structure)
+      // Get employer name
       const employerName = user?.user_metadata?.name || 'Employer';
       
-      // Notify worker
+      // Notify worker using edge function
       try {
-        await createJobAcceptedNotification(
-          workerId,
-          employerName,
-          jobId,
-          job.title
-        );
-        console.log('Worker acceptance notification sent');
-        
-        // Send email notification to worker when job is accepted
-        const worker = await getWorkerById(workerId);
-        if (worker && worker.user_id) {
-          try {
-            await fetch(`${process.env.SUPABASE_URL}/functions/v1/send-notification`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
-              },
-              body: JSON.stringify({
-                userId: worker.user_id,
-                message: `Your application for "${job.title}" has been accepted by ${employerName}!`,
-                type: 'job_accepted',
-                relatedId: jobId,
-                sendEmail: true
-              })
-            });
-            console.log('Worker email notification sent');
-          } catch (emailError) {
-            console.error('Error sending worker email notification:', emailError);
+        const { error: notifyError } = await supabase.functions.invoke('notify-user', {
+          body: {
+            userId: workerId,
+            message: `Your application for "${job.title}" has been accepted by ${employerName}!`,
+            type: 'job_accepted',
+            relatedId: jobId,
+            sendEmail: true,
+            sendSms: true
           }
+        });
+        
+        if (notifyError) {
+          console.error('Error sending acceptance notification:', notifyError);
+        } else {
+          console.log('Worker acceptance notification sent');
         }
       } catch (notifyError) {
-        console.error('Error sending acceptance notification:', notifyError);
+        console.error('Error in notification function:', notifyError);
         // Continue even if notification fails
       }
       
@@ -179,6 +174,7 @@ export const useJobApplications = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['applications'] });
+      queryClient.invalidateQueries({ queryKey: ['worker-applications'] });
       toast.success('Worker has been notified of acceptance');
     },
     onError: (error: any) => {
@@ -196,15 +192,23 @@ export const useJobApplications = () => {
       // Notify worker about job completion and payment
       if (updatedApplication && updatedApplication.worker_id) {
         try {
-          await createNotification(
-            updatedApplication.worker_id,
-            `Your job has been marked as completed and payment is being processed.`,
-            'job_completed',
-            updatedApplication.job_id
-          );
-          console.log('Worker completion notification sent');
+          const { error: notifyError } = await supabase.functions.invoke('notify-user', {
+            body: {
+              userId: updatedApplication.worker_id,
+              message: `Your job has been marked as completed and payment is being processed.`,
+              type: 'job_completed',
+              relatedId: updatedApplication.job_id,
+              sendEmail: true
+            }
+          });
+          
+          if (notifyError) {
+            console.error('Error sending completion notification:', notifyError);
+          } else {
+            console.log('Worker completion notification sent');
+          }
         } catch (notifyError) {
-          console.error('Error sending completion notification:', notifyError);
+          console.error('Error in notification function:', notifyError);
         }
       }
       
@@ -212,6 +216,7 @@ export const useJobApplications = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['applications'] });
+      queryClient.invalidateQueries({ queryKey: ['worker-applications'] });
       toast.success('Job marked as completed and payment is being processed');
     },
     onError: (error: any) => {

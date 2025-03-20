@@ -1,9 +1,13 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Notification, getNotifications, markNotificationAsRead, createNotification } from '@/services/notificationService';
+import { 
+  Notification, 
+  getNotifications, 
+  markNotificationAsRead 
+} from '@/services/notificationService';
 
 export const useNotifications = () => {
   const { user } = useAuth();
@@ -23,15 +27,10 @@ export const useNotifications = () => {
     const fetchNotifications = async () => {
       try {
         setLoading(true);
-        const { data, error } = await supabase
-          .from('notifications')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
         
-        const notificationsList = data || [];
+        // Use our service instead of direct query to handle errors consistently
+        const notificationsList = await getNotifications(user.id);
+        
         setNotifications(notificationsList);
         
         // Count unread notifications
@@ -41,6 +40,7 @@ export const useNotifications = () => {
         console.log(`Fetched ${notificationsList.length} notifications, ${unread} unread`);
       } catch (error: any) {
         console.error('Error fetching notifications:', error);
+        toast.error('Failed to load notifications');
       } finally {
         setLoading(false);
       }
@@ -75,13 +75,40 @@ export const useNotifications = () => {
       )
       .subscribe();
 
+    // Subscription for when notifications are marked as read
+    const updateChannel = supabase
+      .channel('public:notifications:updates')
+      .on('postgres_changes', 
+        { 
+          event: 'UPDATE', 
+          schema: 'public', 
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}` 
+        },
+        (payload: { new: Notification, old: Notification }) => {
+          console.log('Notification updated:', payload.new);
+          
+          // Update the notification in our state
+          setNotifications(prev => 
+            prev.map(n => n.id === payload.new.id ? payload.new : n)
+          );
+          
+          // If it was marked as read, update the unread count
+          if (!payload.old.is_read && payload.new.is_read) {
+            setUnreadCount(prev => Math.max(0, prev - 1));
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(updateChannel);
     };
   }, [user]);
 
   // Mark notification as read
-  const markAsRead = async (notificationId: string) => {
+  const markAsRead = useCallback(async (notificationId: string) => {
     try {
       if (!user) return;
       
@@ -96,13 +123,14 @@ export const useNotifications = () => {
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error: any) {
       console.error('Error marking notification as read:', error);
+      toast.error('Failed to mark notification as read');
     }
-  };
+  }, [user]);
 
   // Mark all notifications as read
-  const markAllAsRead = async () => {
+  const markAllAsRead = useCallback(async () => {
     try {
-      if (!user) return;
+      if (!user || unreadCount === 0) return;
       
       const { error } = await supabase
         .from('notifications')
@@ -117,30 +145,21 @@ export const useNotifications = () => {
       );
       
       setUnreadCount(0);
+      
+      return true;
     } catch (error: any) {
       console.error('Error marking all notifications as read:', error);
+      toast.error('Failed to mark all notifications as read');
+      throw error;
     }
-  };
-
-  // Create a new notification
-  const sendNotification = async (message: string, type: string, relatedId?: string) => {
-    if (!user) return null;
-    
-    try {
-      return await createNotification(user.id, message, type, relatedId);
-    } catch (error: any) {
-      console.error('Error creating notification:', error);
-      return null;
-    }
-  };
+  }, [user, unreadCount]);
 
   return {
     notifications,
     unreadCount,
     loading,
     markAsRead,
-    markAllAsRead,
-    sendNotification
+    markAllAsRead
   };
 };
 

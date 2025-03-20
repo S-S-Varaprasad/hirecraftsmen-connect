@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getApplicationsByWorkerId } from '@/services/applicationService';
+import { getApplicationsByWorkerId, Application } from '@/services/applicationService';
 import { Badge } from '@/components/ui/badge';
 import { 
   Table, 
@@ -13,10 +13,11 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { formatDistanceToNow } from 'date-fns';
-import { CalendarClock, DollarSign, Briefcase, Check, X, Clock, Award, FileText } from 'lucide-react';
+import { CalendarClock, DollarSign, Briefcase, Check, X, Clock, Award, FileText, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { useJobApplications } from '@/hooks/useJobApplications';
+import { useToast } from '@/components/ui/use-toast';
 
 const StatusBadge = ({ status }: { status: string }) => {
   switch (status) {
@@ -59,17 +60,43 @@ const PaymentStatus = ({ status, rate }: { status: string, rate: string | undefi
   }
 };
 
-const WorkerHistory = ({ workerId }: { workerId: string }) => {
+interface WorkerHistoryProps {
+  workerId: string;
+  applications?: Application[];
+  isLoading?: boolean;
+  error?: Error;
+}
+
+const WorkerHistory = ({ 
+  workerId, 
+  applications: externalApplications,
+  isLoading: externalLoading,
+  error: externalError
+}: WorkerHistoryProps) => {
   const { markJobCompleted } = useJobApplications();
+  const { toast } = useToast();
   
-  const { data: applications, isLoading, error } = useQuery({
+  // Only fetch if external applications are not provided
+  const { data: fetchedApplications, isLoading: fetchLoading, error: fetchError } = useQuery({
     queryKey: ['worker-applications', workerId],
     queryFn: () => getApplicationsByWorkerId(workerId),
-    enabled: !!workerId,
+    enabled: !!workerId && externalApplications === undefined,
   });
 
+  // Use external data if provided, otherwise use fetched data
+  const applications = externalApplications || fetchedApplications;
+  const isLoading = externalLoading !== undefined ? externalLoading : fetchLoading;
+  const error = externalError || fetchError;
+
   const handleMarkComplete = (applicationId: string) => {
-    markJobCompleted.mutate({ applicationId });
+    markJobCompleted.mutate({ applicationId }, {
+      onSuccess: () => {
+        toast({
+          title: "Job marked as completed",
+          description: "The job has been marked as completed and payment is being processed.",
+        });
+      }
+    });
   };
 
   if (isLoading) {
@@ -102,7 +129,12 @@ const WorkerHistory = ({ workerId }: { workerId: string }) => {
         <CardHeader className="text-center">
           <Briefcase className="h-12 w-12 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
           <CardTitle>No Job History</CardTitle>
-          <CardDescription>You haven't applied to any jobs yet.</CardDescription>
+          <CardDescription>
+            You haven't applied to any jobs yet. 
+            <Button asChild variant="link" className="p-0 h-auto">
+              <a href="/jobs" className="ml-1">Browse available jobs</a>
+            </Button>
+          </CardDescription>
         </CardHeader>
       </Card>
     );
@@ -155,8 +187,8 @@ const WorkerHistory = ({ workerId }: { workerId: string }) => {
                         className="h-8 px-2 text-blue-600 dark:text-blue-400"
                         onClick={() => window.open(`/jobs/${application.job?.id}`, '_blank')}
                       >
-                        <FileText className="h-3 w-3 mr-1" />
-                        Details
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        View Job
                       </Button>
                     )}
                     
