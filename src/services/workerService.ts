@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import { getIndianWorkers } from '@/utils/workerFilters';
 
 export interface Worker {
   id: string;
@@ -33,7 +32,7 @@ export const getWorkers = async () => {
     languages: (worker as any).languages || []
   })) || [];
   
-  return getIndianWorkers(workersWithLanguages as Worker[]);
+  return workersWithLanguages as Worker[];
 };
 
 export const getWorkersByCategory = async (category: string) => {

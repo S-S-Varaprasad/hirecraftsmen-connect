@@ -2,19 +2,15 @@
 import React from 'react';
 import ProfileCard from '@/components/ProfileCard';
 import { Worker } from '@/services/workerService';
-import { getIndianWorkers } from '@/utils/workerFilters';
 
 interface WorkerGridProps {
   workers: Worker[];
 }
 
 const WorkerGrid: React.FC<WorkerGridProps> = ({ workers }) => {
-  // Filter to only show Indian workers
-  const indianWorkers = getIndianWorkers(workers);
-  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {indianWorkers.map((worker) => (
+      {workers.map((worker) => (
         <ProfileCard 
           key={worker.id} 
           id={worker.id}
