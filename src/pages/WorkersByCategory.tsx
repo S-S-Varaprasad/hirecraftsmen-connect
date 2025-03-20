@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SearchFilters from '@/components/SearchFilters';
@@ -10,7 +10,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getWorkers, Worker } from '@/services/workerService';
 import WorkerGrid from '@/components/workers/WorkerGrid';
 import NoWorkersFound from '@/components/workers/NoWorkersFound';
-import { useToast } from '@/hooks/use-toast';
+import LoadingState from '@/components/workers/LoadingState';
+import ErrorState from '@/components/workers/ErrorState';
 import { toast } from 'sonner';
 
 const professionMap: { [key: string]: string } = {
@@ -32,21 +33,34 @@ const professionMap: { [key: string]: string } = {
 
 const WorkersByCategory = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [categoryName, setCategoryName] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
 
-  const { data: workersData = [], isLoading: isLoadingWorkers } = useQuery({
+  console.log('Current slug:', slug);
+
+  const { data: workersData = [], isLoading: isLoadingWorkers, error: workersError } = useQuery({
     queryKey: ['workers'],
     queryFn: getWorkers,
   });
 
   useEffect(() => {
-    if (slug && workersData.length > 0) {
+    // If we don't have a slug, redirect to the workers page
+    if (!slug) {
+      navigate('/workers');
+      return;
+    }
+
+    if (workersData.length > 0) {
+      setIsLoading(true);
+      
+      // Get the profession name from the map
       const profession = professionMap[slug] || '';
       setCategoryName(profession || 'Specialized');
       
-      setIsLoading(true);
+      console.log('Looking for workers matching profession:', profession);
       
       // This ensures we have results even if the profession isn't found directly
       const professionToMatch = profession.toLowerCase();
@@ -63,10 +77,12 @@ const WorkersByCategory = () => {
         results = workersData.slice(0, 6);
       }
       
+      console.log(`Found ${results.length} workers matching "${professionToMatch}"`);
+      
       setFilteredWorkers(results);
       setIsLoading(false);
     }
-  }, [slug, workersData]);
+  }, [slug, workersData, navigate]);
 
   useEffect(() => {
     if (slug && !professionMap[slug]) {
@@ -112,12 +128,28 @@ const WorkersByCategory = () => {
     }, 400);
   };
 
+  if (workersError) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
+          <div className="container mx-auto px-4 py-8">
+            <ErrorState />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (isLoadingWorkers) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24 flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
+          <div className="container mx-auto px-4 py-8">
+            <LoadingState />
+          </div>
         </main>
         <Footer />
       </div>
@@ -126,6 +158,7 @@ const WorkersByCategory = () => {
 
   // Count available workers (those with is_available = true)
   const availableWorkersCount = filteredWorkers.filter(worker => worker.is_available).length;
+  const totalCount = filteredWorkers.length;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -157,9 +190,7 @@ const WorkersByCategory = () => {
           </div>
           
           {isLoading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            </div>
+            <LoadingState />
           ) : (
             <>
               {filteredWorkers.length > 0 ? (
@@ -172,7 +203,7 @@ const WorkersByCategory = () => {
           
           <div className="mt-10 text-center">
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Found {filteredWorkers.length} {categoryName.toLowerCase() || 'specialized'} workers 
+              Found {totalCount} {categoryName.toLowerCase() || 'specialized'} workers 
               ({availableWorkersCount} currently available)
             </p>
             <Button variant="outline" asChild>

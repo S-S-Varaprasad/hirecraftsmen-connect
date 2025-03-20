@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Search, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,15 +62,15 @@ const HeroSection = () => {
             
             <div className="mt-8 flex flex-wrap justify-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <p className="mr-1">Popular:</p>
-              <a href="/workers/category/carpenter" className="hover:text-orange-500 hover:underline">Carpenter</a>
+              <Link to="/workers/category/carpenter" className="hover:text-orange-500 hover:underline">Carpenter</Link>
               <span className="mx-1">•</span>
-              <a href="/workers/category/plumber" className="hover:text-orange-500 hover:underline">Plumber</a>
+              <Link to="/workers/category/plumber" className="hover:text-orange-500 hover:underline">Plumber</Link>
               <span className="mx-1">•</span>
-              <a href="/workers/category/electrician" className="hover:text-orange-500 hover:underline">Electrician</a>
+              <Link to="/workers/category/electrician" className="hover:text-orange-500 hover:underline">Electrician</Link>
               <span className="mx-1">•</span>
-              <a href="/workers/category/painter" className="hover:text-orange-500 hover:underline">Painter</a>
+              <Link to="/workers/category/painter" className="hover:text-orange-500 hover:underline">Painter</Link>
               <span className="mx-1">•</span>
-              <a href="/workers/category/cleaner" className="hover:text-orange-500 hover:underline">Cleaner</a>
+              <Link to="/workers/category/cleaner" className="hover:text-orange-500 hover:underline">Cleaner</Link>
             </div>
           </div>
         </div>

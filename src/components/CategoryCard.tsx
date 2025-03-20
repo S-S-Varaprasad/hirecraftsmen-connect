@@ -17,14 +17,25 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   description,
   slug,
 }) => {
-  const { getWorkerCountByCategory, workers } = useWorkerProfiles();
+  const { workers } = useWorkerProfiles();
   const [availableWorkers, setAvailableWorkers] = useState(0);
   
   // Update count whenever workers data changes
   useEffect(() => {
-    const count = getWorkerCountByCategory(title);
-    setAvailableWorkers(count);
-  }, [workers, title, getWorkerCountByCategory]);
+    if (workers && workers.length > 0) {
+      const professionToMatch = title.toLowerCase();
+      
+      // Count workers that match this category and are available
+      const count = workers.filter(worker => {
+        const workerProfession = worker.profession.toLowerCase();
+        const isMatch = workerProfession.includes(professionToMatch) || 
+                       worker.skills.some((skill: string) => skill.toLowerCase().includes(professionToMatch));
+        return isMatch && worker.is_available;
+      }).length;
+      
+      setAvailableWorkers(count);
+    }
+  }, [workers, title]);
 
   return (
     <Link 

@@ -22,7 +22,7 @@ const WorkerGrid: React.FC<WorkerGridProps> = ({ workers }) => {
           hourlyRate={worker.hourly_rate}
           skills={worker.skills}
           isAvailable={worker.is_available}
-          imageUrl={worker.image_url}
+          imageUrl={worker.image_url || '/placeholder.svg'}
           userId={worker.user_id}
         />
       ))}
