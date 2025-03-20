@@ -66,18 +66,35 @@ serve(async (req: Request) => {
     let emailResult = null;
     if (sendEmail) {
       try {
-        const { data: userData, error: userError } = await supabaseClient
-          .from("auth.users")
-          .select("email")
-          .eq("id", userId)
-          .single();
+        // First, get user's email from auth users table
+        const { data: userData, error: userError } = await supabaseClient.auth.admin.getUserById(userId);
 
         if (userError || !userData) {
-          console.error("Error fetching user email:", userError);
-        } else if (userData.email) {
+          console.error("Error fetching user email:", userError || "No user data found");
+        } else if (userData.user.email) {
           // Here you would integrate with an email service to send the email
-          console.log(`Would send email to ${userData.email}: ${message}`);
-          emailResult = { success: true, email: userData.email };
+          // This is a placeholder for actual email sending code
+          
+          console.log(`Would send email to ${userData.user.email}: ${message}`);
+          emailResult = { success: true, email: userData.user.email };
+          
+          // You could implement a real email service here
+          // For example, using a service like Mailgun, SendGrid, or AWS SES
+          /*
+          const emailResponse = await fetch('https://api.mailservice.com/send', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${Deno.env.get("EMAIL_API_KEY")}`
+            },
+            body: JSON.stringify({
+              to: userData.user.email,
+              subject: `Notification: ${type}`,
+              text: message,
+              html: `<div><h1>${type}</h1><p>${message}</p></div>`
+            })
+          });
+          */
         }
       } catch (emailError) {
         console.error("Error sending email notification:", emailError);
@@ -85,12 +102,45 @@ serve(async (req: Request) => {
       }
     }
 
-    // Handle SMS notification (placeholder for future implementation)
+    // Handle SMS notification
     let smsResult = null;
     if (sendSms) {
-      // Here you would implement SMS sending logic
-      console.log(`Would send SMS notification: ${message}`);
-      smsResult = { success: true, message: "SMS notification simulated" };
+      try {
+        // Get worker's phone number
+        const { data: workerData, error: workerError } = await supabaseClient
+          .from("workers")
+          .select("phone_number")
+          .eq("user_id", userId)
+          .single();
+          
+        if (workerError || !workerData || !workerData.phone_number) {
+          console.error("Error fetching worker phone number:", workerError || "No phone number found");
+        } else {
+          // Here you would implement SMS sending logic with a service like Twilio
+          // This is a placeholder for actual SMS sending code
+          
+          console.log(`Would send SMS to ${workerData.phone_number}: ${message}`);
+          smsResult = { success: true, phone: workerData.phone_number };
+          
+          // Example implementation with Twilio would be:
+          /*
+          const twilioResponse = await fetch('https://api.twilio.com/send-sms', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Basic ${btoa(`${Deno.env.get("TWILIO_ACCOUNT_SID")}:${Deno.env.get("TWILIO_AUTH_TOKEN")}`)}`
+            },
+            body: JSON.stringify({
+              to: workerData.phone_number,
+              body: message
+            })
+          });
+          */
+        }
+      } catch (smsError) {
+        console.error("Error sending SMS notification:", smsError);
+        smsResult = { success: false, error: smsError.message };
+      }
     }
 
     return new Response(

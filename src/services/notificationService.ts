@@ -140,6 +140,19 @@ export const createNewJobNotification = async (
   );
 };
 
+export const createJobUpdatedNotification = async (
+  workerId: string,
+  jobId: string,
+  jobTitle: string
+) => {
+  return createNotification(
+    workerId,
+    `A job you might be interested in was updated: ${jobTitle}`,
+    'job_updated',
+    jobId
+  );
+};
+
 export const notifyWorkersAboutJob = async (
   jobId: string, 
   jobTitle: string, 
@@ -173,6 +186,44 @@ export const notifyWorkersAboutJob = async (
     return result;
   } catch (error) {
     console.error('Error notifying workers about job:', error);
+    throw error;
+  }
+};
+
+export const notifyWorkersAboutJobUpdate = async (
+  jobId: string, 
+  jobTitle: string, 
+  skills: string[],
+  category?: string,
+  sendEmail: boolean = false,
+  sendSms: boolean = false
+) => {
+  try {
+    const response = await fetch(`${process.env.SUPABASE_URL}/functions/v1/notify-workers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({
+        jobId,
+        jobTitle,
+        skills,
+        category,
+        sendEmail,
+        sendSms,
+        isUpdate: true
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error notifying workers about job update: ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error notifying workers about job update:', error);
     throw error;
   }
 };

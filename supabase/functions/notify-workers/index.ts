@@ -16,6 +16,7 @@ interface NotifyWorkersRequest {
   sendEmail?: boolean;
   sendSms?: boolean;
   employerId?: string;
+  isUpdate?: boolean;
 }
 
 serve(async (req: Request) => {
@@ -35,7 +36,7 @@ serve(async (req: Request) => {
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get request body
-    const { jobId, jobTitle, skills, category, sendEmail, sendSms, employerId } = await req.json() as NotifyWorkersRequest;
+    const { jobId, jobTitle, skills, category, sendEmail, sendSms, employerId, isUpdate } = await req.json() as NotifyWorkersRequest;
 
     if (!jobId || !jobTitle || !skills || skills.length === 0) {
       return new Response(
@@ -44,7 +45,8 @@ serve(async (req: Request) => {
       );
     }
 
-    console.log(`Notifying workers about job: ${jobTitle} with skills: ${skills.join(', ')}`);
+    const notificationType = isUpdate ? "job update" : "new job";
+    console.log(`Notifying workers about ${notificationType}: ${jobTitle} with skills: ${skills.join(', ')}`);
     
     // Get workers with matching skills or profession
     const { data: workers, error: workersError } = await supabaseClient
@@ -79,13 +81,19 @@ serve(async (req: Request) => {
         
         try {
           // Insert notification into the database
+          const message = isUpdate 
+            ? `A job matching your skills was updated: ${jobTitle}` 
+            : `New job posted that matches your skills: ${jobTitle}`;
+            
+          const notificationType = isUpdate ? 'job_updated' : 'new_job';
+          
           const { data: notification, error: notifyError } = await supabaseClient
             .from("notifications")
             .insert([
               {
                 user_id: worker.user_id,
-                message: `New job posted that matches your skills: ${jobTitle}`,
-                type: 'new_job',
+                message: message,
+                type: notificationType,
                 related_id: jobId,
               },
             ])
@@ -97,6 +105,42 @@ serve(async (req: Request) => {
           } else {
             console.log(`Created notification for worker ${worker.id}:`, notification);
             notifications.push(notification);
+          }
+          
+          // Send email notification if requested
+          if (sendEmail) {
+            try {
+              await supabaseClient.functions.invoke("send-notification", {
+                body: {
+                  userId: worker.user_id,
+                  message: message,
+                  type: notificationType,
+                  relatedId: jobId,
+                  sendEmail: true
+                }
+              });
+              console.log(`Email notification sent to worker ${worker.id}`);
+            } catch (emailError) {
+              console.error(`Error sending email to worker ${worker.id}:`, emailError);
+            }
+          }
+          
+          // Send SMS notification if requested
+          if (sendSms) {
+            try {
+              await supabaseClient.functions.invoke("send-notification", {
+                body: {
+                  userId: worker.user_id,
+                  message: message,
+                  type: notificationType,
+                  relatedId: jobId,
+                  sendSms: true
+                }
+              });
+              console.log(`SMS notification sent to worker ${worker.id}`);
+            } catch (smsError) {
+              console.error(`Error sending SMS to worker ${worker.id}:`, smsError);
+            }
           }
         } catch (error) {
           console.error(`Error in notification process for worker ${worker.id}:`, error);

@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { getJobById, updateJob } from '@/services/jobService';
 import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
+import { notifyWorkersAboutJobUpdate } from '@/services/notificationService';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,8 @@ const formSchema = z.object({
   skills: z.string().min(3, 'Skills are required'),
   description: z.string().min(50, 'Description must be at least 50 characters'),
   notifyWorkers: z.boolean().optional(),
+  sendEmail: z.boolean().optional(),
+  sendSms: z.boolean().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -95,6 +98,8 @@ const EditJob = () => {
       skills: '',
       description: '',
       notifyWorkers: true,
+      sendEmail: true,
+      sendSms: false,
     },
   });
 
@@ -117,6 +122,8 @@ const EditJob = () => {
         skills: job.skills.join(', '),
         description: job.description,
         notifyWorkers: true,
+        sendEmail: true,
+        sendSms: false,
       });
     }
   }, [job, form]);
@@ -153,15 +160,20 @@ const EditJob = () => {
       
       // Notify matched workers if option is selected
       if (data.notifyWorkers && updatedJob) {
-        await notifyWorkers(
-          updatedJob.id, 
-          updatedJob.title, 
-          skillsArray,
-          undefined,
-          true, // send email
-          false, // don't send SMS
-          user.id
-        );
+        try {
+          await notifyWorkersAboutJobUpdate(
+            updatedJob.id, 
+            updatedJob.title, 
+            skillsArray,
+            undefined,
+            data.sendEmail, // send email based on checkbox
+            data.sendSms,   // send SMS based on checkbox
+          );
+          console.log('Workers notified about job update');
+        } catch (notifyError) {
+          console.error('Failed to notify workers:', notifyError);
+          // Continue execution even if notification fails
+        }
       }
       
       setIsSuccess(true);
@@ -384,6 +396,75 @@ const EditJob = () => {
                           </FormItem>
                         )}
                       />
+                      
+                      <div className="space-y-4 border-t pt-4">
+                        <h3 className="font-medium text-sm">Notification Options</h3>
+                        
+                        <FormField
+                          control={form.control}
+                          name="notifyWorkers"
+                          render={({ field }) => (
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                id="notifyWorkers"
+                                checked={field.value}
+                                onChange={field.onChange}
+                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                              <label htmlFor="notifyWorkers" className="text-sm text-gray-700 dark:text-gray-300">
+                                Notify qualified workers about this job update
+                              </label>
+                            </div>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="sendEmail"
+                          render={({ field }) => (
+                            <div className="flex items-center space-x-2 ml-6">
+                              <input
+                                type="checkbox"
+                                id="sendEmail"
+                                checked={field.value}
+                                onChange={field.onChange}
+                                disabled={!form.watch('notifyWorkers')}
+                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                              <label 
+                                htmlFor="sendEmail" 
+                                className={`text-sm ${!form.watch('notifyWorkers') ? 'text-gray-400 dark:text-gray-600' : 'text-gray-700 dark:text-gray-300'}`}
+                              >
+                                Also send email notifications
+                              </label>
+                            </div>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="sendSms"
+                          render={({ field }) => (
+                            <div className="flex items-center space-x-2 ml-6">
+                              <input
+                                type="checkbox"
+                                id="sendSms"
+                                checked={field.value}
+                                onChange={field.onChange}
+                                disabled={!form.watch('notifyWorkers')}
+                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                              <label 
+                                htmlFor="sendSms" 
+                                className={`text-sm ${!form.watch('notifyWorkers') ? 'text-gray-400 dark:text-gray-600' : 'text-gray-700 dark:text-gray-300'}`}
+                              >
+                                Also send SMS notifications
+                              </label>
+                            </div>
+                          )}
+                        />
+                      </div>
                       
                       <CardFooter className="px-0 pb-0 pt-2">
                         <div className="w-full flex flex-col md:flex-row gap-3 justify-end">
