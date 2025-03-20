@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Briefcase, Clock, MapPin, Tag, AlertCircle } from 'lucide-react';
+import { Briefcase, MapPin, Tag, AlertCircle } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ const PostJob = () => {
     location: '',
     job_type: 'full-time',
     rate: '',
-    urgency: 'normal',
+    urgency: 'Medium' as 'Low' | 'Medium' | 'High',
     description: '',
     skills: '',
   });
@@ -39,10 +38,33 @@ const PostJob = () => {
   };
   
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name === 'urgency') {
+      let typedValue: 'Low' | 'Medium' | 'High';
+      switch (value) {
+        case 'low':
+          typedValue = 'Low';
+          break;
+        case 'normal':
+          typedValue = 'Medium';
+          break;
+        case 'high':
+        case 'urgent':
+          typedValue = 'High';
+          break;
+        default:
+          typedValue = 'Medium';
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        [name]: typedValue,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,10 +79,8 @@ const PostJob = () => {
     try {
       setIsSubmitting(true);
       
-      // Convert skills from comma-separated string to array
       const skillsArray = formData.skills.split(',').map(skill => skill.trim());
       
-      // Prepare job data
       const jobData = {
         title: formData.title,
         company: formData.company,
@@ -71,10 +91,8 @@ const PostJob = () => {
         description: formData.description,
         skills: skillsArray,
         employer_id: user.id,
-        posted_date: new Date().toISOString(),
       };
       
-      // Create job
       const newJob = await createJob(jobData);
       
       toast.success('Job posted successfully!');
@@ -212,7 +230,11 @@ const PostJob = () => {
                   <div>
                     <Label htmlFor="urgency" className="text-base font-medium">Urgency</Label>
                     <Select 
-                      value={formData.urgency} 
+                      value={
+                        formData.urgency === 'Low' ? 'low' :
+                        formData.urgency === 'Medium' ? 'normal' :
+                        formData.urgency === 'High' ? 'high' : 'normal'
+                      } 
                       onValueChange={(value) => handleSelectChange('urgency', value)}
                     >
                       <SelectTrigger>
