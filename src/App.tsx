@@ -89,6 +89,10 @@ function App() {
             padding: "8px 16px"
           }}
           expires={150}
+          // Add these props to fix the repeated display
+          hideOnAccept={true}
+          acceptOnScroll={false}
+          sameSite="strict"
         >
           This website uses cookies to enhance the user experience.
         </CookieConsent>
