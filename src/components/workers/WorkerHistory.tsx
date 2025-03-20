@@ -51,19 +51,19 @@ const StatusBadge = ({ status }: { status: string }) => {
       <Tooltip>
         <TooltipTrigger asChild>
           {status === 'applied' ? (
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 py-1.5 shadow-sm">
+            <Badge variant="outline" className="py-1.5 px-2.5 bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 shadow-sm">
               <Clock className="h-3 w-3 mr-1" /> Applied
             </Badge>
           ) : status === 'accepted' ? (
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800 py-1.5 shadow-sm">
+            <Badge variant="outline" className="py-1.5 px-2.5 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800 shadow-sm">
               <Check className="h-3 w-3 mr-1" /> Accepted
             </Badge>
           ) : status === 'rejected' ? (
-            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800 py-1.5 shadow-sm">
+            <Badge variant="outline" className="py-1.5 px-2.5 bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800 shadow-sm">
               <X className="h-3 w-3 mr-1" /> Rejected
             </Badge>
           ) : status === 'completed' ? (
-            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800 py-1.5 shadow-sm">
+            <Badge variant="outline" className="py-1.5 px-2.5 bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800 shadow-sm">
               <Award className="h-3 w-3 mr-1" /> Completed
             </Badge>
           ) : (
@@ -178,7 +178,7 @@ const WorkerHistory = ({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 space-y-6 bg-white/20 dark:bg-gray-800/20 rounded-xl backdrop-blur-sm border border-gray-100 dark:border-gray-700 shadow-sm">
+      <div className="flex flex-col items-center justify-center p-12 space-y-6 bg-white/60 dark:bg-gray-800/30 rounded-xl backdrop-blur-sm border border-gray-100 dark:border-gray-700/50 shadow-md">
         <div className="relative w-16 h-16">
           <div className="absolute inset-0 rounded-full border-t-2 border-b-2 border-primary animate-spin"></div>
           <div className="absolute inset-3 rounded-full border-r-2 border-l-2 border-primary/70 animate-spin animate-reverse"></div>
@@ -191,7 +191,7 @@ const WorkerHistory = ({
 
   if (error) {
     return (
-      <Card className="border-red-200 dark:border-red-800 shadow-3d">
+      <Card className="border-red-200 dark:border-red-800 shadow-lg backdrop-blur-sm bg-white/80 dark:bg-gray-800/50">
         <CardHeader>
           <CardTitle className="text-red-600 dark:text-red-400 flex items-center">
             <AlertTriangle className="mr-2 h-5 w-5" />
@@ -204,7 +204,7 @@ const WorkerHistory = ({
           </p>
           <Button 
             variant="outline" 
-            className="mt-6 hover-lift"
+            className="mt-6 shadow-sm transition-all duration-300 hover:-translate-y-1"
             onClick={() => refetch()}
           >
             <RefreshCw className="h-4 w-4 mr-1" />
@@ -217,7 +217,7 @@ const WorkerHistory = ({
 
   if (!applications || applications.length === 0) {
     return (
-      <Card className="border-gray-200 dark:border-gray-700 shadow-3d glass">
+      <Card className="border-gray-200 dark:border-gray-700/50 shadow-lg bg-white/80 dark:bg-gray-800/40 backdrop-blur-sm">
         <CardHeader className="text-center">
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }}
@@ -245,7 +245,7 @@ const WorkerHistory = ({
             variant="outline" 
             size="sm" 
             onClick={() => refetch()}
-            className="mt-2 hover-lift"
+            className="mt-2 shadow-sm transition-all duration-300 hover:-translate-y-1"
           >
             <RefreshCw className="h-4 w-4 mr-1" />
             Refresh History
@@ -262,16 +262,16 @@ const WorkerHistory = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="bg-gradient-to-r from-blue-50 to-blue-50/30 dark:from-blue-900/10 dark:to-blue-900/5 p-5 rounded-xl mb-6 border dark:border-gray-700/50 shadow-md">
+      <Card className="bg-gradient-to-r from-blue-50 to-blue-50/30 dark:from-blue-900/10 dark:to-blue-900/5 p-5 rounded-xl mb-6 border dark:border-gray-700/50 shadow-md backdrop-blur-sm">
         <CardContent className="p-0">
           <h3 className="font-medium flex items-center text-gray-700 dark:text-gray-300 mb-4">
             <HelpCircle className="h-5 w-5 mr-2 text-blue-500" />
             <span className="text-lg">Understanding Your Application Status</span>
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <motion.div 
-              className="flex items-start space-x-3 hover-lift p-4 bg-white/70 dark:bg-gray-800/50 rounded-lg border border-blue-100 dark:border-blue-900/30 shadow-sm transition-all" 
-              whileHover={{ y: -5 }}
+              className="flex items-start space-x-3 p-4 bg-white/70 dark:bg-gray-800/50 rounded-lg border border-blue-100 dark:border-blue-900/30 shadow-sm transition-all" 
+              whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.1)' }}
               transition={{ duration: 0.2 }}
             >
               <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full mt-0.5">
@@ -283,8 +283,8 @@ const WorkerHistory = ({
               </div>
             </motion.div>
             <motion.div 
-              className="flex items-start space-x-3 hover-lift p-4 bg-white/70 dark:bg-gray-800/50 rounded-lg border border-green-100 dark:border-green-900/30 shadow-sm transition-all" 
-              whileHover={{ y: -5 }}
+              className="flex items-start space-x-3 p-4 bg-white/70 dark:bg-gray-800/50 rounded-lg border border-green-100 dark:border-green-900/30 shadow-sm transition-all" 
+              whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(34, 197, 94, 0.1), 0 8px 10px -6px rgba(34, 197, 94, 0.1)' }}
               transition={{ duration: 0.2 }}
             >
               <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-full mt-0.5">
@@ -296,8 +296,8 @@ const WorkerHistory = ({
               </div>
             </motion.div>
             <motion.div 
-              className="flex items-start space-x-3 hover-lift p-4 bg-white/70 dark:bg-gray-800/50 rounded-lg border border-red-100 dark:border-red-900/30 shadow-sm transition-all" 
-              whileHover={{ y: -5 }}
+              className="flex items-start space-x-3 p-4 bg-white/70 dark:bg-gray-800/50 rounded-lg border border-red-100 dark:border-red-900/30 shadow-sm transition-all" 
+              whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(239, 68, 68, 0.1), 0 8px 10px -6px rgba(239, 68, 68, 0.1)' }}
               transition={{ duration: 0.2 }}
             >
               <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full mt-0.5">
@@ -309,8 +309,8 @@ const WorkerHistory = ({
               </div>
             </motion.div>
             <motion.div 
-              className="flex items-start space-x-3 hover-lift p-4 bg-white/70 dark:bg-gray-800/50 rounded-lg border border-purple-100 dark:border-purple-900/30 shadow-sm transition-all" 
-              whileHover={{ y: -5 }}
+              className="flex items-start space-x-3 p-4 bg-white/70 dark:bg-gray-800/50 rounded-lg border border-purple-100 dark:border-purple-900/30 shadow-sm transition-all" 
+              whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(147, 51, 234, 0.1), 0 8px 10px -6px rgba(147, 51, 234, 0.1)' }}
               transition={{ duration: 0.2 }}
             >
               <div className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-full mt-0.5">
@@ -325,8 +325,8 @@ const WorkerHistory = ({
         </CardContent>
       </Card>
         
-      <Card className="shadow-3d rounded-xl overflow-hidden border dark:border-gray-700/50">
-        <div className="bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-800/80 px-6 py-4 border-b dark:border-gray-700/50 flex justify-between items-center">
+      <Card className="shadow-lg rounded-xl overflow-hidden border dark:border-gray-700/50 backdrop-blur-sm bg-white/90 dark:bg-gray-800/60">
+        <div className="bg-gradient-to-r from-primary/10 to-blue-500/10 dark:from-primary/20 dark:to-blue-500/20 px-6 py-4 border-b dark:border-gray-700/50 flex justify-between items-center">
           <h3 className="font-bold text-lg text-gray-800 dark:text-white flex items-center gap-2">
             <Briefcase className="h-5 w-5 text-primary" />
             Your Applications
@@ -335,13 +335,13 @@ const WorkerHistory = ({
             variant="ghost" 
             size="sm" 
             onClick={() => refetch()}
-            className="h-9 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="h-9 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors"
           >
             <RefreshCw className="h-3.5 w-3.5 mr-1" />
             Refresh
           </Button>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
           <Table>
             <TableCaption>Job application history and payment details</TableCaption>
             <TableHeader>

@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -257,6 +258,49 @@
   /* Glass morphism for notifications */
   .glass-notification {
     @apply bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 shadow-xl;
+  }
+  
+  /* Professional hover lift effect */
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-md;
+  }
+  
+  /* Enhanced shadow for cards */
+  .shadow-3d {
+    @apply shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)];
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+  }
+  
+  /* Scrollbar styles */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+  
+  /* Subtle hover effects */
+  .hover-subtle {
+    @apply transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50;
+  }
+  
+  /* Animation for spinners */
+  .animate-reverse {
+    animation-direction: reverse;
   }
 }
 

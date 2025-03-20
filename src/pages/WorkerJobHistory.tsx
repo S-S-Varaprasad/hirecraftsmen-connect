@@ -58,7 +58,7 @@ const WorkerJobHistory = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow bg-gradient-to-b from-blue-50/40 via-blue-50/20 to-white dark:from-gray-900 dark:via-gray-900/90 dark:to-gray-800 pt-24 flex justify-center items-center">
+        <main className="flex-grow bg-gradient-to-b from-blue-50/60 via-blue-50/30 to-white dark:from-gray-900/90 dark:via-gray-900/80 dark:to-gray-800/90 pt-24 pb-16 flex justify-center items-center">
           <motion.div 
             className="flex flex-col items-center gap-4"
             initial={{ opacity: 0 }}
@@ -79,17 +79,17 @@ const WorkerJobHistory = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50/40 via-blue-50/20 to-white dark:from-gray-900 dark:via-gray-900/90 dark:to-gray-800">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50/60 via-blue-50/30 to-white dark:from-gray-900/90 dark:via-gray-900/80 dark:to-gray-800/90">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-12 mt-16 md:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {error ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <Card className="glass shadow-3d overflow-hidden border-red-200 dark:border-red-800/40 backdrop-blur-sm">
+              <Card className="glass shadow-lg overflow-hidden border-red-200 dark:border-red-800/40 backdrop-blur-sm">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-center mb-6">
                     {error.includes("logged in") ? (
@@ -119,7 +119,7 @@ const WorkerJobHistory = () => {
                   </Button>
                   <Button 
                     variant="outline"
-                    className="hover-lift shadow-sm"
+                    className="hover:shadow-md transition-all duration-300 hover:-translate-y-1"
                     onClick={() => navigate("/")}
                   >
                     Go to Home
@@ -135,27 +135,27 @@ const WorkerJobHistory = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                  <div>
-                    <h1 className="text-3xl font-bold gradient-text bg-gradient-to-r from-primary via-blue-500 to-indigo-600">Your Job History</h1>
-                    <p className="text-muted-foreground mt-1">Track all your job applications and their current status</p>
-                  </div>
-                  <div className="mt-4 md:mt-0">
-                    <Button 
-                      variant="outline" 
-                      className="hover-lift shadow-sm group transition-all"
-                      onClick={() => navigate("/jobs")}
-                    >
-                      <Briefcase className="h-4 w-4 mr-2 group-hover:text-primary transition-colors" />
-                      <span className="group-hover:text-primary transition-colors">Browse Jobs</span>
-                    </Button>
+                <div className="bg-white/80 dark:bg-gray-800/40 backdrop-blur-sm rounded-xl p-6 shadow-md mb-8 border border-gray-100 dark:border-gray-700/50">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-500 to-indigo-600 mb-1">Your Job History</h1>
+                      <p className="text-muted-foreground">Track all your job applications and their current status</p>
+                    </div>
+                    <div>
+                      <Button 
+                        variant="outline" 
+                        className="shadow-sm transition-all duration-300 hover:-translate-y-1 group"
+                        onClick={() => navigate("/jobs")}
+                      >
+                        <Briefcase className="h-4 w-4 mr-2 group-hover:text-primary transition-colors" />
+                        <span className="group-hover:text-primary transition-colors">Browse Jobs</span>
+                      </Button>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="h-1 w-32 bg-gradient-to-r from-primary to-blue-500 rounded-full my-1"></div>
+                {workerId && <WorkerHistory workerId={workerId} />}
               </motion.div>
-              
-              {workerId && <WorkerHistory workerId={workerId} />}
             </>
           )}
         </div>
