@@ -179,7 +179,7 @@ const JobDetail = () => {
                     </Button>
                   </div>
                   <Button asChild>
-                    <Link to={`/apply/${job.id}`}>
+                    <Link to={`/apply-now/${job.id}`}>
                       <SendHorizonal className="mr-2 h-4 w-4" /> Apply Now
                     </Link>
                   </Button>

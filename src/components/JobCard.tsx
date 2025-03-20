@@ -120,7 +120,7 @@ const JobCard: React.FC<JobCardProps> = ({
             <Link to={`/jobs/${id}`}>View Details</Link>
           </Button>
           <Button asChild>
-            <Link to={`/apply/${id}`}>Apply Now</Link>
+            <Link to={`/apply-now/${id}`}>Apply Now</Link>
           </Button>
         </div>
       </CardFooter>
