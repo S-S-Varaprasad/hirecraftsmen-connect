@@ -1,35 +1,36 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from "@/components/theme-provider"
-import {
-  Index,
-  About,
-  Contact,
-  Login,
-  SignUp,
-  Terms,
-  Privacy,
-  Profile,
-  Settings,
-  Workers,
-  WorkerDetail,
-  Jobs,
-  JobDetail,
-  PostJob,
-  EditJob,
-  ApplyNow,
-  JoinAsWorker,
-  NotFound,
-  WorkersByCategory,
-  ContactEmployer,
-  DeactivateWorker,
-  DeleteWorker,
-  WorkerJobHistory
-} from '@/pages';
 import { AuthProvider, RequireAuth } from '@/context/AuthContext';
 import CookieConsent from "react-cookie-consent";
+
+// Import pages individually instead of from a barrel file
+import Index from '@/pages/Index';
+import About from '@/pages/About';
+import Contact from '@/pages/Contact';
+import Login from '@/pages/Login';
+import SignUp from '@/pages/SignUp';
+import Terms from '@/pages/Terms';
+import Privacy from '@/pages/Privacy';
+import Profile from '@/pages/Profile';
+import Settings from '@/pages/Settings';
+import Workers from '@/pages/Workers';
+import WorkerDetail from '@/pages/WorkerDetail';
+import Jobs from '@/pages/Jobs';
+import JobDetail from '@/pages/JobDetail';
+import PostJob from '@/pages/PostJob';
+import EditJob from '@/pages/EditJob';
+import ApplyNow from '@/pages/ApplyNow';
+import JoinAsWorker from '@/pages/JoinAsWorker';
+import NotFound from '@/pages/NotFound';
+import WorkersByCategory from '@/pages/WorkersByCategory';
+import ContactEmployer from '@/pages/ContactEmployer';
+import DeactivateWorker from '@/pages/DeactivateWorker';
+import DeleteWorker from '@/pages/DeleteWorker';
+import WorkerJobHistory from '@/pages/WorkerJobHistory';
 import MessageWorker from '@/pages/MessageWorker';
 import ContactWorker from '@/pages/ContactWorker';
 
