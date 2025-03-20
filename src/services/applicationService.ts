@@ -115,3 +115,8 @@ export const updateApplicationStatus = async (
   
   return data?.[0] as Application;
 };
+
+// Add a new function to mark jobs as completed (for payment tracking)
+export const markApplicationCompleted = async (id: string) => {
+  return updateApplicationStatus(id, 'completed');
+};

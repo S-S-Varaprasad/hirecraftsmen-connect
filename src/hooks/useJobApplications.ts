@@ -1,7 +1,12 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { applyToJob, getApplicationsByWorkerId, getApplicationsByJobId, updateApplicationStatus } from '@/services/applicationService';
+import { 
+  applyToJob, 
+  getApplicationsByWorkerId, 
+  getApplicationsByJobId, 
+  updateApplicationStatus,
+  markApplicationCompleted 
+} from '@/services/applicationService';
 import { getJobById } from '@/services/jobService';
 import { 
   createWorkerApplicationNotification, 
@@ -181,6 +186,39 @@ export const useJobApplications = () => {
     },
   });
 
+  // Add markJobCompleted mutation
+  const markJobCompleted = useMutation({
+    mutationFn: async ({ applicationId }: { applicationId: string }) => {
+      console.log(`Marking application as completed: ${applicationId}`);
+      
+      const updatedApplication = await markApplicationCompleted(applicationId);
+      
+      // Notify worker about job completion and payment
+      if (updatedApplication && updatedApplication.worker_id) {
+        try {
+          await createNotification(
+            updatedApplication.worker_id,
+            `Your job has been marked as completed and payment is being processed.`,
+            'job_completed',
+            updatedApplication.job_id
+          );
+          console.log('Worker completion notification sent');
+        } catch (notifyError) {
+          console.error('Error sending completion notification:', notifyError);
+        }
+      }
+      
+      return updatedApplication;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['applications'] });
+      toast.success('Job marked as completed and payment is being processed');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to mark job as completed');
+    },
+  });
+
   // Get applications for a job
   const getJobApplications = async (jobId: string) => {
     try {
@@ -206,6 +244,7 @@ export const useJobApplications = () => {
   return {
     applyForJob,
     acceptApplication,
+    markJobCompleted,
     getJobApplications,
     getWorkerApplications,
     isSubmitting,
