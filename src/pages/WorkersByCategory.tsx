@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -12,7 +13,7 @@ import NoWorkersFound from '@/components/workers/NoWorkersFound';
 import LoadingState from '@/components/workers/LoadingState';
 import ErrorState from '@/components/workers/ErrorState';
 import { toast } from 'sonner';
-import { applyFilters } from '@/utils/workerFilters';
+import { applyFilters, getIndianWorkers } from '@/utils/workerFilters';
 
 const professionMap: { [key: string]: string } = {
   'painter': 'Painter',
@@ -55,6 +56,9 @@ const WorkersByCategory = () => {
     if (workersData.length > 0) {
       setIsLoading(true);
       
+      // First, filter to only Indian workers
+      const indianWorkers = getIndianWorkers(workersData);
+      
       const profession = professionMap[slug] || '';
       setCategoryName(profession || 'Specialized');
       
@@ -64,13 +68,13 @@ const WorkersByCategory = () => {
       let results = [];
       
       if (professionToMatch) {
-        results = workersData.filter(worker => {
+        results = indianWorkers.filter(worker => {
           const workerProfession = worker.profession.toLowerCase();
           return workerProfession.includes(professionToMatch) || 
                 worker.skills.some((skill: string) => skill.toLowerCase().includes(professionToMatch));
         });
       } else {
-        results = workersData.slice(0, 6);
+        results = indianWorkers.slice(0, 6);
       }
       
       console.log(`Found ${results.length} workers matching "${professionToMatch}"`);

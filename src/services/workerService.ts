@@ -1,4 +1,6 @@
+
 import { supabase } from '@/integrations/supabase/client';
+import { getIndianWorkers } from '@/utils/workerFilters';
 
 export interface Worker {
   id: string;
@@ -95,6 +97,17 @@ export const getWorkerByUserId = async (userId: string) => {
 };
 
 export const registerWorker = async (workerData: Omit<Worker, 'id' | 'rating' | 'created_at'>) => {
+  // Validate location to ensure it's in India
+  const indiaLocationTerms = ['india', 'mumbai', 'delhi', 'bangalore', 'chennai', 'kolkata', 'hyderabad'];
+  const isIndianLocation = indiaLocationTerms.some(term => 
+    workerData.location.toLowerCase().includes(term.toLowerCase())
+  );
+  
+  // If not an Indian location, append "India" to the location
+  if (!isIndianLocation) {
+    workerData.location = `${workerData.location}, India`;
+  }
+  
   const dataToSend = {
     ...workerData,
     languages: workerData.languages || [],

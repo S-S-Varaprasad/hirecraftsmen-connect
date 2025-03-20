@@ -23,10 +23,16 @@ export interface WorkerFilters {
   location?: string;
   professions?: string[];
   availableOnly?: boolean;
+  onlyIndian?: boolean;
 }
 
 export const applyFilters = (workers: Worker[], filters: WorkerFilters): Worker[] => {
   let results = [...workers];
+  
+  // Apply Indian filter first if requested
+  if (filters.onlyIndian) {
+    results = getIndianWorkers(results);
+  }
   
   if (filters.searchTerm) {
     const term = filters.searchTerm.toLowerCase();

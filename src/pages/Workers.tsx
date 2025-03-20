@@ -12,7 +12,7 @@ import NoWorkersFound from '@/components/workers/NoWorkersFound';
 import LoadingState from '@/components/workers/LoadingState';
 import ErrorState from '@/components/workers/ErrorState';
 import WorkersHeader from '@/components/workers/WorkersHeader';
-import { applyFilters, WorkerFilters } from '@/utils/workerFilters';
+import { applyFilters, WorkerFilters, getIndianWorkers } from '@/utils/workerFilters';
 
 const Workers = () => {
   const location = useLocation();
@@ -32,11 +32,16 @@ const Workers = () => {
   useEffect(() => {
     if (workersData) {
       console.log('Workers data received:', workersData);
+      
+      // Get only Indian workers
+      const indianWorkers = getIndianWorkers(workersData);
+      
       // Apply initial filters from URL if they exist
       if (initialSearch || initialLocation) {
         const filters: WorkerFilters = {
           searchTerm: initialSearch,
-          location: initialLocation
+          location: initialLocation,
+          onlyIndian: true
         };
         
         const results = applyFilters(workersData, filters);
@@ -45,11 +50,11 @@ const Workers = () => {
         if (results.length > 0) {
           toast.info(`Found ${results.length} worker${results.length !== 1 ? 's' : ''} matching your search criteria`);
         } else {
-          toast.info('No workers found matching your search criteria. Showing all workers instead.');
-          setFilteredWorkers(workersData);
+          toast.info('No workers found matching your search criteria. Showing all Indian workers instead.');
+          setFilteredWorkers(indianWorkers);
         }
       } else {
-        setFilteredWorkers(workersData);
+        setFilteredWorkers(indianWorkers);
       }
     }
   }, [workersData, initialSearch, initialLocation]);
@@ -57,9 +62,12 @@ const Workers = () => {
   const handleSearch = (filters) => {
     setIsLoading(true);
     
+    // Always apply Indian filter
+    const allFilters = { ...filters, onlyIndian: true };
+    
     // Apply filters
     setTimeout(() => {
-      const results = applyFilters(workersData, filters);
+      const results = applyFilters(workersData, allFilters);
       
       setFilteredWorkers(results);
       setIsLoading(false);
