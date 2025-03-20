@@ -29,14 +29,15 @@ export const ensureStorageBuckets = async () => {
           // Set bucket to public
           try {
             // Create a policy that allows public read access to all files in the bucket
-            await supabase.rpc('create_storage_policy', {
-              bucket_name: 'worker-profiles',
-              policy_name: 'public-read',
-              definition: {
-                role: 'anon',
-                operation: 'SELECT'
+            await supabase.storage.from('worker-profiles').createPolicy(
+              'public-read',
+              {
+                type: 'SELECT',
+                definition: {
+                  role: 'anon'
+                }
               }
-            });
+            );
             console.log('Created public read policy for worker-profiles bucket');
           } catch (policyErr) {
             console.error('Error creating bucket policy:', policyErr);
