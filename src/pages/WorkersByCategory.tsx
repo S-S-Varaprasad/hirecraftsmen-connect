@@ -165,7 +165,6 @@ const WorkersByCategory = () => {
                       skills={worker.skills}
                       isAvailable={worker.is_available}
                       imageUrl={worker.image_url || '/placeholder.svg'}
-                      userId={worker.user_id}
                     />
                   ))}
                 </div>

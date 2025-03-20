@@ -3,253 +3,260 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Send, ArrowLeft } from 'lucide-react';
+import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
 import { useAuth } from '@/context/AuthContext';
-import { getWorkerById } from '@/services/workerService';
-import { createNotification } from '@/services/notificationService';
+import { Worker } from '@/services/workerService';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-// Define the Message interface
 interface Message {
   id: string;
   sender_id: string;
   receiver_id: string;
   content: string;
-  timestamp: string;
+  created_at: string;
   is_read: boolean;
 }
 
 const MessageWorker = () => {
   const { workerId } = useParams<{ workerId: string }>();
-  const { user } = useAuth();
   const navigate = useNavigate();
-  
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [worker, setWorker] = useState<any>(null);
+  const { getWorker } = useWorkerProfiles();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  
-  const messagesEndRef = React.useRef<HTMLDivElement>(null);
-  
+  const [worker, setWorker] = useState<Worker | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    
-    const fetchWorkerAndMessages = async () => {
+    const fetchWorker = async () => {
       if (!workerId) return;
       
       try {
-        const workerData = await getWorkerById(workerId);
+        const workerData = await getWorker(workerId);
         setWorker(workerData);
-        
-        // Since we don't have a messages table yet, we'll use notifications as messages
-        // This is a temporary solution
-        const mockMessages: Message[] = [
-          {
-            id: '1',
-            sender_id: user?.id || '',
-            receiver_id: workerId,
-            content: 'Hello, are you available for work next week?',
-            timestamp: new Date(Date.now() - 3600000).toISOString(),
-            is_read: true
-          },
-          {
-            id: '2',
-            sender_id: workerId,
-            receiver_id: user?.id || '',
-            content: 'Yes, I am available. What kind of work do you need done?',
-            timestamp: new Date(Date.now() - 3000000).toISOString(),
-            is_read: true
-          }
-        ];
-        
-        setMessages(mockMessages);
-        setLoading(false);
-        
-        // Scroll to bottom of messages
-        scrollToBottom();
       } catch (error) {
-        console.error('Error fetching worker or messages:', error);
-        toast.error('Failed to load conversation');
-        navigate('/workers');
+        console.error("Error fetching worker:", error);
+        toast.error("Could not load worker profile");
+      } finally {
+        setLoading(false);
       }
     };
-    
-    fetchWorkerAndMessages();
-  }, [workerId, user, navigate]);
-  
+
+    fetchWorker();
+  }, [workerId, getWorker]);
+
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-  
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-  
+    if (!user || !workerId) return;
+
+    // Subscribe to messages between current user and worker
+    const fetchMessages = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('messages')
+          .select('*')
+          .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+          .or(`sender_id.eq.${worker?.user_id},receiver_id.eq.${worker?.user_id}`)
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        if (data) setMessages(data);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+
+    fetchMessages();
+
+    // Set up real-time subscription for new messages
+    const subscription = supabase
+      .channel('messages')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `sender_id=eq.${user.id},receiver_id=eq.${worker?.user_id}`
+      }, (payload) => {
+        setMessages(prev => [...prev, payload.new as Message]);
+      })
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [user, workerId, worker?.user_id]);
+
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !user || !worker) return;
-    
+    if (!user || !worker || !worker.user_id || !newMessage.trim()) return;
+
     try {
       setSending(true);
       
-      // Create a new message object
-      const message: Message = {
-        id: Date.now().toString(),
-        sender_id: user.id || '',
-        receiver_id: workerId || '',
-        content: newMessage,
-        timestamp: new Date().toISOString(),
-        is_read: false
-      };
-      
-      // Add to local messages
-      setMessages([...messages, message]);
-      
-      // Clear input
+      // In a real app, you would insert the message to a messages table
+      // For now, we'll simulate sending a notification to the worker
+      const { data, error } = await supabase
+        .from('notifications')
+        .insert([
+          {
+            user_id: worker.user_id,
+            message: `New message from ${user.email}: ${newMessage.substring(0, 30)}${newMessage.length > 30 ? '...' : ''}`,
+            type: 'message',
+            related_id: user.id
+          }
+        ])
+        .select();
+
+      if (error) throw error;
+
+      // In a real app with a messages table:
+      // const { data, error } = await supabase
+      //   .from('messages')
+      //   .insert([
+      //     {
+      //       sender_id: user.id,
+      //       receiver_id: worker.user_id,
+      //       content: newMessage,
+      //       is_read: false
+      //     }
+      //   ])
+      //   .select();
+
+      toast.success("Message sent successfully");
       setNewMessage('');
-      
-      // Create a notification for the worker (this is our temporary messaging solution)
-      if (worker.user_id) {
-        await createNotification(
-          worker.user_id,
-          `New message from ${user.email}: ${newMessage}`,
-          'message',
-          user.id
-        );
-        
-        toast.success('Message sent');
-      } else {
-        // If the worker doesn't have a user account
-        toast.info('Message sent (demo only)');
-      }
     } catch (error) {
-      console.error('Error sending message:', error);
-      toast.error('Failed to send message');
+      console.error("Error sending message:", error);
+      toast.error("Failed to send message");
     } finally {
       setSending(false);
     }
   };
-  
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return date.toLocaleString();
-  };
-  
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase();
-  };
-  
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow pt-24 pb-12 bg-gray-50 dark:bg-gray-900">
-          <div className="container mx-auto px-4">
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-            </div>
+        <main className="flex-grow pt-32 pb-16 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-app-orange"></div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!worker) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow pt-32 pb-16 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Worker Not Found</h2>
+            <Button onClick={() => navigate('/workers')}>Back to Workers</Button>
           </div>
         </main>
         <Footer />
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow pt-24 pb-12 bg-gray-50 dark:bg-gray-900">
+      <main className="flex-grow bg-gray-50 dark:bg-gray-900 pt-32 pb-16">
         <div className="container mx-auto px-4">
           <Button 
             variant="ghost" 
-            className="mb-4" 
-            onClick={() => navigate(-1)}
+            className="mb-6" 
+            onClick={() => navigate(`/workers/${workerId}`)}
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Profile
           </Button>
           
-          <Card className="max-w-4xl mx-auto">
+          <Card className="max-w-3xl mx-auto">
             <CardHeader className="border-b">
-              <div className="flex items-center">
-                <Avatar className="h-10 w-10 mr-3">
-                  <AvatarImage src={worker?.image_url || ''} alt={worker?.name} />
-                  <AvatarFallback>{worker ? getInitials(worker.name) : 'W'}</AvatarFallback>
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={worker.image_url || ''} alt={worker.name} />
+                  <AvatarFallback className="bg-app-orange text-white">
+                    {worker.name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
-                <div>
-                  <CardTitle className="text-lg">{worker?.name}</CardTitle>
-                  <CardDescription>{worker?.profession}</CardDescription>
-                </div>
+                <CardTitle>Message {worker.name}</CardTitle>
               </div>
             </CardHeader>
-            
-            <CardContent className="p-0">
-              <div className="h-[400px] overflow-y-auto p-4 flex flex-col space-y-4">
-                {messages.map((message) => (
-                  <div 
-                    key={message.id}
-                    className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div 
-                      className={`max-w-[80%] px-4 py-2 rounded-lg ${
-                        message.sender_id === user?.id 
-                          ? 'bg-primary text-white rounded-br-none' 
-                          : 'bg-gray-200 dark:bg-gray-700 rounded-bl-none'
-                      }`}
-                    >
-                      <p>{message.content}</p>
-                      <p className={`text-xs mt-1 ${
-                        message.sender_id === user?.id 
-                          ? 'text-primary-foreground/70' 
-                          : 'text-gray-500 dark:text-gray-400'
-                      }`}>
-                        {formatTimestamp(message.timestamp)}
-                      </p>
-                    </div>
+            <CardContent className="p-6 space-y-6">
+              <div className="space-y-4">
+                {messages.length > 0 ? (
+                  <div className="space-y-4">
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${
+                          message.sender_id === user?.id ? 'justify-end' : 'justify-start'
+                        }`}
+                      >
+                        <div
+                          className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                            message.sender_id === user?.id
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-gray-200 dark:bg-gray-700 dark:text-white'
+                          }`}
+                        >
+                          <p>{message.content}</p>
+                          <p className="text-xs opacity-70 mt-1">
+                            {new Date(message.created_at).toLocaleTimeString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-                <div ref={messagesEndRef} />
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <p>No messages yet. Start the conversation!</p>
+                  </div>
+                )}
               </div>
               
-              <div className="p-4 border-t flex gap-2">
-                <Textarea 
-                  placeholder="Type your message here..." 
-                  className="flex-1 min-h-[60px]" 
+              <div className="flex space-x-2">
+                <Textarea
+                  placeholder="Type your message..."
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
+                  className="resize-none"
                 />
                 <Button 
-                  onClick={handleSendMessage} 
-                  disabled={!newMessage.trim() || sending}
-                  className="self-end"
+                  variant="default" 
+                  size="icon" 
+                  className="h-auto aspect-square" 
+                  onClick={handleSendMessage}
+                  disabled={sending || !newMessage.trim()}
                 >
-                  {sending ? (
-                    <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4 mr-1" />
-                      Send
-                    </>
-                  )}
+                  <Send className="h-5 w-5" />
                 </Button>
+              </div>
+              
+              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 mt-6">
+                <h3 className="font-medium mb-2">About {worker.name}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <span className="font-semibold">Profession:</span> {worker.profession}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <span className="font-semibold">Location:</span> {worker.location}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <span className="font-semibold">Hourly Rate:</span> {worker.hourly_rate}
+                </p>
+              </div>
+              
+              <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+                <p>This is a direct message to {worker.name}. Be respectful and clear in your communication.</p>
               </div>
             </CardContent>
           </Card>

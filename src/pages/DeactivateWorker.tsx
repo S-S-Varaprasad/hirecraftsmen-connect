@@ -119,7 +119,7 @@ const DeactivateWorker = () => {
                   <p className="font-medium text-yellow-700 dark:text-yellow-400">Note:</p>
                   <p className="text-gray-600 dark:text-gray-400">
                     This is not permanent. If you want to permanently delete your profile,
-                    please use the <Link to={`/workers/delete/${workerId}`} className="text-blue-600 dark:text-blue-400 underline">delete option</Link> instead.
+                    please use the <Link to={`/delete-worker/${workerId}`} className="text-blue-600 dark:text-blue-400 underline">delete option</Link> instead.
                   </p>
                 </div>
               </div>

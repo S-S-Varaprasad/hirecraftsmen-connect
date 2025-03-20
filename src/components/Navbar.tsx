@@ -1,265 +1,157 @@
 
-import * as React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, User, LogIn, Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { NotificationBell } from "@/components/NotificationBell";
-import { useAuth } from "@/context/AuthContext";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useTheme } from "./theme-provider";
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Menu, X, User, Briefcase } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
+import UserProfile from './UserProfile';
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate("/");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
-
-  const getInitials = (email: string): string => {
-    if (!email) return "U";
-    return email.charAt(0).toUpperCase();
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm' : 'bg-transparent'
+      }`}
+    >
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <span className="text-xl font-bold text-orange-600 dark:text-orange-500">
-              KaamKhoj
+          <Link 
+            to="/" 
+            className="flex items-center space-x-2 transition-all hover:opacity-80"
+          >
+            <span className="text-primary font-bold text-xl md:text-2xl tracking-tight">
+              HireEase
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link
-              to="/"
-              className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
-            >
-              Home
-            </Link>
-            <Link
-              to="/workers"
-              className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
-            >
+          <nav className="hidden md:flex items-center space-x-1">
+            <Link to="/workers" className="px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
               Find Workers
             </Link>
-            <Link
-              to="/jobs"
-              className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
-            >
+            <Link to="/jobs" className="px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
               Browse Jobs
             </Link>
-            <Link
-              to="/post-job"
-              className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
-            >
-              Post a Job
+            <Link to="/about" className="px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+              About
             </Link>
           </nav>
 
-          {/* User Menu (Desktop) */}
+          {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="h-9 w-9 rounded-full"
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )}
-              </Button>
-
-              {user ? (
-                <>
-                  <NotificationBell />
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="relative h-9 w-9 rounded-full"
-                      >
-                        <Avatar className="h-9 w-9">
-                          <AvatarImage
-                            src={user.user_metadata?.avatar_url}
-                            alt={user.email || "User"}
-                          />
-                          <AvatarFallback>
-                            {getInitials(user.email || "")}
-                          </AvatarFallback>
-                        </Avatar>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => navigate("/profile")}
-                      >
-                        Profile
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => navigate("/dashboard")}
-                      >
-                        Dashboard
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={handleSignOut}
-                      >
-                        Sign Out
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </>
-              ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="bg-orange-600 hover:bg-orange-700"
-                  onClick={() => navigate("/login")}
-                >
-                  <LogIn className="mr-2 h-4 w-4" />
-                  Login
-                </Button>
-              )}
-            </div>
+            {isAuthenticated ? (
+              <UserProfile />
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" size="sm">Login</Button>
+                </Link>
+                <Link to="/register">
+                  <Button variant="default" size="sm">Sign Up</Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-500"
-            onClick={toggleMenu}
+            type="button"
+            className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            {isMenuOpen ? (
-              <X className="h-6 w-6" />
+            <span className="sr-only">{isMobileMenuOpen ? 'Close menu' : 'Open menu'}</span>
+            {isMobileMenuOpen ? (
+              <X className="h-6 w-6" aria-hidden="true" />
             ) : (
-              <Menu className="h-6 w-6" />
+              <Menu className="h-6 w-6" aria-hidden="true" />
             )}
           </button>
         </div>
+      </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden py-3 pb-5">
-            <nav className="flex flex-col space-y-3">
-              <Link
-                to="/"
-                className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
-                onClick={toggleMenu}
-              >
-                Home
-              </Link>
-              <Link
-                to="/workers"
-                className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
-                onClick={toggleMenu}
-              >
-                Find Workers
-              </Link>
-              <Link
-                to="/jobs"
-                className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
-                onClick={toggleMenu}
-              >
-                Browse Jobs
-              </Link>
-              <Link
-                to="/post-job"
-                className="text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500 transition-colors"
-                onClick={toggleMenu}
-              >
-                Post a Job
-              </Link>
-              <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex justify-between items-center">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="h-9 w-9 rounded-full"
-                >
-                  {theme === "dark" ? (
-                    <Sun className="h-5 w-5" />
-                  ) : (
-                    <Moon className="h-5 w-5" />
-                  )}
-                </Button>
-                {user ? (
-                  <div className="flex items-center gap-3">
-                    <NotificationBell />
-                    <Link
-                      to="/profile"
-                      className="flex items-center gap-2 text-gray-700 hover:text-orange-600 dark:text-gray-300 dark:hover:text-orange-500"
-                      onClick={toggleMenu}
-                    >
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={user.user_metadata?.avatar_url}
-                          alt={user.email || "User"}
-                        />
-                        <AvatarFallback>
-                          {getInitials(user.email || "")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span>Profile</span>
-                    </Link>
-                  </div>
-                ) : (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="bg-orange-600 hover:bg-orange-700"
-                    onClick={() => {
-                      navigate("/login");
-                      toggleMenu();
-                    }}
-                  >
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Login
-                  </Button>
-                )}
-              </div>
-              {user && (
-                <Button
-                  variant="ghost"
-                  className="justify-start px-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                  onClick={() => {
-                    handleSignOut();
-                    toggleMenu();
-                  }}
-                >
-                  Sign Out
-                </Button>
-              )}
-            </nav>
+      {/* Mobile Menu */}
+      <div 
+        className={`
+          md:hidden fixed inset-0 bg-white dark:bg-gray-900 z-40 transition-transform duration-300 ease-in-out transform
+          ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}
+        `}
+        style={{ top: '64px' }}
+      >
+        <div className="px-4 pt-4 pb-6 space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <Link to="/workers" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center transition-all-gpu hover:shadow-md">
+              <Briefcase className="h-6 w-6 mb-2 text-primary" />
+              <span className="text-sm font-medium">Find Workers</span>
+            </Link>
+            <Link to="/jobs" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center transition-all-gpu hover:shadow-md">
+              <User className="h-6 w-6 mb-2 text-primary" />
+              <span className="text-sm font-medium">Browse Jobs</span>
+            </Link>
           </div>
-        )}
+          
+          <div className="space-y-2">
+            {isAuthenticated ? (
+              <div className="py-3 px-4 rounded-md text-center font-medium bg-gray-50 dark:bg-gray-800 mb-4">
+                <UserProfile />
+              </div>
+            ) : (
+              <>
+                <Link 
+                  to="/login" 
+                  className="block w-full py-3 px-4 rounded-md text-center font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Log In
+                </Link>
+                <Link 
+                  to="/register" 
+                  className="block w-full py-3 px-4 rounded-md text-center font-medium text-white bg-primary hover:bg-primary/90 transition-all"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
+            <Link 
+              to="/join-as-worker" 
+              className="block w-full py-3 px-4 rounded-md text-center font-medium text-white bg-blue-600 hover:bg-blue-700 transition-all"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Join as a Worker
+            </Link>
+          </div>
+
+          <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
+            <Link 
+              to="/about" 
+              className="block py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              About
+            </Link>
+            <Link 
+              to="/contact" 
+              className="block py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Contact
+            </Link>
+          </div>
+        </div>
       </div>
     </header>
   );
