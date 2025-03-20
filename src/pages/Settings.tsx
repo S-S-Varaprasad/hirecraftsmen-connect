@@ -36,7 +36,7 @@ import {
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/context/AuthContext';
-import { useTheme } from 'next-themes';
+import { useTheme } from '@/components/theme-provider';
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
@@ -282,7 +282,7 @@ const Settings = () => {
                   </div>
                 </TabsContent>
                 
-                {/* Account Tab - Removed language settings, keeping only danger zone */}
+                {/* Account Tab */}
                 <TabsContent value="account" className="space-y-6">
                   <div className="bg-gray-50 dark:bg-gray-850 rounded-lg p-6 space-y-6">
                     <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
