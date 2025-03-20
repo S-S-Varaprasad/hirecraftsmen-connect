@@ -91,7 +91,7 @@ const EditJob = () => {
       location: '',
       job_type: '',
       rate: '',
-      urgency: 'Medium',
+      urgency: 'Medium' as 'Low' | 'Medium' | 'High',
       skills: '',
       description: '',
       notifyWorkers: true,
@@ -101,13 +101,19 @@ const EditJob = () => {
   // Update form when job data is loaded
   useEffect(() => {
     if (job) {
+      // Validate the urgency value to ensure it's one of the allowed values
+      let urgencyValue: 'Low' | 'Medium' | 'High' = 'Medium';
+      if (job.urgency === 'Low' || job.urgency === 'Medium' || job.urgency === 'High') {
+        urgencyValue = job.urgency;
+      }
+
       form.reset({
         title: job.title,
         company: job.company,
         location: job.location,
         job_type: job.job_type,
         rate: job.rate,
-        urgency: job.urgency,
+        urgency: urgencyValue,
         skills: job.skills.join(', '),
         description: job.description,
         notifyWorkers: true,
