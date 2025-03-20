@@ -10,59 +10,76 @@ import { Label } from '@/components/ui/label';
 import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { AutocompleteField, SuggestiveInputField } from '@/components/ui/form-field';
+import { 
+  allIndianRegions, 
+  professions, 
+  indianLanguages, 
+  skills as skillSuggestions,
+} from '@/utils/suggestions';
+import { useForm } from 'react-hook-form';
 
 const JoinAsWorker = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { createWorkerProfile } = useWorkerProfiles();
 
-  const [formData, setFormData] = useState({
-    name: '',
-    profession: '',
-    location: '',
-    experience: '',
-    hourlyRate: '',
-    skills: '',
-    languages: '',
-    about: '',
-    profileImage: null,
-    resume: null,
+  // React Hook Form setup
+  const { register, handleSubmit, control, formState: { errors } } = useForm({
+    defaultValues: {
+      name: '',
+      profession: '',
+      location: '',
+      experience: '',
+      hourlyRate: '',
+      skills: '',
+      languages: '',
+      about: '',
+    }
   });
+
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [resumeName, setResumeName] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [resume, setResume] = useState<File | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // Convert professions to the format required by AutocompleteField
+  const professionOptions = professions.map(profession => ({
+    value: profession,
+    label: profession,
+  }));
+
+  // Convert regions to the format required by AutocompleteField
+  const locationOptions = allIndianRegions.map(region => ({
+    value: region,
+    label: region,
+  }));
+
+  // Convert languages to the format required by AutocompleteField
+  const languageOptions = indianLanguages.map(language => ({
+    value: language,
+    label: language,
+  }));
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'profileImage' | 'resume') => {
     const file = e.target.files && e.target.files[0];
 
     if (file) {
-      setFormData(prev => ({
-        ...prev,
-        [type]: file,
-      }));
-
       if (type === 'profileImage') {
+        setProfileImage(file);
         const reader = new FileReader();
         reader.onloadend = () => {
           setProfileImagePreview(reader.result as string);
         };
         reader.readAsDataURL(file);
       } else if (type === 'resume') {
+        setResume(file);
         setResumeName(file.name);
       }
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onSubmit = async (data: any) => {
     if (!user) {
       toast.error('You must be logged in to create a profile');
       navigate('/login');
@@ -71,16 +88,16 @@ const JoinAsWorker = () => {
 
     try {
       const result = await createWorkerProfile.mutateAsync({
-        name: formData.name,
-        profession: formData.profession,
-        location: formData.location,
-        experience: formData.experience,
-        hourlyRate: formData.hourlyRate,
-        skills: formData.skills,
-        languages: formData.languages,
-        about: formData.about,
-        profileImage: formData.profileImage,
-        resume: formData.resume,
+        name: data.name,
+        profession: data.profession,
+        location: data.location,
+        experience: data.experience,
+        hourlyRate: data.hourlyRate,
+        skills: data.skills,
+        languages: data.languages,
+        about: data.about,
+        profileImage: profileImage,
+        resume: resume,
       });
 
       toast.success('Profile created successfully!');
@@ -101,111 +118,100 @@ const JoinAsWorker = () => {
           <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
             <div className="px-8 py-12">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">Join as a Worker</h2>
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="mb-4">
                   <Label htmlFor="name" className="text-base">Full Name</Label>
                   <Input
                     type="text"
                     id="name"
-                    name="name"
+                    {...register("name", { required: "Name is required" })}
                     placeholder="Your Full Name"
-                    value={formData.name}
-                    onChange={handleChange}
                     className="mt-1"
                     required
                   />
+                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
                 </div>
+
                 <div className="mb-4">
-                  <Label htmlFor="profession" className="text-base">Profession</Label>
-                  <Input
-                    type="text"
-                    id="profession"
+                  <AutocompleteField
                     name="profession"
+                    control={control}
+                    label="Profession"
                     placeholder="e.g., Electrician, Plumber"
-                    value={formData.profession}
-                    onChange={handleChange}
-                    className="mt-1"
-                    required
+                    options={professionOptions}
+                    description="Select your profession from the list or type to search"
                   />
                 </div>
+
                 <div className="mb-4">
-                  <Label htmlFor="location" className="text-base">Location</Label>
-                  <Input
-                    type="text"
-                    id="location"
+                  <AutocompleteField
                     name="location"
+                    control={control}
+                    label="Location"
                     placeholder="Your City, State"
-                    value={formData.location}
-                    onChange={handleChange}
-                    className="mt-1"
-                    required
+                    options={locationOptions}
+                    description="Select your location from the list or type to search"
                   />
                 </div>
+
                 <div className="mb-4">
                   <Label htmlFor="experience" className="text-base">Years of Experience</Label>
                   <Input
                     type="text"
                     id="experience"
-                    name="experience"
+                    {...register("experience", { required: "Experience is required" })}
                     placeholder="e.g., 5 years, 10+ years"
-                    value={formData.experience}
-                    onChange={handleChange}
                     className="mt-1"
                     required
                   />
                 </div>
+
                 <div className="mb-4">
                   <Label htmlFor="hourlyRate" className="text-base">Hourly Rate</Label>
                   <Input
                     type="text"
                     id="hourlyRate"
-                    name="hourlyRate"
+                    {...register("hourlyRate", { required: "Hourly rate is required" })}
                     placeholder="e.g., $25/hr, $40/hr"
-                    value={formData.hourlyRate}
-                    onChange={handleChange}
                     className="mt-1"
                     required
                   />
                 </div>
+
                 <div className="mb-4">
-                  <Label htmlFor="skills" className="text-base">Skills</Label>
-                  <Input
-                    type="text"
-                    id="skills"
+                  <SuggestiveInputField
                     name="skills"
-                    placeholder="e.g., Wiring, Plumbing, Carpentry (comma separated)"
-                    value={formData.skills}
-                    onChange={handleChange}
-                    className="mt-1"
-                    required
+                    control={control}
+                    label="Skills"
+                    placeholder="e.g., Wiring, Plumbing, Carpentry"
+                    suggestions={skillSuggestions}
+                    description="List your skills, separated by commas"
                   />
-                  <p className="text-sm text-gray-500 mt-1">List your skills, separated by commas</p>
                 </div>
+
                 <div className="mb-4">
-                  <Label htmlFor="languages" className="text-base">Languages</Label>
-                  <Input
-                    type="text"
-                    id="languages"
+                  <AutocompleteField
                     name="languages"
-                    placeholder="English, Spanish, French (comma separated)"
-                    value={formData.languages}
-                    onChange={handleChange}
-                    className="mt-1"
+                    control={control}
+                    label="Languages"
+                    placeholder="English, Hindi, Tamil"
+                    options={languageOptions}
+                    description="Select languages you speak"
+                    searchable={true}
                   />
-                  <p className="text-sm text-gray-500 mt-1">List languages you speak, separated by commas</p>
                 </div>
+
                 <div className="mb-4">
                   <Label htmlFor="about" className="text-base">About</Label>
                   <Textarea
                     id="about"
-                    name="about"
+                    {...register("about")}
                     placeholder="Tell us about yourself"
-                    value={formData.about}
-                    onChange={handleChange}
                     className="mt-1"
                     rows={4}
                   />
                 </div>
+
                 <div className="mb-4">
                   <Label htmlFor="profileImage" className="text-base">Profile Image</Label>
                   <Input
@@ -226,6 +232,7 @@ const JoinAsWorker = () => {
                     </div>
                   )}
                 </div>
+
                 <div className="mb-4">
                   <Label htmlFor="resume" className="text-base">Resume</Label>
                   <Input
@@ -240,6 +247,7 @@ const JoinAsWorker = () => {
                     <p className="mt-1 text-sm text-gray-500">Selected: {resumeName}</p>
                   )}
                 </div>
+
                 <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
                   Create Profile
                 </Button>

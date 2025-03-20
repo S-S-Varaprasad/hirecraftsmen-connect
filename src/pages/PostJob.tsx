@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -37,6 +38,13 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { Loader2, CheckCircle } from 'lucide-react';
+import { AutocompleteField, SuggestiveInputField } from '@/components/ui/form-field';
+import { 
+  skills as skillSuggestions, 
+  popularLocations, 
+  professions,
+  allIndianRegions
+} from '@/utils/suggestions';
 
 // Form validation schema
 const formSchema = z.object({
@@ -66,6 +74,15 @@ const PostJob = () => {
   // Get worker info from location state if coming from "Hire Me" button
   const workerInfo = location.state || {};
   const { workerId, workerName, workerProfession, workerSkills } = workerInfo;
+
+  // Convert locations to the format required by AutocompleteField
+  const locationOptions = [...popularLocations, ...allIndianRegions].map(location => ({
+    value: location,
+    label: location,
+  }));
+
+  // Convert professions to the format required for title suggestions
+  const jobTitleSuggestions = professions.map(profession => `Need a ${profession}`);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -206,7 +223,13 @@ const PostJob = () => {
                             <FormItem>
                               <FormLabel>Job Title</FormLabel>
                               <FormControl>
-                                <Input placeholder="e.g. Experienced Plumber Needed" {...field} />
+                                <SuggestiveInputField
+                                  name="title"
+                                  control={form.control}
+                                  label=""
+                                  placeholder="e.g. Experienced Plumber Needed"
+                                  suggestions={jobTitleSuggestions}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -236,7 +259,13 @@ const PostJob = () => {
                             <FormItem>
                               <FormLabel>Location</FormLabel>
                               <FormControl>
-                                <Input placeholder="e.g. Mumbai, Maharashtra" {...field} />
+                                <AutocompleteField
+                                  name="location"
+                                  control={form.control}
+                                  label=""
+                                  placeholder="e.g. Mumbai, Maharashtra"
+                                  options={locationOptions}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -315,9 +344,12 @@ const PostJob = () => {
                           <FormItem>
                             <FormLabel>Required Skills</FormLabel>
                             <FormControl>
-                              <Input 
-                                placeholder="e.g. Plumbing, Repairs, Installation (comma separated)" 
-                                {...field} 
+                              <SuggestiveInputField
+                                name="skills"
+                                control={form.control}
+                                label=""
+                                placeholder="e.g. Plumbing, Repairs, Installation"
+                                suggestions={skillSuggestions} 
                               />
                             </FormControl>
                             <FormMessage />
