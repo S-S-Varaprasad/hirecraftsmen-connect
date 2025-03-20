@@ -13,7 +13,7 @@ const sampleWorkers = [
     skills: ['Wiring', 'Installation', 'Repairs', 'Lighting'],
     languages: ['Hindi', 'English', 'Marathi'],
     about: 'Experienced electrician with expertise in residential and commercial projects.',
-    image_url: '/lovable-uploads/5c55a581-8181-4c77-aa02-5362c74cedf2.png'
+    image_url: '/lovable-uploads/f1738232-6943-4b8a-aa79-e83c67587da8.png'
   },
   {
     name: 'Priya Singh',
@@ -24,7 +24,7 @@ const sampleWorkers = [
     skills: ['Pipe Fitting', 'Repairs', 'Drainage', 'Installation'],
     languages: ['Hindi', 'English', 'Punjabi'],
     about: 'Professional plumber specializing in residential plumbing solutions.',
-    image_url: '/lovable-uploads/e8ddebd8-54c9-450e-a765-8cf8b4a79b76.png'
+    image_url: '/lovable-uploads/d9650b91-3e58-4c46-a4ea-7072b4c5995c.png'
   },
   {
     name: 'Amit Sharma',
@@ -57,7 +57,7 @@ const sampleWorkers = [
     skills: ['Interior Painting', 'Exterior Painting', 'Wall Texturing', 'Refinishing'],
     languages: ['Hindi', 'English', 'Telugu'],
     about: 'Professional painter with attention to detail and quality finishes.',
-    image_url: '/lovable-uploads/f36f852d-e4d0-4908-9c18-98dbb9681494.png'
+    image_url: '/lovable-uploads/f1738232-6943-4b8a-aa79-e83c67587da8.png'
   },
   {
     name: 'Ananya Desai',
@@ -68,7 +68,7 @@ const sampleWorkers = [
     skills: ['Landscaping', 'Plant Care', 'Garden Design', 'Maintenance'],
     languages: ['Marathi', 'Hindi', 'English'],
     about: 'Passionate gardener with expertise in creating and maintaining beautiful gardens.',
-    image_url: '/lovable-uploads/2c40bb89-20b4-462d-87db-98c1edce958e.png'
+    image_url: '/lovable-uploads/d9650b91-3e58-4c46-a4ea-7072b4c5995c.png'
   },
   {
     name: 'Sunil Verma',
@@ -79,7 +79,7 @@ const sampleWorkers = [
     skills: ['Surveillance', 'Access Control', 'Security Protocols', 'Emergency Response'],
     languages: ['Bengali', 'Hindi', 'English'],
     about: 'Professional security guard with background in military service.',
-    image_url: '/lovable-uploads/80fa7af4-b36f-4ccc-b0eb-7228bf8c1a17.png'
+    image_url: '/lovable-uploads/f1738232-6943-4b8a-aa79-e83c67587da8.png'
   },
   {
     name: 'Meena Reddy',
@@ -90,7 +90,7 @@ const sampleWorkers = [
     skills: ['Garment Construction', 'Alterations', 'Custom Designs', 'Embroidery'],
     languages: ['Gujarati', 'Hindi', 'English'],
     about: 'Expert tailor specializing in custom clothing and alterations.',
-    image_url: '/lovable-uploads/e62f187e-caaf-4552-b1fc-d98fd2878f01.png'
+    image_url: '/lovable-uploads/d9650b91-3e58-4c46-a4ea-7072b4c5995c.png'
   },
   {
     name: 'Rohan Khanna',
@@ -101,7 +101,7 @@ const sampleWorkers = [
     skills: ['Safe Driving', 'Route Planning', 'Vehicle Maintenance', 'Customer Service'],
     languages: ['Hindi', 'English', 'Rajasthani'],
     about: 'Professional driver with clean record and excellent customer service skills.',
-    image_url: '/lovable-uploads/2c40bb89-20b4-462d-87db-98c1edce958e.png'
+    image_url: '/lovable-uploads/f1738232-6943-4b8a-aa79-e83c67587da8.png'
   },
   {
     name: 'Neha Gupta',
@@ -123,10 +123,10 @@ const sampleWorkers = [
     skills: ['Indian Cuisine', 'Baking', 'Meal Planning', 'Catering'],
     languages: ['Malayalam', 'English', 'Tamil', 'Hindi'],
     about: 'Experienced cook specializing in traditional and fusion Indian cuisine.',
-    image_url: '/lovable-uploads/208c9f41-1354-48e6-bbf3-c160a8dc338b.png'
+    image_url: '/lovable-uploads/f1738232-6943-4b8a-aa79-e83c67587da8.png'
   },
   {
-    name: 'Arjun Pillai',
+    name: 'Pooja Pillai',
     profession: 'Babysitter',
     location: 'Goa',
     experience: '6 years',
@@ -134,7 +134,7 @@ const sampleWorkers = [
     skills: ['Childcare', 'First Aid', 'Meal Preparation', 'Educational Activities'],
     languages: ['Konkani', 'English', 'Hindi'],
     about: 'Caring and reliable babysitter with experience in early childhood education.',
-    image_url: '/lovable-uploads/0f8c59f2-eb94-486a-a4c2-8e46b51ec9af.png'
+    image_url: '/lovable-uploads/d9650b91-3e58-4c46-a4ea-7072b4c5995c.png'
   }
 ];
 

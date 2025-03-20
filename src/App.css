@@ -8,11 +8,11 @@
 
 /* Add global styles for app-wide consistency */
 body {
-  background-color: rgb(255, 247, 237, 0.4); /* Orange-50 with reduced opacity */
+  background-color: rgb(255, 242, 230, 0.7); /* Lighter Orange shade with reduced opacity */
 }
 
 .app-page-background {
-  background-color: rgb(255, 247, 237, 0.4);
+  background-color: rgb(255, 242, 230, 0.7); /* Same color for consistency */
 }
 
 @keyframes logo-spin {
