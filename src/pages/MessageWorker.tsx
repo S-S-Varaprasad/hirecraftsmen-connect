@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Worker } from '@/services/workerService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { createNotification } from '@/services/notificationService';
 
 interface Message {
   id: string;
@@ -54,28 +55,15 @@ const MessageWorker = () => {
   }, [workerId, getWorker]);
 
   useEffect(() => {
-    if (!user || !workerId) return;
+    if (!user || !workerId || !worker?.user_id) return;
 
-    // Subscribe to messages between current user and worker
-    const fetchMessages = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('messages')
-          .select('*')
-          .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-          .or(`sender_id.eq.${worker?.user_id},receiver_id.eq.${worker?.user_id}`)
-          .order('created_at', { ascending: true });
+    // Since there's no actual messages table yet, we'll just use an empty array
+    // In a real implementation, you would fetch from a messages table
+    setMessages([]);
 
-        if (error) throw error;
-        if (data) setMessages(data);
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      }
-    };
-
-    fetchMessages();
-
-    // Set up real-time subscription for new messages
+    // This subscription code would be used if there was a messages table
+    // We'll leave it commented out for future implementation
+    /*
     const subscription = supabase
       .channel('messages')
       .on('postgres_changes', {
@@ -91,6 +79,7 @@ const MessageWorker = () => {
     return () => {
       subscription.unsubscribe();
     };
+    */
   }, [user, workerId, worker?.user_id]);
 
   const handleSendMessage = async () => {
@@ -99,8 +88,7 @@ const MessageWorker = () => {
     try {
       setSending(true);
       
-      // In a real app, you would insert the message to a messages table
-      // For now, we'll simulate sending a notification to the worker
+      // Send a notification to the worker since we don't have an actual messages table
       const { data, error } = await supabase
         .from('notifications')
         .insert([
@@ -115,19 +103,17 @@ const MessageWorker = () => {
 
       if (error) throw error;
 
-      // In a real app with a messages table:
-      // const { data, error } = await supabase
-      //   .from('messages')
-      //   .insert([
-      //     {
-      //       sender_id: user.id,
-      //       receiver_id: worker.user_id,
-      //       content: newMessage,
-      //       is_read: false
-      //     }
-      //   ])
-      //   .select();
-
+      // For user experience, we'll simulate adding the message to the UI
+      const newMsg: Message = {
+        id: Date.now().toString(), // Temporary ID
+        sender_id: user.id,
+        receiver_id: worker.user_id,
+        content: newMessage,
+        created_at: new Date().toISOString(),
+        is_read: false
+      };
+      
+      setMessages(prev => [...prev, newMsg]);
       toast.success("Message sent successfully");
       setNewMessage('');
     } catch (error) {
@@ -253,6 +239,11 @@ const MessageWorker = () => {
                 <p className="text-sm text-gray-600 dark:text-gray-300">
                   <span className="font-semibold">Hourly Rate:</span> {worker.hourly_rate}
                 </p>
+                {worker.languages && worker.languages.length > 0 && (
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    <span className="font-semibold">Languages:</span> {worker.languages.join(', ')}
+                  </p>
+                )}
               </div>
               
               <div className="text-center text-xs text-gray-500 dark:text-gray-400">
