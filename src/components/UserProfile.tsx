@@ -16,10 +16,11 @@ import { useAuth } from '@/context/AuthContext';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useNotifications } from '@/hooks/useNotifications';
+import { toast } from 'sonner';
 
 const UserProfile = () => {
   const { user, signOut } = useAuth();
-  const { notifications, markAsRead } = useNotifications();
+  const { notifications, markAsRead, loading } = useNotifications();
   const [unreadCount, setUnreadCount] = useState(0);
   
   // Calculate unread count whenever notifications change
@@ -42,7 +43,29 @@ const UserProfile = () => {
   };
 
   const handleSignOut = async () => {
-    await signOut();
+    try {
+      await signOut();
+      toast.success('You have been signed out successfully');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast.error('Failed to sign out');
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      if (notifications && notifications.length > 0) {
+        for (const notification of notifications) {
+          if (!notification.is_read) {
+            await markAsRead(notification.id);
+          }
+        }
+        toast.success('All notifications marked as read');
+      }
+    } catch (error) {
+      console.error('Error marking notifications as read:', error);
+      toast.error('Failed to mark notifications as read');
+    }
   };
 
   return (
@@ -54,7 +77,7 @@ const UserProfile = () => {
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
               <Badge 
-                className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.2rem] h-[1.2rem] bg-app-red text-white text-xs flex items-center justify-center"
+                className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[1.2rem] h-[1.2rem] bg-red-500 text-white text-xs flex items-center justify-center"
               >
                 {unreadCount > 9 ? '9+' : unreadCount}
               </Badge>
@@ -62,11 +85,26 @@ const UserProfile = () => {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-80 p-0">
-          <div className="p-3 font-medium border-b">
-            Notifications
+          <div className="p-3 font-medium border-b flex justify-between items-center">
+            <span>Notifications</span>
+            {unreadCount > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs h-7 px-2"
+                onClick={handleMarkAllAsRead}
+              >
+                Mark all as read
+              </Button>
+            )}
           </div>
           <div className="max-h-[300px] overflow-y-auto">
-            {!notifications || notifications.length === 0 ? (
+            {loading ? (
+              <div className="p-4 text-center">
+                <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                <p className="text-sm text-gray-500">Loading notifications...</p>
+              </div>
+            ) : !notifications || notifications.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
                 No notifications yet
               </div>
@@ -85,22 +123,6 @@ const UserProfile = () => {
               ))
             )}
           </div>
-          {notifications && notifications.length > 0 && (
-            <div className="p-2 border-t">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="w-full text-xs"
-                onClick={() => {
-                  notifications.forEach(n => {
-                    if (!n.is_read) markAsRead(n.id);
-                  });
-                }}
-              >
-                Mark all as read
-              </Button>
-            </div>
-          )}
         </PopoverContent>
       </Popover>
 

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LucideIcon } from 'lucide-react';
 import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
@@ -17,8 +17,14 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   description,
   slug,
 }) => {
-  const { getWorkerCountByCategory } = useWorkerProfiles();
-  const availableWorkers = getWorkerCountByCategory(title);
+  const { getWorkerCountByCategory, workers } = useWorkerProfiles();
+  const [availableWorkers, setAvailableWorkers] = useState(0);
+  
+  // Update count whenever workers data changes
+  useEffect(() => {
+    const count = getWorkerCountByCategory(title);
+    setAvailableWorkers(count);
+  }, [workers, title, getWorkerCountByCategory]);
 
   return (
     <Link 

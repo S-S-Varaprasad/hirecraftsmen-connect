@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -11,20 +10,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import {
   Bell,
   Moon,
   Sun,
-  Globe,
   Lock,
   UserCog,
   Trash2,
   AlertTriangle,
   LogOut,
-  User,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -49,22 +44,12 @@ const Settings = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   
-  const [language, setLanguage] = useState('english');
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [smsNotifications, setSmsNotifications] = useState(false);
   const [profileVisibility, setProfileVisibility] = useState('public');
   const [locationSharing, setLocationSharing] = useState(true);
   const [activityStatus, setActivityStatus] = useState(true);
-
-  // Handle language change
-  const handleLanguageChange = (value: string) => {
-    setLanguage(value);
-    toast({
-      title: "Language Updated",
-      description: `Your language preference has been set to ${value.charAt(0).toUpperCase() + value.slice(1)}.`,
-    });
-  };
 
   // Handle account deactivation
   const handleDeactivateAccount = () => {
@@ -133,7 +118,7 @@ const Settings = () => {
               <h1 className="text-2xl font-bold mb-6">Settings</h1>
               
               <Tabs defaultValue="appearance" className="w-full">
-                <TabsList className="grid grid-cols-4 mb-8">
+                <TabsList className="grid grid-cols-3 mb-8">
                   <TabsTrigger value="appearance" className="flex items-center gap-2">
                     <Sun className="h-4 w-4" />
                     <span className="hidden sm:inline">Appearance</span>
@@ -145,10 +130,6 @@ const Settings = () => {
                   <TabsTrigger value="privacy" className="flex items-center gap-2">
                     <Lock className="h-4 w-4" />
                     <span className="hidden sm:inline">Privacy</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="account" className="flex items-center gap-2">
-                    <UserCog className="h-4 w-4" />
-                    <span className="hidden sm:inline">Account</span>
                   </TabsTrigger>
                 </TabsList>
                 
@@ -301,32 +282,13 @@ const Settings = () => {
                   </div>
                 </TabsContent>
                 
-                {/* Account Tab */}
+                {/* Account Tab - Removed language settings, keeping only danger zone */}
                 <TabsContent value="account" className="space-y-6">
                   <div className="bg-gray-50 dark:bg-gray-850 rounded-lg p-6 space-y-6">
                     <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
                     
                     <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="language" className="block mb-2">Language Preference</Label>
-                        <Select 
-                          value={language} 
-                          onValueChange={handleLanguageChange}
-                        >
-                          <SelectTrigger id="language" className="w-full">
-                            <SelectValue placeholder="Select language" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="english">English</SelectItem>
-                            <SelectItem value="spanish">Spanish</SelectItem>
-                            <SelectItem value="french">French</SelectItem>
-                            <SelectItem value="german">German</SelectItem>
-                            <SelectItem value="hindi">Hindi</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="pt-6">
+                      <div className="pt-2">
                         <h3 className="text-lg font-medium mb-4 text-red-500">Danger Zone</h3>
                         
                         <div className="space-y-4">

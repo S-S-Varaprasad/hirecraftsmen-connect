@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export function useStorage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,22 +16,43 @@ export function useStorage() {
       setIsLoading(true);
       setError(null);
 
-      // Cast the entire supabase.storage to any to bypass type checking
-      const { data, error } = await (supabase.storage as any)
+      console.log(`Attempting to upload file to bucket: ${bucket}, path: ${path}`);
+      
+      // Create the bucket if it doesn't exist
+      try {
+        const { data: buckets } = await supabase.storage.listBuckets();
+        if (!buckets?.find(b => b.name === bucket)) {
+          console.log(`Bucket ${bucket} does not exist, creating it...`);
+          await supabase.storage.createBucket(bucket, { public: true });
+          console.log(`Created bucket: ${bucket}`);
+        }
+      } catch (err) {
+        console.log(`Error checking/creating bucket: ${err}`);
+        // Continue even if bucket creation fails
+      }
+
+      // Upload the file
+      const { data, error: uploadError } = await supabase.storage
         .from(bucket)
         .upload(path, file, {
           upsert: true,
+          cacheControl: '3600',
         });
 
-      if (error) {
-        throw error;
+      if (uploadError) {
+        console.error('Error during file upload:', uploadError);
+        toast.error(`Upload failed: ${uploadError.message}`);
+        throw uploadError;
       }
 
-      // Get public URL with stronger type assertion
-      const { data: urlData } = (supabase.storage as any)
+      console.log('File uploaded successfully, data:', data);
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
         .from(bucket)
         .getPublicUrl(data.path);
 
+      console.log('Public URL retrieved:', urlData.publicUrl);
       return urlData.publicUrl;
     } catch (err: any) {
       console.error('Error uploading file:', err);
@@ -46,8 +68,7 @@ export function useStorage() {
       setIsLoading(true);
       setError(null);
 
-      // Cast the entire supabase.storage to any to bypass type checking
-      const { error } = await (supabase.storage as any)
+      const { error } = await supabase.storage
         .from(bucket)
         .remove([path]);
 

@@ -23,42 +23,61 @@ import MessageWorker from "./pages/MessageWorker";
 import ApplyNow from "./pages/ApplyNow";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import { useEffect } from "react";
+import { ensureStorageBuckets } from "./services/storageService";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <AuthProvider>
-          <TooltipProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/workers" element={<Workers />} />
-              <Route path="/workers/category/:slug" element={<WorkersByCategory />} />
-              <Route path="/workers/:id" element={<WorkerDetail />} />
-              <Route path="/message/:id" element={<MessageWorker />} />
-              <Route path="/apply/:id" element={<ApplyNow />} />
-              <Route path="/jobs" element={<Jobs />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<SignUp />} />
-              <Route path="/join-as-worker" element={<JoinAsWorker />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
-            <Sonner />
-          </TooltipProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+// Initialize app resources
+const initializeResources = async () => {
+  try {
+    // Ensure storage buckets exist
+    await ensureStorageBuckets();
+  } catch (error) {
+    console.error('Error initializing app resources:', error);
+  }
+};
+
+const App = () => {
+  useEffect(() => {
+    // Initialize app resources when the app first loads
+    initializeResources();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          <AuthProvider>
+            <TooltipProvider>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/workers" element={<Workers />} />
+                <Route path="/workers/category/:slug" element={<WorkersByCategory />} />
+                <Route path="/workers/:id" element={<WorkerDetail />} />
+                <Route path="/message/:id" element={<MessageWorker />} />
+                <Route path="/apply/:id" element={<ApplyNow />} />
+                <Route path="/jobs" element={<Jobs />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<SignUp />} />
+                <Route path="/join-as-worker" element={<JoinAsWorker />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
+              <Sonner />
+            </TooltipProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
