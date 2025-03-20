@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -26,24 +25,24 @@ const Workers = () => {
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load sample workers if none exist
+  // Load sample workers if none exist - update to use forceAddSampleWorkers to ensure we have the latest data
   useEffect(() => {
     const loadSampleWorkersIfNeeded = async () => {
-      if (workersData && workersData.length < 3) {
-        try {
-          const added = await forceAddSampleWorkers();
-          if (added) {
-            toast.success('Sample workers added for demonstration');
-            refetch(); // Refetch the workers data
-          }
-        } catch (error) {
-          console.error('Error adding sample workers:', error);
+      try {
+        // Use forceAddSampleWorkers to ensure we have the latest sample data
+        const added = await forceAddSampleWorkers();
+        if (added) {
+          toast.success('Worker profiles refreshed successfully');
+          refetch(); // Refetch the workers data
         }
+      } catch (error) {
+        console.error('Error refreshing worker profiles:', error);
+        toast.error('Failed to refresh worker profiles');
       }
     };
     
     loadSampleWorkersIfNeeded();
-  }, [workersData, refetch]);
+  }, [refetch]);
 
   useEffect(() => {
     if (workersData) {

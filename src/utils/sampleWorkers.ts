@@ -217,6 +217,33 @@ export const forceAddSampleWorkers = async () => {
   try {
     console.log('Force adding sample workers...');
     
+    // First, let's remove existing workers to start with a clean slate
+    try {
+      const { data: existingWorkers, error: fetchError } = await supabase
+        .from('workers')
+        .select('id');
+      
+      if (fetchError) {
+        console.error('Error fetching existing workers:', fetchError);
+      } else if (existingWorkers && existingWorkers.length > 0) {
+        console.log(`Found ${existingWorkers.length} existing workers, removing them...`);
+        // Delete all existing workers
+        const { error: deleteError } = await supabase
+          .from('workers')
+          .delete()
+          .in('id', existingWorkers.map(worker => worker.id));
+          
+        if (deleteError) {
+          console.error('Error deleting existing workers:', deleteError);
+        } else {
+          console.log('Successfully removed existing workers');
+        }
+      }
+    } catch (cleanupError) {
+      console.error('Error during worker cleanup:', cleanupError);
+    }
+    
+    // Now add the sample workers
     for (const worker of sampleWorkers) {
       try {
         await registerWorker({
