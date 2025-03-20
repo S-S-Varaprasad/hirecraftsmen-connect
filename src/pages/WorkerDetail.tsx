@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -9,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { Briefcase, MapPin, Mail, Phone, Star } from 'lucide-react';
 import LoadingState from '@/components/workers/LoadingState';
 import ErrorState from '@/components/workers/ErrorState';
-import WorkerHistory from '@/components/workers/WorkerHistory';
 
 const WorkerDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -86,18 +86,6 @@ const WorkerDetail = () => {
                 </div>
               </div>
               
-              {/* Worker History Section */}
-              <div className="mt-8">
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-                  <div className="p-6">
-                    <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">
-                      Job History & Payments
-                    </h2>
-                    <WorkerHistory workerId={worker.id} />
-                  </div>
-                </div>
-              </div>
-              
               {/* Worker Availability Section */}
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
                 <div className="p-6">
@@ -113,7 +101,7 @@ const WorkerDetail = () => {
             </div>
           ) : (
             <div className="flex justify-center items-center h-full">
-              <ErrorState message="Worker not found." />
+              <ErrorState>Worker not found.</ErrorState>
             </div>
           )}
         </div>
