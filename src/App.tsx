@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/context/AuthContext';
+import { addSampleWorkers } from '@/utils/sampleWorkers';
 
 import Index from '@/pages/Index';
 import About from '@/pages/About';
@@ -35,6 +36,11 @@ function App() {
       },
     },
   });
+
+  useEffect(() => {
+    // Add sample workers when the app loads
+    addSampleWorkers();
+  }, []);
 
   return (
     <BrowserRouter>

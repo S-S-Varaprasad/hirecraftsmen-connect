@@ -151,7 +151,7 @@ export const addSampleWorkers = async () => {
       return false;
     }
     
-    // Only add sample workers if there are fewer than 5 workers
+    // Only add sample workers if there are no workers yet
     if (count !== null && count < 5) {
       console.log(`Only ${count} workers found, adding sample workers...`);
       

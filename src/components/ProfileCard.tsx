@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Clock, Briefcase, Eye, BriefcaseBusiness, Upload, Check, X, Trash2 } from 'lucide-react';
@@ -134,7 +133,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               onClick={isOwner ? handleProfilePictureClick : undefined}
             >
               <AvatarImage 
-                src={imageUrl} 
+                src={imageUrl || `https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 99)}.jpg`}
                 alt={name}
                 className="object-cover"
               />
@@ -241,3 +240,4 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 };
 
 export default ProfileCard;
+
