@@ -9,6 +9,9 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Briefcase } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getWorkers, Worker } from '@/services/workerService';
+import WorkerGrid from '@/components/workers/WorkerGrid';
+import NoWorkersFound from '@/components/workers/NoWorkersFound';
+import { useToast } from '@/hooks/use-toast';
 
 const professionMap: { [key: string]: string } = {
   'painter': 'Painter',
@@ -32,6 +35,7 @@ const WorkersByCategory = () => {
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [categoryName, setCategoryName] = useState<string>('');
+  const { toast } = useToast();
 
   const { data: workersData = [], isLoading: isLoadingWorkers } = useQuery({
     queryKey: ['workers'],
@@ -64,6 +68,16 @@ const WorkersByCategory = () => {
       setIsLoading(false);
     }
   }, [slug, workersData]);
+
+  useEffect(() => {
+    if (slug && !professionMap[slug]) {
+      toast({
+        title: "Category not found",
+        description: "Showing available workers that might match your needs",
+        variant: "default"
+      });
+    }
+  }, [slug, toast]);
 
   const handleSearch = (filters: any) => {
     setIsLoading(true);
@@ -169,21 +183,19 @@ const WorkersByCategory = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-20 bg-white/80 rounded-xl shadow-sm border border-gray-100 dark:bg-gray-800/80 dark:border-gray-700">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary/90 rounded-full flex items-center justify-center">
-                    <Briefcase className="w-8 h-8" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">No workers found</h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                    We couldn't find any {categoryName.toLowerCase()} professionals matching your criteria. Try adjusting your filters or browse all workers.
-                  </p>
-                  <Button variant="default" asChild>
-                    <Link to="/workers">Browse All Workers</Link>
-                  </Button>
-                </div>
+                <NoWorkersFound />
               )}
             </>
           )}
+          
+          <div className="mt-10 text-center">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Found {filteredWorkers.length} {categoryName.toLowerCase() || 'specialized'} workers
+            </p>
+            <Button variant="outline" asChild>
+              <Link to="/workers">Browse All Workers</Link>
+            </Button>
+          </div>
         </div>
       </main>
       

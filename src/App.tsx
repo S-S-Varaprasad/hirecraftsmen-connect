@@ -58,7 +58,7 @@ function App() {
                 <Route path="/jobs/:id" element={<JobDetail />} />
                 <Route path="/workers" element={<Workers />} />
                 <Route path="/workers/:id" element={<WorkerDetail />} />
-                <Route path="/categories/:category" element={<WorkersByCategory />} />
+                <Route path="/workers/category/:slug" element={<WorkersByCategory />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/privacy" element={<Privacy />} />
