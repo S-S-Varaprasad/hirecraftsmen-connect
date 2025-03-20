@@ -11,10 +11,18 @@ export const useWorkerProfiles = () => {
   const { user } = useAuth();
   const { uploadFile } = useStorage();
 
-  // Ensure storage buckets exist
-  ensureStorageBuckets().catch(error => {
-    console.error('Error ensuring storage buckets:', error);
-  });
+  // Change from immediate execution to a try/catch to prevent breaking the app
+  const initializeBuckets = async () => {
+    try {
+      await ensureStorageBuckets();
+    } catch (error) {
+      console.error('Error ensuring storage buckets:', error);
+      // Don't throw here, let the app continue
+    }
+  };
+  
+  // Call the function but don't await it or throw errors
+  initializeBuckets();
 
   // Fetch all workers
   const { data: workers = [], isLoading, error, refetch } = useQuery({

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/context/AuthContext';
@@ -35,35 +35,37 @@ function App() {
   });
 
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <div className="min-h-screen flex flex-col">
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/workers" element={<Workers />} />
-            <Route path="/workers/category/:category" element={<WorkersByCategory />} />
-            <Route path="/workers/:id" element={<WorkerDetail />} />
-            <Route path="/workers/deactivate/:id" element={<DeactivateWorker />} />
-            <Route path="/workers/delete/:id" element={<DeleteWorker />} />
-            <Route path="/apply/:id" element={<ApplyNow />} />
-            <Route path="/message/:id" element={<MessageWorker />} />
-            <Route path="/join-as-worker" element={<JoinAsWorker />} />
-            <Route path="/jobs" element={<Jobs />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
-        
-        <Toaster richColors />
-      </QueryClientProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <div className="min-h-screen flex flex-col">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/workers" element={<Workers />} />
+              <Route path="/workers/category/:category" element={<WorkersByCategory />} />
+              <Route path="/workers/:id" element={<WorkerDetail />} />
+              <Route path="/workers/deactivate/:id" element={<DeactivateWorker />} />
+              <Route path="/workers/delete/:id" element={<DeleteWorker />} />
+              <Route path="/apply/:id" element={<ApplyNow />} />
+              <Route path="/message/:id" element={<MessageWorker />} />
+              <Route path="/join-as-worker" element={<JoinAsWorker />} />
+              <Route path="/jobs" element={<Jobs />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
+          
+          <Toaster richColors />
+        </QueryClientProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
