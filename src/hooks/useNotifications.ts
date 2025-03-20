@@ -49,9 +49,11 @@ export const useNotifications = () => {
     fetchNotifications();
 
     // Set up real-time subscription for new notifications
+    // Using type assertion to fix the TypeScript error
     const channel = supabase
       .channel('public:notifications')
-      .on('postgres_changes', 
+      .on(
+        'postgres_changes' as any, 
         { 
           event: 'INSERT', 
           schema: 'public', 
@@ -78,7 +80,8 @@ export const useNotifications = () => {
     // Subscription for when notifications are marked as read
     const updateChannel = supabase
       .channel('public:notifications:updates')
-      .on('postgres_changes', 
+      .on(
+        'postgres_changes' as any, 
         { 
           event: 'UPDATE', 
           schema: 'public', 
