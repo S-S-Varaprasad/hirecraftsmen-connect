@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Worker {
@@ -31,7 +30,8 @@ export const getWorkers = async () => {
   // Add empty languages array for each worker if not present
   const workersWithLanguages = data?.map(worker => ({
     ...worker,
-    languages: worker.languages || []
+    // Explicitly cast to any to avoid TypeScript errors
+    languages: (worker as any).languages || []
   })) || [];
   
   return workersWithLanguages as Worker[];
@@ -51,7 +51,8 @@ export const getWorkersByCategory = async (category: string) => {
   // Add empty languages array for each worker if not present
   const workersWithLanguages = data?.map(worker => ({
     ...worker,
-    languages: worker.languages || []
+    // Explicitly cast to any to avoid TypeScript errors
+    languages: (worker as any).languages || []
   })) || [];
   
   return workersWithLanguages as Worker[];
@@ -72,7 +73,8 @@ export const getWorkerById = async (id: string) => {
   // Add empty languages array if not present
   const workerWithLanguages = {
     ...data,
-    languages: data.languages || []
+    // Explicitly cast to any to avoid TypeScript errors
+    languages: (data as any).languages || []
   };
   
   return workerWithLanguages as Worker;
@@ -93,7 +95,8 @@ export const getWorkerByUserId = async (userId: string) => {
   // Add empty languages array if not present for the worker
   const workerWithLanguages = data ? {
     ...data,
-    languages: data.languages || []
+    // Explicitly cast to any to avoid TypeScript errors
+    languages: (data as any).languages || []
   } : null;
   
   return workerWithLanguages as Worker | null;
@@ -178,5 +181,12 @@ export const searchWorkers = async (searchTerm: string) => {
     throw error;
   }
   
-  return data || [] as Worker[];
+  // Add empty languages array for each worker if not present
+  const workersWithLanguages = data?.map(worker => ({
+    ...worker,
+    // Explicitly cast to any to avoid TypeScript errors
+    languages: (worker as any).languages || []
+  })) || [];
+  
+  return workersWithLanguages as Worker[];
 };
