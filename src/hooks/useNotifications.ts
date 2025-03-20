@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Notification, getNotifications, markNotificationAsRead, createNotification } from '@/services/notificationService';
+import { Notification } from '@/services/notificationService';
 
 export const useNotifications = () => {
   const { user } = useAuth();
@@ -85,7 +85,12 @@ export const useNotifications = () => {
     try {
       if (!user) return;
       
-      await markNotificationAsRead(notificationId);
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', notificationId);
+
+      if (error) throw error;
 
       setNotifications(prev => 
         prev.map(n => 
@@ -122,26 +127,11 @@ export const useNotifications = () => {
     }
   };
 
-  // Create a new notification
-  const sendNotification = async (message: string, type: string, relatedId?: string) => {
-    if (!user) return null;
-    
-    try {
-      return await createNotification(user.id, message, type, relatedId);
-    } catch (error: any) {
-      console.error('Error creating notification:', error);
-      return null;
-    }
-  };
-
   return {
     notifications,
     unreadCount,
     loading,
     markAsRead,
-    markAllAsRead,
-    sendNotification
+    markAllAsRead
   };
 };
-
-export type { Notification };

@@ -16,14 +16,23 @@ import { useNotifications } from '@/hooks/useNotifications';
 
 export const NotificationBell = () => {
   const { user } = useAuth();
-  const { notifications, unreadCount, markAsRead } = useNotifications(user?.id);
+  const { notifications, unreadCount, markAsRead } = useNotifications();
   const [open, setOpen] = useState(false);
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
     if (isOpen && unreadCount > 0) {
-      markAsRead();
+      markAllAsRead();
     }
+  };
+
+  // We need to define this function to mark all notifications as read
+  const markAllAsRead = () => {
+    notifications.forEach((notification) => {
+      if (!notification.is_read) {
+        markAsRead(notification.id);
+      }
+    });
   };
 
   return (
@@ -48,7 +57,7 @@ export const NotificationBell = () => {
               {notifications.map((notification) => (
                 <DropdownMenuItem
                   key={notification.id}
-                  className={`flex flex-col items-start gap-1 p-3 ${!notification.read ? 'bg-blue-50 dark:bg-blue-900/10' : ''}`}
+                  className={`flex flex-col items-start gap-1 p-3 ${!notification.is_read ? 'bg-blue-50 dark:bg-blue-900/10' : ''}`}
                 >
                   <p className="text-sm font-medium">{notification.message}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
