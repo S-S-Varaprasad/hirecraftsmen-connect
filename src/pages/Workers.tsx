@@ -25,23 +25,26 @@ const Workers = () => {
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load sample workers if none exist - update to use forceAddSampleWorkers to ensure we have the latest data
+  // Always force refresh the workers data to ensure only Indian profiles are displayed
   useEffect(() => {
-    const loadSampleWorkersIfNeeded = async () => {
+    const refreshWorkerProfiles = async () => {
       try {
-        // Use forceAddSampleWorkers to ensure we have the latest sample data
+        setIsLoading(true);
+        // Force reset and add only the Indian sample workers
         const added = await forceAddSampleWorkers();
         if (added) {
-          toast.success('Worker profiles refreshed successfully');
-          refetch(); // Refetch the workers data
+          toast.success('Worker profiles have been refreshed');
+          await refetch(); // Refetch after the database has been updated
         }
+        setIsLoading(false);
       } catch (error) {
         console.error('Error refreshing worker profiles:', error);
         toast.error('Failed to refresh worker profiles');
+        setIsLoading(false);
       }
     };
     
-    loadSampleWorkersIfNeeded();
+    refreshWorkerProfiles();
   }, [refetch]);
 
   useEffect(() => {
@@ -123,7 +126,7 @@ const Workers = () => {
     }, 500);
   };
 
-  if (isLoadingWorkers) {
+  if (isLoadingWorkers || isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />

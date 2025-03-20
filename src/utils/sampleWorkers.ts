@@ -217,33 +217,25 @@ export const forceAddSampleWorkers = async () => {
   try {
     console.log('Force adding sample workers...');
     
-    // First, let's remove existing workers to start with a clean slate
+    // First completely clear the workers table
     try {
-      const { data: existingWorkers, error: fetchError } = await supabase
+      // Delete ALL existing workers from the database
+      const { error: deleteError } = await supabase
         .from('workers')
-        .select('id');
-      
-      if (fetchError) {
-        console.error('Error fetching existing workers:', fetchError);
-      } else if (existingWorkers && existingWorkers.length > 0) {
-        console.log(`Found ${existingWorkers.length} existing workers, removing them...`);
-        // Delete all existing workers
-        const { error: deleteError } = await supabase
-          .from('workers')
-          .delete()
-          .in('id', existingWorkers.map(worker => worker.id));
-          
-        if (deleteError) {
-          console.error('Error deleting existing workers:', deleteError);
-        } else {
-          console.log('Successfully removed existing workers');
-        }
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // This will delete all rows
+        
+      if (deleteError) {
+        console.error('Error deleting existing workers:', deleteError);
+      } else {
+        console.log('Successfully removed all existing workers from database');
       }
     } catch (cleanupError) {
-      console.error('Error during worker cleanup:', cleanupError);
+      console.error('Error during complete worker cleanup:', cleanupError);
     }
     
     // Now add the sample workers
+    console.log('Adding sample Indian workers to database...');
     for (const worker of sampleWorkers) {
       try {
         await registerWorker({
