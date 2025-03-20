@@ -1,519 +1,257 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { User, Mail, Phone, MapPin, Briefcase, Clock, IndianRupee, FileText, Upload, Star } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { toast } from 'sonner';
-import { useAuth } from '@/context/AuthContext';
-import { useStorage } from '@/hooks/useStorage';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 const JoinAsWorker = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
-  const { uploadFile } = useStorage();
+  const { user } = useAuth();
   const { createWorkerProfile } = useWorkerProfiles();
-  
+
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
-    phone: '',
-    location: '',
     profession: '',
+    location: '',
     experience: '',
     hourlyRate: '',
-    languages: '',
     skills: '',
+    languages: '',
     about: '',
-    profileImage: null as File | null,
-    resume: null as File | null,
+    profileImage: null,
+    resume: null,
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [profilePreview, setProfilePreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
+  const [resumeName, setResumeName] = useState<string | null>(null);
 
-  if (!isAuthenticated) {
-    toast.error('Please log in to register as a worker');
-    return <Navigate to="/login" />;
-  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-  useEffect(() => {
-    if (user && user.email) {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'profileImage' | 'resume') => {
+    const file = e.target.files && e.target.files[0];
+
+    if (file) {
       setFormData(prev => ({
         ...prev,
-        email: user.email || '',
-        name: user.user_metadata?.name || ''
+        [type]: file,
       }));
-    }
-  }, [user]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'profileImage' | 'resume') => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      
-      if (fieldName === 'profileImage' && !file.type.startsWith('image/')) {
-        toast.error('Please upload an image file (JPG, PNG, etc.)');
-        return;
-      }
-      
-      if (fieldName === 'resume' && !['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
-        toast.error('Please upload a PDF or Word document');
-        return;
-      }
-      
-      setFormData({ ...formData, [fieldName]: file });
-      
-      if (fieldName === 'profileImage') {
+      if (type === 'profileImage') {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setProfilePreview(reader.result as string);
+          setProfileImagePreview(reader.result as string);
         };
         reader.readAsDataURL(file);
-      }
-    }
-  };
-
-  const handleProfileUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>, fieldName: 'profileImage' | 'resume') => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      
-      if (fieldName === 'profileImage' && !file.type.startsWith('image/')) {
-        toast.error('Please upload an image file (JPG, PNG, etc.)');
-        return;
-      }
-      
-      if (fieldName === 'resume' && !['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
-        toast.error('Please upload a PDF or Word document');
-        return;
-      }
-      
-      setFormData({ ...formData, [fieldName]: file });
-      
-      if (fieldName === 'profileImage') {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setProfilePreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
+      } else if (type === 'resume') {
+        setResumeName(file.name);
       }
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+
+    if (!user) {
+      toast.error('You must be logged in to create a profile');
+      navigate('/login');
+      return;
+    }
 
     try {
-      if (!formData.name || !formData.email || !formData.phone || !formData.profession || !formData.location || !formData.languages || !formData.skills) {
-        toast.warning('Please fill all required fields.');
-        setIsLoading(false);
-        return;
-      }
+      const result = await createWorkerProfile.mutateAsync({
+        name: formData.name,
+        profession: formData.profession,
+        location: formData.location,
+        experience: formData.experience,
+        hourlyRate: formData.hourlyRate,
+        skills: formData.skills,
+        languages: formData.languages,
+        about: formData.about,
+        profileImage: formData.profileImage,
+        resume: formData.resume,
+      });
 
-      if (!formData.profileImage) {
-        toast.warning('A profile photo is required to complete your registration.');
-        setIsLoading(false);
-        return;
-      }
-      
-      await createWorkerProfile.mutateAsync(formData);
-      
-      toast.success('Your profile has been created successfully!');
-      
-      setTimeout(() => {
-        navigate('/workers');
-      }, 2000);
-      
+      toast.success('Profile created successfully!');
+      navigate('/profile');
     } catch (error: any) {
-      console.error('Error registering worker:', error);
-      toast.error(error.message || 'An error occurred while submitting your profile');
-    } finally {
-      setIsLoading(false);
+      console.error('Error creating worker profile:', error);
+      toast.error(error?.message || 'Failed to create worker profile');
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-blue-50/40 dark:bg-gray-900">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      
-      <main className="flex-grow pt-24">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-              <div className="p-8">
-                <div className="text-center mb-8">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Join as a Skilled Professional</h1>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Create your professional profile and connect with clients in your area
-                  </p>
-                </div>
-                
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="space-y-4 mb-8">
-                    <h2 className="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">Profile Picture</h2>
-                    <div className="flex flex-col items-center justify-center">
-                      <div 
-                        className="w-32 h-32 mb-4 rounded-full overflow-hidden border-2 border-primary/20 flex items-center justify-center bg-gray-100 dark:bg-gray-700 cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={handleProfileUploadClick}
-                        onDragOver={handleDragOver}
-                        onDrop={(e) => handleDrop(e, 'profileImage')}
-                      >
-                        {profilePreview ? (
-                          <img 
-                            src={profilePreview} 
-                            alt="Profile Preview" 
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex flex-col items-center justify-center text-gray-400">
-                            <User className="w-12 h-12 mb-2" />
-                            <span className="text-xs">Add Photo</span>
-                          </div>
-                        )}
-                      </div>
-                      <input
-                        ref={fileInputRef}
-                        id="profileImage"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => handleFileChange(e, 'profileImage')}
-                      />
-                      <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-2">
-                        {formData.profileImage ? formData.profileImage.name : "Click or drag & drop to upload your profile photo"}
-                      </p>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        className="bg-blue-600 text-white hover:bg-blue-700 border-none"
-                        onClick={handleProfileUploadClick}
-                      >
-                        Select Profile Photo
-                      </Button>
-                      <p className="text-xs text-primary mt-2">
-                        * A profile photo is required to complete your registration
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4 md:col-span-2">
-                      <h2 className="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">Personal Information</h2>
-                      
-                      <div className="space-y-1">
-                        <label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Full Name <span className="text-red-500">*</span>
-                        </label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <User className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <Input
-                            id="name"
-                            name="name"
-                            type="text"
-                            placeholder="Your name"
-                            className="pl-10"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Email Address <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <Mail className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          placeholder="you@example.com"
-                          className="pl-10"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <label htmlFor="phone" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Phone Number <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <Phone className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <Input
-                          id="phone"
-                          name="phone"
-                          type="tel"
-                          placeholder="+91 9876543210"
-                          className="pl-10"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <label htmlFor="location" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Location <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <MapPin className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <Input
-                          id="location"
-                          name="location"
-                          type="text"
-                          placeholder="Bengaluru, Karnataka"
-                          className="pl-10"
-                          value={formData.location}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4 md:col-span-2">
-                      <h2 className="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">Professional Information</h2>
-                      
-                      <div className="space-y-1">
-                        <label htmlFor="profession" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Profession/Trade <span className="text-red-500">*</span>
-                        </label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <Briefcase className="h-5 w-5 text-gray-400" />
-                          </div>
-                          <Input
-                            id="profession"
-                            name="profession"
-                            type="text"
-                            placeholder="e.g., Carpenter, Electrician, Plumber"
-                            className="pl-10"
-                            value={formData.profession}
-                            onChange={handleInputChange}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <label htmlFor="experience" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Years of Experience <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <Clock className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <Input
-                          id="experience"
-                          name="experience"
-                          type="text"
-                          placeholder="e.g., 5 years"
-                          className="pl-10"
-                          value={formData.experience}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <label htmlFor="hourlyRate" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Hourly Rate (₹) <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <IndianRupee className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <Input
-                          id="hourlyRate"
-                          name="hourlyRate"
-                          type="text"
-                          placeholder="e.g., ₹400"
-                          className="pl-10"
-                          value={formData.hourlyRate}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-1 md:col-span-2">
-                      <label htmlFor="languages" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Languages <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <Star className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <Input
-                          id="languages"
-                          name="languages"
-                          type="text"
-                          placeholder="e.g., English, Hindi, Tamil"
-                          className="pl-10"
-                          value={formData.languages}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Separate languages with commas</p>
-                    </div>
-                    
-                    <div className="space-y-1 md:col-span-2">
-                      <label htmlFor="skills" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Skills/Specializations <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <Star className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <Input
-                          id="skills"
-                          name="skills"
-                          type="text"
-                          placeholder="e.g., Furniture making, Cabinet installation, Home remodeling"
-                          className="pl-10"
-                          value={formData.skills}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Separate skills with commas</p>
-                    </div>
-                    
-                    <div className="space-y-1 md:col-span-2">
-                      <label htmlFor="about" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        About Yourself
-                      </label>
-                      <textarea
-                        id="about"
-                        name="about"
-                        rows={4}
-                        className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        placeholder="Briefly describe your experience, specializations, and why clients should hire you..."
-                        value={formData.about}
-                        onChange={handleInputChange}
-                      ></textarea>
-                    </div>
-                    
-                    <div className="space-y-4 md:col-span-2">
-                      <h2 className="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">Resume/CV</h2>
-                      
-                      <div className="space-y-1">
-                        <label htmlFor="resume" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Resume/CV
-                        </label>
-                        <div 
-                          className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 text-center"
-                          onDragOver={handleDragOver}
-                          onDrop={(e) => handleDrop(e, 'resume')}
-                        >
-                          <div className="flex flex-col items-center justify-center">
-                            <FileText className="h-8 w-8 text-gray-400 mb-2" />
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                              {formData.resume ? 
-                                formData.resume.name : 
-                                "Upload your resume (PDF format preferred)"
-                              }
-                            </p>
-                            <input
-                              id="resume"
-                              type="file"
-                              accept=".pdf,.doc,.docx"
-                              className="hidden"
-                              onChange={(e) => handleFileChange(e, 'resume')}
-                            />
-                            <Button 
-                              type="button" 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => document.getElementById('resume')?.click()}
-                            >
-                              Select File
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center md:col-span-2">
-                      <input
-                        id="terms"
-                        type="checkbox"
-                        className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
-                        required
-                      />
-                      <label htmlFor="terms" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                        I agree to the <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
-                      </label>
-                    </div>
-                  </div>
-                  
-                  <Button
-                    type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <div className="animate-spin mr-2 h-4 w-4 border-2 border-b-transparent rounded-full"></div>
-                        Submitting Registration...
-                      </>
-                    ) : (
-                      'Register as a Professional'
-                    )}
-                  </Button>
-                </form>
-                
-                <div className="mt-6 text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Already registered?{' '}
-                    <Link to="/login" className="font-medium text-primary hover:underline">
-                      Sign In
-                    </Link>
-                  </p>
+      <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            <div className="px-8 py-12">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">Join as a Worker</h2>
+              <form onSubmit={handleSubmit}>
+                <div className="mb-4">
+                  <Label htmlFor="name" className="text-base">Full Name</Label>
+                  <Input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Your Full Name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="mt-1"
+                    required
+                  />
                 </div>
+                <div className="mb-4">
+                  <Label htmlFor="profession" className="text-base">Profession</Label>
+                  <Input
+                    type="text"
+                    id="profession"
+                    name="profession"
+                    placeholder="e.g., Electrician, Plumber"
+                    value={formData.profession}
+                    onChange={handleChange}
+                    className="mt-1"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <Label htmlFor="location" className="text-base">Location</Label>
+                  <Input
+                    type="text"
+                    id="location"
+                    name="location"
+                    placeholder="Your City, State"
+                    value={formData.location}
+                    onChange={handleChange}
+                    className="mt-1"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <Label htmlFor="experience" className="text-base">Years of Experience</Label>
+                  <Input
+                    type="text"
+                    id="experience"
+                    name="experience"
+                    placeholder="e.g., 5 years, 10+ years"
+                    value={formData.experience}
+                    onChange={handleChange}
+                    className="mt-1"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <Label htmlFor="hourlyRate" className="text-base">Hourly Rate</Label>
+                  <Input
+                    type="text"
+                    id="hourlyRate"
+                    name="hourlyRate"
+                    placeholder="e.g., $25/hr, $40/hr"
+                    value={formData.hourlyRate}
+                    onChange={handleChange}
+                    className="mt-1"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <Label htmlFor="skills" className="text-base">Skills</Label>
+                  <Input
+                    type="text"
+                    id="skills"
+                    name="skills"
+                    placeholder="e.g., Wiring, Plumbing, Carpentry (comma separated)"
+                    value={formData.skills}
+                    onChange={handleChange}
+                    className="mt-1"
+                    required
+                  />
+                  <p className="text-sm text-gray-500 mt-1">List your skills, separated by commas</p>
+                </div>
+                <div className="mb-4">
+                  <Label htmlFor="languages" className="text-base">Languages</Label>
+                  <Input
+                    type="text"
+                    id="languages"
+                    name="languages"
+                    placeholder="English, Spanish, French (comma separated)"
+                    value={formData.languages}
+                    onChange={handleChange}
+                    className="mt-1"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">List languages you speak, separated by commas</p>
+                </div>
+                <div className="mb-4">
+                  <Label htmlFor="about" className="text-base">About</Label>
+                  <Textarea
+                    id="about"
+                    name="about"
+                    placeholder="Tell us about yourself"
+                    value={formData.about}
+                    onChange={handleChange}
+                    className="mt-1"
+                    rows={4}
+                  />
+                </div>
+                <div className="mb-4">
+                  <Label htmlFor="profileImage" className="text-base">Profile Image</Label>
+                  <Input
+                    type="file"
+                    id="profileImage"
+                    name="profileImage"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, 'profileImage')}
+                    className="mt-1"
+                  />
+                  {profileImagePreview && (
+                    <div className="mt-2">
+                      <img
+                        src={profileImagePreview}
+                        alt="Profile Preview"
+                        className="w-20 h-20 rounded-full object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="mb-4">
+                  <Label htmlFor="resume" className="text-base">Resume</Label>
+                  <Input
+                    type="file"
+                    id="resume"
+                    name="resume"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => handleFileChange(e, 'resume')}
+                    className="mt-1"
+                  />
+                  {resumeName && (
+                    <p className="mt-1 text-sm text-gray-500">Selected: {resumeName}</p>
+                  )}
+                </div>
+                <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
+                  Create Profile
+                </Button>
+              </form>
+              <div className="mt-6 text-center">
+                <Link to="/login" className="text-sm text-gray-600 dark:text-gray-400 hover:underline">
+                  Already have an account? Login
+                </Link>
               </div>
             </div>
           </div>
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );

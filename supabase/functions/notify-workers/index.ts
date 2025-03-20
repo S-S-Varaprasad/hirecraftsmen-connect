@@ -48,7 +48,7 @@ serve(async (req: Request) => {
     // Get workers with matching skills or profession
     const { data: workers, error: workersError } = await supabaseClient
       .from('workers')
-      .select('id, user_id, skills, profession, name')
+      .select('id, user_id, skills, profession, name, languages')
       .eq('is_available', true);
     
     if (workersError) {

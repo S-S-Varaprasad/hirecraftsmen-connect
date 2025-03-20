@@ -223,6 +223,16 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <Button variant="default" className="col-span-2 mt-2 btn-hire-me" asChild>
               <Link to={`/apply/${id}`}><BriefcaseBusiness className="w-4 h-4 mr-1" />Hire Me</Link>
             </Button>
+            {isOwner && (
+              <>
+                <Button variant="outline" className="col-span-1 mt-2 hover:bg-amber-100 hover:text-amber-800 hover:border-amber-300" asChild>
+                  <Link to={`/workers/deactivate/${id}`}>Deactivate</Link>
+                </Button>
+                <Button variant="outline" className="col-span-1 mt-2 hover:bg-red-100 hover:text-red-800 hover:border-red-300" asChild>
+                  <Link to={`/workers/delete/${id}`}><Trash2 className="w-4 h-4 mr-1" />Delete</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

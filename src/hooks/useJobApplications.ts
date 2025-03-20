@@ -3,7 +3,12 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { applyToJob, getApplicationsByWorkerId, getApplicationsByJobId, updateApplicationStatus } from '@/services/applicationService';
 import { getJobById } from '@/services/jobService';
-import { createWorkerApplicationNotification, createJobAcceptedNotification, createNotification } from '@/services/notificationService';
+import { 
+  createWorkerApplicationNotification, 
+  createJobAcceptedNotification, 
+  createNotification,
+  notifyEmployerAboutApplication
+} from '@/services/notificationService';
 import { getWorkerById } from '@/services/workerService';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
@@ -48,12 +53,13 @@ export const useJobApplications = () => {
           console.log(`Sending notification to employer: ${job.employer_id}`);
           
           try {
-            await createWorkerApplicationNotification(
+            await notifyEmployerAboutApplication(
               job.employer_id,
               workerId,
               worker.name,
               jobId,
-              job.title
+              job.title,
+              true // Send email notification
             );
             console.log('Employer notification sent successfully');
           } catch (notifyError) {

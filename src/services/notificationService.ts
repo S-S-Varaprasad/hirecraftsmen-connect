@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Notification {
@@ -143,54 +142,84 @@ export const createNewJobNotification = async (
 export const notifyWorkersAboutJob = async (
   jobId: string, 
   jobTitle: string, 
-  skills: string[]
+  skills: string[],
+  category?: string,
+  sendEmail: boolean = false,
+  sendSms: boolean = false
 ) => {
   try {
-    // Get workers with matching skills
-    const { data: workers, error } = await supabase
-      .from('workers')
-      .select('id, user_id, skills, profession')
-      .filter('is_available', 'eq', true);
+    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/notify-workers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabase.supabaseKey}`
+      },
+      body: JSON.stringify({
+        jobId,
+        jobTitle,
+        skills,
+        category,
+        sendEmail,
+        sendSms
+      })
+    });
     
-    if (error) {
-      console.error('Error fetching workers for job notification:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`Error notifying workers: ${response.statusText}`);
     }
     
-    if (!workers || workers.length === 0) {
-      return [];
-    }
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error notifying workers about job:', error);
+    throw error;
+  }
+};
+
+export const notifyEmployerAboutApplication = async (
+  employerId: string, 
+  workerId: string,
+  workerName: string,
+  jobId: string,
+  jobTitle: string,
+  sendEmail: boolean = false
+) => {
+  try {
+    const notification = await createNotification(
+      employerId,
+      `${workerName} has applied to your job: ${jobTitle}`,
+      'application',
+      jobId
+    );
     
-    const notifications: Notification[] = [];
-    const skillsLower = skills.map(s => s.toLowerCase());
-    
-    // Filter workers with matching skills and send notifications
-    for (const worker of workers) {
-      if (!worker.user_id) continue;
-      
-      const workerSkillsLower = worker.skills.map((s: string) => s.toLowerCase());
-      const hasMatchingSkill = workerSkillsLower.some((skill: string) => 
-        skillsLower.some(jobSkill => skill.includes(jobSkill) || jobSkill.includes(skill))
-      );
-      
-      if (hasMatchingSkill) {
-        try {
-          const notification = await createNotification(
-            worker.user_id,
-            `New job posted that matches your skills: ${jobTitle}`,
-            'new_job',
-            jobId
-          );
-          notifications.push(notification);
-        } catch (notifyError) {
-          console.error(`Error creating notification for worker ${worker.id}:`, notifyError);
+    if (sendEmail) {
+      try {
+        const response = await fetch(`${supabase.supabaseUrl}/functions/v1/send-notification`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabase.supabaseKey}`
+          },
+          body: JSON.stringify({
+            userId: employerId,
+            message: `${workerName} has applied to your job: ${jobTitle}`,
+            type: 'application',
+            relatedId: jobId,
+            sendEmail: true
+          })
+        });
+        
+        if (!response.ok) {
+          console.error('Error sending email notification:', response.statusText);
         }
+      } catch (emailError) {
+        console.error('Error with email notification:', emailError);
       }
     }
     
-    return notifications;
+    return notification;
   } catch (error) {
-    console.error('Error notifying workers about job:', error);
+    console.error('Error notifying employer about application:', error);
     throw error;
   }
 };
