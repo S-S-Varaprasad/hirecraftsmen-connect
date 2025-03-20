@@ -51,7 +51,7 @@ export const getWorkersByCategory = async (category: string) => {
     languages: (worker as any).languages || []
   })) || [];
   
-  return getIndianWorkers(workersWithLanguages as Worker[]);
+  return workersWithLanguages as Worker[];
 };
 
 export const getWorkerById = async (id: string) => {
@@ -178,7 +178,7 @@ export const searchWorkers = async (searchTerm: string) => {
     languages: (worker as any).languages || []
   })) || [];
   
-  return getIndianWorkers(workersWithLanguages as Worker[]);
+  return workersWithLanguages as Worker[];
 };
 
 export const notifyWorkersAboutJob = async (
