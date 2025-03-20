@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Star, MapPin, Clock, Briefcase, Eye, BriefcaseBusiness, Upload, Check, X, Trash2 } from 'lucide-react';
@@ -22,6 +21,7 @@ interface ProfileCardProps {
   isAvailable: boolean;
   imageUrl: string;
   userId?: string | null;
+  className?: string;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -36,6 +36,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   isAvailable,
   imageUrl,
   userId,
+  className,
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -44,7 +45,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadFile } = useStorage();
 
-  // Get the initials for the fallback avatar
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -53,9 +53,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       .toUpperCase();
   };
 
-  // Get professional profile image based on profession if none exists
   const getDefaultProfileImage = () => {
-    // Map of professions to specific profile images (using randomuser.me consistent IDs)
     const professionImages: Record<string, string> = {
       'Plumber': 'https://randomuser.me/api/portraits/women/44.jpg',
       'Electrician': 'https://randomuser.me/api/portraits/women/68.jpg',
@@ -73,8 +71,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       'Babysitter': 'https://randomuser.me/api/portraits/women/29.jpg',
     };
 
-    // Return profession-specific image or a generic one based on gender inference from name
-    // This is a simplistic approach and might not work for all names
     return professionImages[profession] || 
            (name.endsWith('a') || name.includes('Priya') || name.includes('Ananya') || 
             name.includes('Lakshmi') || name.includes('Meera') || name.includes('Divya') || 
@@ -83,7 +79,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             `https://randomuser.me/api/portraits/men/${Math.floor(Math.random() * 70)}.jpg`);
   };
 
-  // Check if the current user owns this worker profile
   const isOwner = user && user.id === userId;
 
   const handleProfilePictureClick = () => {
@@ -106,7 +101,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       if (publicUrl) {
         await updateWorkerProfilePicture(id, publicUrl);
         toast.success('Profile picture updated successfully');
-        // Force a refresh of the page to show the new image
         window.location.reload();
       }
     } catch (error) {
@@ -123,7 +117,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   };
 
   const handleHireMe = () => {
-    // Navigate to post job page with worker info pre-filled
     navigate('/post-job', { 
       state: { 
         workerId: id,
@@ -135,7 +128,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   };
 
   return (
-    <div className="group relative rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-card hover:shadow-elevated transition-all duration-300 animate-in">
+    <div className={`group relative rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-card hover:shadow-elevated transition-all duration-300 animate-in ${className || ''}`}>
       <div className="absolute top-4 right-4 z-10">
         <Badge variant={isAvailable ? "default" : "secondary"} className={`flex items-center gap-1 px-2 py-1 text-xs ${isAvailable ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'}`}>
           <span className={`w-2 h-2 rounded-full ${isAvailable ? 'bg-green-200' : 'bg-gray-300'}`}></span>
