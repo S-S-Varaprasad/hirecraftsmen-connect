@@ -13,7 +13,7 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { formatDistanceToNow } from 'date-fns';
-import { CalendarClock, DollarSign, Briefcase, Check, X, Clock, Award, FileText, ExternalLink } from 'lucide-react';
+import { CalendarClock, DollarSign, Briefcase, Check, X, Clock, Award, FileText, ExternalLink, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { useJobApplications } from '@/hooks/useJobApplications';
@@ -99,11 +99,14 @@ const WorkerHistory = ({
     });
   };
 
+  // Show a more detailed loading state
   if (isLoading) {
     return (
-      <div className="space-y-4 p-4">
-        <div className="h-8 w-1/3 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
-        <div className="h-64 bg-gray-100 dark:bg-gray-800 animate-pulse rounded"></div>
+      <div className="flex flex-col items-center justify-center p-8 space-y-4">
+        <div className="animate-spin">
+          <RefreshCw className="h-8 w-8 text-primary" />
+        </div>
+        <p className="text-muted-foreground">Loading your job applications...</p>
       </div>
     );
   }
@@ -116,13 +119,22 @@ const WorkerHistory = ({
         </CardHeader>
         <CardContent>
           <p className="text-red-500 dark:text-red-400">
-            Error loading application history. Please try again.
+            Error loading application history: {error.message || 'Unknown error'}. Please try again.
           </p>
+          <Button 
+            variant="outline" 
+            className="mt-4"
+            onClick={() => window.location.reload()}
+          >
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Reload Page
+          </Button>
         </CardContent>
       </Card>
     );
   }
 
+  // Improved empty state with more context
   if (!applications || applications.length === 0) {
     return (
       <Card className="border-gray-200 dark:border-gray-700">
@@ -130,16 +142,28 @@ const WorkerHistory = ({
           <Briefcase className="h-12 w-12 mx-auto text-gray-300 dark:text-gray-600 mb-2" />
           <CardTitle>No Job History</CardTitle>
           <CardDescription>
-            You haven't applied to any jobs yet. 
+            You haven't applied to any jobs yet or your applications are still processing.
             <Button asChild variant="link" className="p-0 h-auto">
               <a href="/jobs" className="ml-1">Browse available jobs</a>
             </Button>
           </CardDescription>
         </CardHeader>
+        <CardContent className="flex justify-center">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => window.location.reload()}
+            className="mt-2"
+          >
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Refresh Page
+          </Button>
+        </CardContent>
       </Card>
     );
   }
 
+  // When applications exist, render them in the table
   return (
     <div className="space-y-6">
       <div className="rounded-md border dark:border-gray-700">

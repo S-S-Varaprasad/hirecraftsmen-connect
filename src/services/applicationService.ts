@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Job } from './jobService';
 import { Worker } from './workerService';
@@ -17,21 +16,29 @@ export interface Application {
 }
 
 export const getApplicationsByWorkerId = async (workerId: string) => {
-  const { data, error } = await (supabase as any)
-    .from('applications')
-    .select(`
-      *,
-      job:jobs(*)
-    `)
-    .eq('worker_id', workerId)
-    .order('created_at', { ascending: false });
+  console.log('Fetching applications for worker ID:', workerId);
   
-  if (error) {
-    console.error('Error fetching worker applications:', error);
-    throw error;
+  try {
+    const { data, error } = await supabase
+      .from('applications')
+      .select(`
+        *,
+        job:jobs(*)
+      `)
+      .eq('worker_id', workerId)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching worker applications:', error);
+      throw error;
+    }
+    
+    console.log('Applications fetched successfully:', data?.length || 0, 'applications found');
+    return data || [] as Application[];
+  } catch (err) {
+    console.error('Exception fetching applications:', err);
+    throw err;
   }
-  
-  return data || [] as Application[];
 };
 
 export const getApplicationsByJobId = async (jobId: string) => {

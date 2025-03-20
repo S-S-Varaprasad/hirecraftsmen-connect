@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -7,7 +7,7 @@ import WorkerHistory from '@/components/workers/WorkerHistory';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { History, ArrowLeft } from 'lucide-react';
+import { History, ArrowLeft, RefreshCw } from 'lucide-react';
 import { 
   Select,
   SelectContent,
@@ -24,11 +24,27 @@ const WorkerJobHistory = () => {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   
-  const { data: applications, isLoading, error, refetch } = useQuery({
+  const { 
+    data: applications, 
+    isLoading, 
+    error, 
+    refetch,
+    isRefetching 
+  } = useQuery({
     queryKey: ['worker-applications', user?.id],
     queryFn: () => user?.id ? getApplicationsByWorkerId(user.id) : Promise.resolve([]),
     enabled: !!user?.id,
+    refetchOnWindowFocus: true,
+    staleTime: 30000, // Consider data stale after 30 seconds
   });
+
+  // Force refetch on mount to ensure we have the latest data
+  useEffect(() => {
+    if (user?.id) {
+      console.log('Forcing refetch of job applications on page load for user:', user.id);
+      refetch();
+    }
+  }, [user?.id, refetch]);
 
   // Redirect if no user is logged in
   if (!user) {
@@ -57,6 +73,14 @@ const WorkerJobHistory = () => {
     refetch();
     toast.success("Job history refreshed");
   };
+
+  // Log applications for debugging
+  useEffect(() => {
+    if (applications) {
+      console.log('Applications data from query:', applications);
+      console.log('Number of applications:', applications.length);
+    }
+  }, [applications]);
 
   const filteredApplications = applications?.filter(app => {
     if (statusFilter === "all") return true;
@@ -108,7 +132,10 @@ const WorkerJobHistory = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={handleRefresh}
+                disabled={isRefetching}
+                className="flex items-center"
               >
+                <RefreshCw className={`h-4 w-4 mr-1 ${isRefetching ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
             </div>
@@ -126,7 +153,7 @@ const WorkerJobHistory = () => {
                 <WorkerHistory 
                   workerId={user.id} 
                   applications={filteredApplications} 
-                  isLoading={isLoading}
+                  isLoading={isLoading || isRefetching}
                   error={error as Error}
                 />
               )}
