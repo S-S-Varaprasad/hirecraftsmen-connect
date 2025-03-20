@@ -7,12 +7,16 @@ import { getWorkerById } from '@/services/workerService';
 import { useQuery } from '@tanstack/react-query';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Briefcase, MapPin, Mail, Phone, Star } from 'lucide-react';
+import { Briefcase, MapPin, Mail, Phone, Star, History } from 'lucide-react';
 import LoadingState from '@/components/workers/LoadingState';
 import ErrorState from '@/components/workers/ErrorState';
+import WorkerHistory from '@/components/workers/WorkerHistory';
+import { useAuth } from '@/context/AuthContext';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const WorkerDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
 
   const { data: worker, isLoading, error } = useQuery({
     queryKey: ['worker', id],
@@ -20,8 +24,11 @@ const WorkerDetail = () => {
     enabled: !!id,
   });
 
+  // Check if the logged-in user is viewing their own profile
+  const isOwnProfile = user && worker && worker.user_id === user.id;
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col dark:bg-gray-900">
       <Navbar />
       
       <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-24">
@@ -86,18 +93,37 @@ const WorkerDetail = () => {
                 </div>
               </div>
               
-              {/* Worker Availability Section */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-                <div className="p-6">
-                  <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">
-                    Availability
-                  </h2>
-                  <Badge variant={worker.is_available ? "default" : "secondary"} className={`flex items-center gap-1 px-2 py-1 text-xs ${worker.is_available ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'}`}>
-                    <span className={`w-2 h-2 rounded-full ${worker.is_available ? 'bg-green-200' : 'bg-gray-300'}`}></span>
-                    {worker.is_available ? 'Available' : 'Unavailable'}
-                  </Badge>
-                </div>
-              </div>
+              {/* Worker Profile Content Tabs */}
+              <Tabs defaultValue="availability">
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="availability">Availability</TabsTrigger>
+                  {isOwnProfile && <TabsTrigger value="history">Job History</TabsTrigger>}
+                </TabsList>
+                
+                <TabsContent value="availability" className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                  <div className="p-6">
+                    <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">
+                      Availability
+                    </h2>
+                    <Badge variant={worker.is_available ? "default" : "secondary"} className={`flex items-center gap-1 px-2 py-1 text-xs ${worker.is_available ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'}`}>
+                      <span className={`w-2 h-2 rounded-full ${worker.is_available ? 'bg-green-200' : 'bg-gray-300'}`}></span>
+                      {worker.is_available ? 'Available' : 'Unavailable'}
+                    </Badge>
+                  </div>
+                </TabsContent>
+                
+                {isOwnProfile && (
+                  <TabsContent value="history" className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                    <div className="p-6">
+                      <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">
+                        <History className="inline-block mr-2 h-6 w-6" />
+                        Job Application History
+                      </h2>
+                      <WorkerHistory workerId={id as string} />
+                    </div>
+                  </TabsContent>
+                )}
+              </Tabs>
             </div>
           ) : (
             <div className="flex justify-center items-center h-full">

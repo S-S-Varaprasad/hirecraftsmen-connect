@@ -39,13 +39,25 @@ function App() {
   useEffect(() => {
     // Simulate loading
     setTimeout(() => setLoading(false), 1000);
+    
+    // Check and apply the theme from localStorage
+    const theme = localStorage.getItem('vite-ui-theme');
+    if (theme) {
+      document.documentElement.classList.remove('light', 'dark');
+      if (theme === 'system') {
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.classList.add(systemTheme);
+      } else {
+        document.documentElement.classList.add(theme);
+      }
+    }
   }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <div className="app">
-          <ThemeProvider defaultTheme="light" storageKey="ui-theme">
+          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
             <Toaster position="top-right" />
             <AuthProvider>
               <Routes>
