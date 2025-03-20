@@ -6,10 +6,10 @@ import Footer from '@/components/Footer';
 import SearchFilters from '@/components/SearchFilters';
 import ProfileCard from '@/components/ProfileCard';
 import { Briefcase, Filter } from 'lucide-react';
-import { getWorkers, Worker, searchWorkers } from '@/services/workerService';
+import { getWorkers, Worker } from '@/services/workerService';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { addSampleWorkers } from '@/utils/sampleWorkers';
+import { forceAddSampleWorkers } from '@/utils/sampleWorkers';
 
 const Workers = () => {
   const location = useLocation();
@@ -31,7 +31,7 @@ const Workers = () => {
     const loadSampleWorkersIfNeeded = async () => {
       if (workersData && workersData.length < 3) {
         try {
-          const added = await addSampleWorkers();
+          const added = await forceAddSampleWorkers();
           if (added) {
             toast.success('Sample workers added for demonstration');
             refetch(); // Refetch the workers data

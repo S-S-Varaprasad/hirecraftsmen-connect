@@ -136,7 +136,6 @@ const sampleWorkers = [
     about: 'Caring and reliable babysitter with experience in early childhood education. Creates a nurturing environment for children of all ages.',
     image_url: 'https://randomuser.me/api/portraits/women/29.jpg'
   },
-  // Added a new worker to ensure the file changes
   {
     name: 'Ajay Mehta',
     profession: 'Electrician',
@@ -147,6 +146,17 @@ const sampleWorkers = [
     languages: ['Gujarati', 'Hindi', 'English'],
     about: 'Skilled electrician with expertise in both residential and commercial settings. Specializing in smart home technology integration.',
     image_url: 'https://randomuser.me/api/portraits/men/36.jpg'
+  },
+  {
+    name: 'Neha Chauhan',
+    profession: 'Interior Designer',
+    location: 'New Delhi, Delhi',
+    experience: '7 years',
+    hourly_rate: '₹600',
+    skills: ['Space Planning', 'Color Selection', 'Furniture Design', 'Home Staging'],
+    languages: ['Hindi', 'English'],
+    about: 'Creative interior designer with a passion for transforming spaces into beautiful, functional environments. Specializes in contemporary Indian designs.',
+    image_url: 'https://randomuser.me/api/portraits/women/57.jpg'
   }
 ];
 
