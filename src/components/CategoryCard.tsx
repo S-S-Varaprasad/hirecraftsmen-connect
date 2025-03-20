@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LucideIcon } from 'lucide-react';
 import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
+import { getIndianWorkers } from '@/utils/workerFilters';
 
 interface CategoryCardProps {
   title: string;
@@ -23,10 +24,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   // Update count whenever workers data changes
   useEffect(() => {
     if (workers && workers.length > 0) {
+      // First filter to only get Indian workers
+      const indianWorkers = getIndianWorkers(workers);
+      
       const professionToMatch = title.toLowerCase();
       
       // Count workers that match this category and are available
-      const count = workers.filter(worker => {
+      const count = indianWorkers.filter(worker => {
         const workerProfession = worker.profession.toLowerCase();
         const isMatch = workerProfession.includes(professionToMatch) || 
                        worker.skills.some((skill: string) => skill.toLowerCase().includes(professionToMatch));

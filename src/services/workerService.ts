@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { getIndianWorkers } from '@/utils/workerFilters';
 
 export interface Worker {
   id: string;
@@ -32,7 +33,7 @@ export const getWorkers = async () => {
     languages: (worker as any).languages || []
   })) || [];
   
-  return workersWithLanguages as Worker[];
+  return getIndianWorkers(workersWithLanguages as Worker[]);
 };
 
 export const getWorkersByCategory = async (category: string) => {
@@ -51,7 +52,7 @@ export const getWorkersByCategory = async (category: string) => {
     languages: (worker as any).languages || []
   })) || [];
   
-  return workersWithLanguages as Worker[];
+  return getIndianWorkers(workersWithLanguages as Worker[]);
 };
 
 export const getWorkerById = async (id: string) => {
@@ -178,7 +179,7 @@ export const searchWorkers = async (searchTerm: string) => {
     languages: (worker as any).languages || []
   })) || [];
   
-  return workersWithLanguages as Worker[];
+  return getIndianWorkers(workersWithLanguages as Worker[]);
 };
 
 export const notifyWorkersAboutJob = async (

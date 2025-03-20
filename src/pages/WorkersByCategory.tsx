@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -13,6 +12,7 @@ import NoWorkersFound from '@/components/workers/NoWorkersFound';
 import LoadingState from '@/components/workers/LoadingState';
 import ErrorState from '@/components/workers/ErrorState';
 import { toast } from 'sonner';
+import { applyFilters } from '@/utils/workerFilters';
 
 const professionMap: { [key: string]: string } = {
   'painter': 'Painter',
@@ -47,7 +47,6 @@ const WorkersByCategory = () => {
   });
 
   useEffect(() => {
-    // If we don't have a slug, redirect to the workers page
     if (!slug) {
       navigate('/workers');
       return;
@@ -56,13 +55,11 @@ const WorkersByCategory = () => {
     if (workersData.length > 0) {
       setIsLoading(true);
       
-      // Get the profession name from the map
       const profession = professionMap[slug] || '';
       setCategoryName(profession || 'Specialized');
       
       console.log('Looking for workers matching profession:', profession);
       
-      // This ensures we have results even if the profession isn't found directly
       const professionToMatch = profession.toLowerCase();
       let results = [];
       
@@ -73,7 +70,6 @@ const WorkersByCategory = () => {
                 worker.skills.some((skill: string) => skill.toLowerCase().includes(professionToMatch));
         });
       } else {
-        // If no profession matches, just show some workers to avoid empty results
         results = workersData.slice(0, 6);
       }
       
@@ -102,24 +98,8 @@ const WorkersByCategory = () => {
             worker.skills.some((skill: string) => skill.toLowerCase().includes(professionToMatch));
     });
     
-    if (filters.searchTerm) {
-      const term = filters.searchTerm.toLowerCase();
-      results = results.filter(worker => 
-        worker.name.toLowerCase().includes(term) || 
-        worker.profession.toLowerCase().includes(term) ||
-        worker.skills.some((skill: string) => skill.toLowerCase().includes(term))
-      );
-    }
-    
-    if (filters.location) {
-      const location = filters.location.toLowerCase();
-      results = results.filter(worker => 
-        worker.location.toLowerCase().includes(location)
-      );
-    }
-    
-    if (filters.availableOnly) {
-      results = results.filter(worker => worker.is_available);
+    if (filters) {
+      results = applyFilters(results, filters);
     }
     
     setTimeout(() => {
@@ -156,7 +136,6 @@ const WorkersByCategory = () => {
     );
   }
 
-  // Count available workers (those with is_available = true)
   const availableWorkersCount = filteredWorkers.filter(worker => worker.is_available).length;
   const totalCount = filteredWorkers.length;
 

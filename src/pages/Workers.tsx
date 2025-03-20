@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -12,7 +11,7 @@ import NoWorkersFound from '@/components/workers/NoWorkersFound';
 import LoadingState from '@/components/workers/LoadingState';
 import ErrorState from '@/components/workers/ErrorState';
 import WorkersHeader from '@/components/workers/WorkersHeader';
-import { getIndianWorkers, applyFilters, WorkerFilters } from '@/utils/workerFilters';
+import { applyFilters, WorkerFilters } from '@/utils/workerFilters';
 
 const Workers = () => {
   const location = useLocation();
@@ -20,7 +19,7 @@ const Workers = () => {
   const initialSearch = searchParams.get('search') || '';
   const initialLocation = searchParams.get('location') || '';
 
-  // Query to fetch workers 
+  // Query to fetch workers (already filtered to only Indian workers in the service)
   const { data: workersData = [], isLoading: isLoadingWorkers, error } = useQuery({
     queryKey: ['workers'],
     queryFn: getWorkers,
@@ -31,9 +30,6 @@ const Workers = () => {
 
   useEffect(() => {
     if (workersData) {
-      // First filter to only get Indian workers
-      const indianWorkers = getIndianWorkers(workersData);
-      
       // Apply initial filters from URL if they exist
       if (initialSearch || initialLocation) {
         const filters: WorkerFilters = {
@@ -41,17 +37,17 @@ const Workers = () => {
           location: initialLocation
         };
         
-        const results = applyFilters(indianWorkers, filters);
+        const results = applyFilters(workersData, filters);
         
         setFilteredWorkers(results);
         if (results.length > 0) {
           toast.info(`Found ${results.length} worker${results.length !== 1 ? 's' : ''} matching your search criteria`);
         } else {
           toast.info('No workers found matching your search criteria. Showing all Indian workers instead.');
-          setFilteredWorkers(indianWorkers);
+          setFilteredWorkers(workersData);
         }
       } else {
-        setFilteredWorkers(indianWorkers);
+        setFilteredWorkers(workersData);
       }
     }
   }, [workersData, initialSearch, initialLocation]);
@@ -61,9 +57,7 @@ const Workers = () => {
     
     // Apply filters
     setTimeout(() => {
-      // First filter to only get Indian workers
-      const indianWorkers = getIndianWorkers(workersData);
-      const results = applyFilters(indianWorkers, filters);
+      const results = applyFilters(workersData, filters);
       
       setFilteredWorkers(results);
       setIsLoading(false);
