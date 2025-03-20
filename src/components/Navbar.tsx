@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, User, Briefcase, PlusCircle, History, Tool, Sun, Moon } from 'lucide-react';
+import { Menu, X, User, Briefcase, PlusCircle, History, Wrench, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import UserProfile from './UserProfile';
@@ -53,7 +53,7 @@ const Navbar = () => {
             className="flex items-center space-x-2 transition-all hover:opacity-80"
           >
             <div className="bg-gradient-to-r from-primary to-blue-500 rounded-full p-1.5 mr-1.5">
-              <Tool className="h-5 w-5 text-white" />
+              <Wrench className="h-5 w-5 text-white" />
             </div>
             <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent font-bold text-xl md:text-2xl tracking-tight">
               HireEase
