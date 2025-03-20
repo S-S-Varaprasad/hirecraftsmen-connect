@@ -77,8 +77,36 @@ serve(async (req: Request) => {
           console.error(`Error fetching user email:`, userError || "No user data");
         } else if (userData.user.email) {
           // Here you would integrate with an email service
+          // For now we'll just log that we would send an email
           console.log(`Would send email to ${userData.user.email}: ${message}`);
           emailResult = { success: true, email: userData.user.email, message: "Email would be sent here" };
+          
+          // TODO: Implement actual email sending using a service like SendGrid
+          // Example implementation:
+          /*
+          const emailResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${Deno.env.get("SENDGRID_API_KEY")}`
+            },
+            body: JSON.stringify({
+              personalizations: [
+                {
+                  to: [{ email: userData.user.email }],
+                  subject: `Notification: ${type}`,
+                }
+              ],
+              from: { email: 'notifications@yourplatform.com', name: 'Job Platform' },
+              content: [
+                {
+                  type: 'text/html',
+                  value: `<div><h2>${type.charAt(0).toUpperCase() + type.slice(1)} Notification</h2><p>${message}</p></div>`
+                }
+              ]
+            })
+          });
+          */
         }
       } catch (emailError) {
         console.error(`Error processing email notification:`, emailError);
@@ -101,8 +129,30 @@ serve(async (req: Request) => {
           console.error(`Error fetching worker phone:`, workerError || "No phone found");
         } else {
           // Here you would integrate with an SMS service like Twilio
+          // For now we'll just log that we would send an SMS
           console.log(`Would send SMS to ${workerData.phone_number}: ${message}`);
           smsResult = { success: true, phone: workerData.phone_number, message: "SMS would be sent here" };
+          
+          // TODO: Implement actual SMS sending using a service like Twilio
+          // Example implementation:
+          /*
+          const twilioSid = Deno.env.get("TWILIO_SID");
+          const twilioToken = Deno.env.get("TWILIO_TOKEN");
+          const twilioPhone = Deno.env.get("TWILIO_PHONE");
+          
+          const smsResponse = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Authorization': `Basic ${btoa(`${twilioSid}:${twilioToken}`)}`
+            },
+            body: new URLSearchParams({
+              To: workerData.phone_number,
+              From: twilioPhone,
+              Body: message
+            }).toString()
+          });
+          */
         }
       } catch (smsError) {
         console.error(`Error processing SMS notification:`, smsError);

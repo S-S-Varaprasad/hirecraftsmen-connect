@@ -30,8 +30,8 @@ export const NotificationBell = () => {
       // Navigate based on notification type
       if (notification.type === 'application' || notification.type === 'new_application') {
         navigate(`/jobs/${notification.related_id}`);
-      } else if (notification.type === 'job_accepted') {
-        navigate(`/jobs/${notification.related_id}`);
+      } else if (notification.type === 'job_accepted' || notification.type === 'job_application' || notification.type === 'job_completed') {
+        navigate(`/job-history`);
       } else if (notification.type === 'new_job' || notification.type === 'job_updated') {
         navigate(`/jobs/${notification.related_id}`);
       }

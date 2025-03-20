@@ -1,9 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Bell, User, Settings, LogOut, History, FileText } from 'lucide-react';
+import { Bell, User, Settings, LogOut, History } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,9 +61,7 @@ const UserProfile = () => {
     if (notification.related_id) {
       if (notification.type === 'application' || notification.type === 'new_application') {
         navigate(`/jobs/${notification.related_id}`);
-      } else if (notification.type === 'job_accepted') {
-        navigate(`/job-history`);
-      } else if (notification.type === 'job_completed') {
+      } else if (notification.type === 'job_accepted' || notification.type === 'job_application' || notification.type === 'job_completed') {
         navigate(`/job-history`);
       } else if (notification.type === 'new_job' || notification.type === 'job_updated') {
         navigate(`/jobs/${notification.related_id}`);

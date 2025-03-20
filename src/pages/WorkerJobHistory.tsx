@@ -7,7 +7,7 @@ import WorkerHistory from '@/components/workers/WorkerHistory';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { History, ArrowLeft, Bell, Filter } from 'lucide-react';
+import { History, ArrowLeft } from 'lucide-react';
 import { 
   Select,
   SelectContent,

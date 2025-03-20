@@ -128,16 +128,7 @@ export const useJobApplications = () => {
       console.log(`Accepting application: ${applicationId} for job: ${jobId} and worker: ${workerId}`);
       
       // Update application status to 'accepted'
-      const { data, error } = await supabase
-        .from('applications')
-        .update({ status: 'accepted' })
-        .eq('id', applicationId)
-        .select();
-        
-      if (error) {
-        console.error('Error updating application status:', error);
-        throw error;
-      }
+      const updatedApplication = await updateApplicationStatus(applicationId, 'accepted');
       
       // Get job and employer details
       const job = await getJobById(jobId);
@@ -170,7 +161,7 @@ export const useJobApplications = () => {
         // Continue even if notification fails
       }
       
-      return data?.[0] || { success: true };
+      return updatedApplication;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['applications'] });
@@ -179,6 +170,62 @@ export const useJobApplications = () => {
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to accept application');
+    },
+  });
+
+  // Reject an application
+  const rejectApplication = useMutation({
+    mutationFn: async ({ 
+      applicationId, 
+      jobId, 
+      workerId 
+    }: { 
+      applicationId: string, 
+      jobId: string, 
+      workerId: string 
+    }) => {
+      console.log(`Rejecting application: ${applicationId} for job: ${jobId} and worker: ${workerId}`);
+      
+      // Update application status to 'rejected'
+      const updatedApplication = await updateApplicationStatus(applicationId, 'rejected');
+      
+      // Get job details
+      const job = await getJobById(jobId);
+      if (!job) throw new Error('Job not found');
+      
+      // Get employer name
+      const employerName = user?.user_metadata?.name || 'Employer';
+      
+      // Notify worker about rejection
+      try {
+        const { error: notifyError } = await supabase.functions.invoke('notify-user', {
+          body: {
+            userId: workerId,
+            message: `Your application for "${job.title}" was not accepted at this time.`,
+            type: 'job_rejected',
+            relatedId: jobId,
+            sendEmail: true
+          }
+        });
+        
+        if (notifyError) {
+          console.error('Error sending rejection notification:', notifyError);
+        } else {
+          console.log('Worker rejection notification sent');
+        }
+      } catch (notifyError) {
+        console.error('Error in notification function:', notifyError);
+      }
+      
+      return updatedApplication;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['applications'] });
+      queryClient.invalidateQueries({ queryKey: ['worker-applications'] });
+      toast.success('Application has been rejected');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to reject application');
     },
   });
 
@@ -249,6 +296,7 @@ export const useJobApplications = () => {
   return {
     applyForJob,
     acceptApplication,
+    rejectApplication,
     markJobCompleted,
     getJobApplications,
     getWorkerApplications,
