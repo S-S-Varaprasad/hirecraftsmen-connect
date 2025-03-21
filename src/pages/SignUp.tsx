@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { User, Lock, Eye, EyeOff, Mail, Phone, Briefcase, UserPlus, ArrowRight, CheckCircle } from 'lucide-react';
@@ -11,6 +10,13 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
+
+interface PasswordChecks {
+  length: boolean;
+  uppercase: boolean;
+  number: boolean;
+  special: boolean;
+}
 
 const SignUp = () => {
   const [name, setName] = useState('');
@@ -81,16 +87,22 @@ const SignUp = () => {
     setActiveField(null);
   };
 
-  const calculatePasswordStrength = (password: string): { strength: number, text: string, color: string } => {
-    if (!password) return { strength: 0, text: '', color: 'bg-gray-200' };
+  const calculatePasswordStrength = (password: string): { strength: number, text: string, color: string, checks: PasswordChecks } => {
+    if (!password) return { 
+      strength: 0, 
+      text: '', 
+      color: 'bg-gray-200', 
+      checks: { length: false, uppercase: false, number: false, special: false } 
+    };
     
-    let strength = 0;
-    let checks = {
+    const checks = {
       length: password.length >= 8,
       uppercase: /[A-Z]/.test(password),
       number: /[0-9]/.test(password),
       special: /[^A-Za-z0-9]/.test(password)
     };
+    
+    let strength = 0;
     
     // Count passed checks
     Object.values(checks).forEach(passed => {
@@ -115,10 +127,10 @@ const SignUp = () => {
       color = 'bg-green-500';
     }
     
-    return { strength, text, color };
+    return { strength, text, color, checks };
   };
 
-  const { strength, text, color } = calculatePasswordStrength(password);
+  const { strength, text, color, checks } = calculatePasswordStrength(password);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50/80 to-white">
@@ -415,3 +427,4 @@ const SignUp = () => {
 };
 
 export default SignUp;
+
