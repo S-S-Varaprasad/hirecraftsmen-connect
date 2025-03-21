@@ -39,9 +39,12 @@ const ResetPassword = () => {
       const setSessionAsync = async () => {
         try {
           // Set the session with the access token from the URL
+          const refreshToken = params.get('refresh_token') || '';
+          console.log('Setting session with tokens:', { accessToken, refreshToken });
+          
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
-            refresh_token: params.get('refresh_token') || '',
+            refresh_token: refreshToken,
           });
           
           if (error) {

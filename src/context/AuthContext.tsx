@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -86,19 +85,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resetPassword = async (email: string) => {
     try {
-      // Use the window.location.origin to get the base URL without any paths
-      const baseUrl = window.location.origin;
+      const currentOrigin = window.location.origin;
       
-      // For debugging - log the full URL we're using
-      console.log("Reset password redirect URL:", `${baseUrl}/reset-password`);
-      
-      // Make sure there are no trailing slashes that might cause issues
-      const cleanUrl = baseUrl.endsWith('/') 
-        ? baseUrl.slice(0, -1) 
-        : baseUrl;
+      console.log("Current origin:", currentOrigin);
+      console.log("Reset password redirect URL:", `${currentOrigin}/reset-password`);
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${cleanUrl}/reset-password`,
+        redirectTo: `${currentOrigin}/reset-password`,
       });
       
       if (error) throw error;
