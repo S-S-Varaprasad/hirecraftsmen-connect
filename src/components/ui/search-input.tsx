@@ -51,13 +51,6 @@ export function SearchInput({
       } else {
         setFilteredSuggestions([])
         setOpen(false)
-        
-        // Reset justSelected after a short delay
-        if (justSelected) {
-          setTimeout(() => {
-            setJustSelected(false)
-          }, 300)
-        }
       }
     }, 200)
 
@@ -108,8 +101,28 @@ export function SearchInput({
     // Focus the input after selection
     setTimeout(() => {
       inputRef.current?.focus();
+      // Add a longer justSelected state to prevent suggestions from showing again
+      setTimeout(() => setJustSelected(false), 500);
     }, 0);
   }
+
+  // Reset justSelected state when component loses focus completely
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Check if we're not clicking on a suggestion
+    if (!e.relatedTarget || !e.relatedTarget.closest('.suggestions-container')) {
+      setTimeout(() => {
+        setOpen(false);
+        // Only reset justSelected when we're truly blurring to another field
+        if (document.activeElement !== inputRef.current) {
+          setJustSelected(false);
+        }
+      }, 150);
+    }
+    
+    if (props.onBlur) {
+      props.onBlur(e);
+    }
+  };
 
   return (
     <div className="relative w-full">
@@ -132,18 +145,14 @@ export function SearchInput({
               setOpen(true)
             }
           }}
-          onBlur={() => {
-            // Close the dropdown when the input loses focus, with a short delay
-            // to allow clicking on suggestions
-            setTimeout(() => setOpen(false), 150)
-          }}
+          onBlur={handleBlur}
         />
       </div>
 
       {open && filteredSuggestions.length > 0 && (
         <div 
           className={cn(
-            "absolute z-50 w-full mt-1 bg-popover text-popover-foreground rounded-md border shadow-md",
+            "absolute z-50 w-full mt-1 bg-popover text-popover-foreground rounded-md border shadow-md suggestions-container",
             suggestionsContainerClassName
           )}
           onMouseDown={(e) => {

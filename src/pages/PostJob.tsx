@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -10,7 +9,6 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { 
   Form, 
   FormControl, 
@@ -36,7 +34,7 @@ import {
 } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2, CheckCircle } from 'lucide-react';
-import { AutocompleteField, SuggestiveInputField } from '@/components/ui/form-field';
+import { AutocompleteField, SuggestiveInputField, JobDescriptionGenerator } from '@/components/ui/form-field';
 import { 
   skills as skillSuggestions, 
   popularLocations, 
@@ -44,7 +42,6 @@ import {
   allIndianRegions
 } from '@/utils/suggestions';
 
-// Form validation schema
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters').max(100),
   company: z.string().min(2, 'Company name is required'),
@@ -65,17 +62,14 @@ const PostJob = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   
-  // Get worker info from location state if coming from "Hire Me" button
   const workerInfo = location.state || {};
   const { workerId, workerName, workerProfession, workerSkills } = workerInfo;
 
-  // Convert locations to the format required by AutocompleteField
   const locationOptions = [...popularLocations, ...allIndianRegions].map(location => ({
     value: location,
     label: location,
   }));
 
-  // Convert professions to the format required for title suggestions
   const jobTitleSuggestions = professions.map(profession => `Need a ${profession}`);
 
   const form = useForm<FormValues>({
@@ -94,6 +88,8 @@ const PostJob = () => {
     },
   });
 
+  const jobTitle = form.watch('title');
+
   const onSubmit = async (data: FormValues) => {
     if (!user) {
       toast.error('You must be logged in to post a job');
@@ -105,12 +101,10 @@ const PostJob = () => {
     console.log('Submitting job with data:', data);
 
     try {
-      // Convert skills string to array
       const skillsArray = data.skills.split(',').map(skill => skill.trim());
       
       console.log('Creating job with skills:', skillsArray);
       
-      // Create job
       const newJob = await createJob({
         title: data.title,
         company: data.company,
@@ -128,10 +122,8 @@ const PostJob = () => {
       setIsSuccess(true);
       toast.success('Job posted successfully!');
       
-      // Reset form
       form.reset();
       
-      // Redirect after a short delay
       setTimeout(() => {
         navigate(`/jobs/${newJob.id}`);
       }, 2000);
@@ -327,22 +319,12 @@ const PostJob = () => {
                         )}
                       />
                       
-                      <FormField
-                        control={form.control}
+                      <JobDescriptionGenerator
                         name="description"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Job Description</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Describe the job requirements, responsibilities, and other important details..." 
-                                className="min-h-[150px]"
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                        control={form.control}
+                        label="Job Description"
+                        jobTitle={jobTitle}
+                        description="Describe job requirements or use the generator button"
                       />
                       
                       <CardFooter className="px-0 pb-0 pt-2">
