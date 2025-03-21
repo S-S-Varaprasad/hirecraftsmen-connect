@@ -15,14 +15,20 @@ const ResetPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hashExists, setHashExists] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     // Check if we have the access token in the URL which indicates a valid reset password request
     const hash = window.location.hash;
+    console.log('URL hash:', hash);
+    
     if (!hash || !hash.includes('access_token')) {
       toast.error('Invalid or expired password reset link');
-      navigate('/login');
+      // Don't redirect immediately, allow user to see the toast
+      setTimeout(() => navigate('/login'), 3000);
+    } else {
+      setHashExists(true);
     }
   }, [navigate]);
 
@@ -51,11 +57,36 @@ const ResetPassword = () => {
       toast.success('Password has been reset successfully');
       navigate('/login');
     } catch (error: any) {
+      console.error('Password reset error:', error);
       toast.error(error.message || 'Failed to reset password');
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (!hashExists) {
+    return (
+      <div className="min-h-screen flex flex-col app-page-background">
+        <Navbar />
+        <main className="flex-grow pt-24 flex items-center justify-center">
+          <div className="container max-w-md mx-auto px-4 py-8">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden p-8">
+              <div className="text-center">
+                <h1 className="text-2xl font-bold text-red-600 mb-2">Invalid Reset Link</h1>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  This password reset link is invalid or has expired.
+                </p>
+                <Button onClick={() => navigate('/forgot-password')} className="mt-4">
+                  Request New Reset Link
+                </Button>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col app-page-background">
