@@ -86,12 +86,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resetPassword = async (email: string) => {
     try {
-      // Get the current origin with the proper protocol (http/https)
+      // Use the window.location.origin to get the base URL without any paths
       const baseUrl = window.location.origin;
+      
+      // For debugging - log the full URL we're using
       console.log("Reset password redirect URL:", `${baseUrl}/reset-password`);
       
+      // Make sure there are no trailing slashes that might cause issues
+      const cleanUrl = baseUrl.endsWith('/') 
+        ? baseUrl.slice(0, -1) 
+        : baseUrl;
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${baseUrl}/reset-password`,
+        redirectTo: `${cleanUrl}/reset-password`,
       });
       
       if (error) throw error;

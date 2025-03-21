@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Eye, EyeOff } from 'lucide-react';
@@ -23,12 +22,39 @@ const ResetPassword = () => {
     const hash = window.location.hash;
     console.log('URL hash:', hash);
     
-    if (!hash || !hash.includes('access_token')) {
+    // Try to parse the hash to see if it contains a valid access token
+    // The hash format is typically #access_token=xxx&refresh_token=xxx&...
+    const params = new URLSearchParams(hash.replace('#', ''));
+    const accessToken = params.get('access_token');
+    
+    if (!accessToken) {
+      console.error('No access token found in URL hash');
       toast.error('Invalid or expired password reset link');
       // Don't redirect immediately, allow user to see the toast
-      setTimeout(() => navigate('/login'), 3000);
+      setTimeout(() => navigate('/forgot-password'), 3000);
     } else {
-      setHashExists(true);
+      // If we have an access token in the URL, we need to set the session
+      // This is crucial for the password update to work
+      try {
+        // Set the session with the access token from the URL
+        const { data, error } = supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: params.get('refresh_token') || '',
+        });
+        
+        if (error) {
+          console.error('Error setting session:', error);
+          toast.error('Invalid or expired reset token');
+          setTimeout(() => navigate('/forgot-password'), 3000);
+        } else {
+          console.log('Session set successfully');
+          setHashExists(true);
+        }
+      } catch (err) {
+        console.error('Exception when setting session:', err);
+        toast.error('An error occurred while processing your reset link');
+        setTimeout(() => navigate('/forgot-password'), 3000);
+      }
     }
   }, [navigate]);
 
@@ -55,7 +81,8 @@ const ResetPassword = () => {
       }
       
       toast.success('Password has been reset successfully');
-      navigate('/login');
+      // Wait a bit before redirecting to ensure the user sees the success message
+      setTimeout(() => navigate('/login'), 2000);
     } catch (error: any) {
       console.error('Password reset error:', error);
       toast.error(error.message || 'Failed to reset password');
