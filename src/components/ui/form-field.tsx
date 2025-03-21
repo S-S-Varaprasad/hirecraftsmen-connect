@@ -82,37 +82,49 @@ export function SuggestiveInputField({
   description,
   suggestions = [],
 }: SuggestiveInputFieldProps) {
+  const [selectedValue, setSelectedValue] = React.useState<string>("");
+
   return (
     <FormField
       control={control}
       name={name}
-      render={({ field }) => (
-        <FormItem>
-          {label && <FormLabel>{label}</FormLabel>}
-          <FormControl>
-            <SearchInput
-              suggestions={suggestions}
-              placeholder={placeholder}
-              value={field.value}
-              onChange={(e) => {
-                if (typeof e === 'object' && e !== null && 'target' in e) {
-                  field.onChange(e.target.value);
-                } else {
-                  field.onChange(e);
-                }
-              }}
-              onSuggestionClick={(value) => {
-                field.onChange(value);
-                // Trigger field.onBlur to mark the field as touched
-                setTimeout(() => field.onBlur(), 100);
-              }}
-              className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg"
-            />
-          </FormControl>
-          {description && <FormDescription>{description}</FormDescription>}
-          <FormMessage />
-        </FormItem>
-      )}
+      render={({ field }) => {
+        // Update the selectedValue when field.value changes
+        React.useEffect(() => {
+          if (field.value) {
+            setSelectedValue(field.value);
+          }
+        }, [field.value]);
+
+        return (
+          <FormItem>
+            {label && <FormLabel>{label}</FormLabel>}
+            <FormControl>
+              <SearchInput
+                suggestions={suggestions}
+                placeholder={placeholder}
+                value={field.value}
+                onChange={(e) => {
+                  if (typeof e === 'object' && e !== null && 'target' in e) {
+                    field.onChange(e.target.value);
+                  } else {
+                    field.onChange(e);
+                  }
+                }}
+                onSuggestionClick={(value) => {
+                  setSelectedValue(value); // Update local state
+                  field.onChange(value); // Update form state
+                  // Trigger field.onBlur to mark the field as touched
+                  setTimeout(() => field.onBlur(), 100);
+                }}
+                className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg"
+              />
+            </FormControl>
+            {description && <FormDescription>{description}</FormDescription>}
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 }

@@ -30,6 +30,7 @@ export function SearchInput({
   const [open, setOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState(props.value?.toString() || "")
   const [filteredSuggestions, setFilteredSuggestions] = React.useState<string[]>([])
+  const [justSelected, setJustSelected] = React.useState(false)
   const inputRef = React.useRef<HTMLInputElement>(null)
 
   // Update inputValue when props.value changes
@@ -41,30 +42,39 @@ export function SearchInput({
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      if (inputValue.trim()) {
+      if (inputValue.trim() && !justSelected) {
         const filtered = suggestions.filter(suggestion => 
           suggestion.toLowerCase().includes(inputValue.toLowerCase())
         )
         setFilteredSuggestions(filtered.slice(0, 8)) // Limit to 8 suggestions
-        // Only show suggestions if we haven't just selected one
         setOpen(filtered.length > 0)
       } else {
         setFilteredSuggestions([])
         setOpen(false)
+        
+        // Reset justSelected after a short delay
+        if (justSelected) {
+          setTimeout(() => {
+            setJustSelected(false)
+          }, 300)
+        }
       }
     }, 200)
 
     return () => clearTimeout(timer)
-  }, [inputValue, suggestions])
+  }, [inputValue, suggestions, justSelected])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setInputValue(value)
+    setJustSelected(false)
     props.onChange?.(e)
   }
 
   const handleSuggestionClick = (value: string) => {
     setInputValue(value)
+    setJustSelected(true)
+    
     // Immediately close the suggestions dropdown and clear suggestions
     setOpen(false)
     setFilteredSuggestions([])
@@ -118,22 +128,29 @@ export function SearchInput({
           onFocus={() => {
             // Only open suggestions if there are filtered suggestions, input has value, 
             // and we're not displaying a just-selected value
-            if (filteredSuggestions.length > 0 && inputValue.trim()) {
+            if (filteredSuggestions.length > 0 && inputValue.trim() && !justSelected) {
               setOpen(true)
             }
           }}
           onBlur={() => {
-            // Close the dropdown when the input loses focus
-            setTimeout(() => setOpen(false), 200)
+            // Close the dropdown when the input loses focus, with a short delay
+            // to allow clicking on suggestions
+            setTimeout(() => setOpen(false), 150)
           }}
         />
       </div>
 
       {open && filteredSuggestions.length > 0 && (
-        <div className={cn(
-          "absolute z-50 w-full mt-1 bg-popover text-popover-foreground rounded-md border shadow-md",
-          suggestionsContainerClassName
-        )}>
+        <div 
+          className={cn(
+            "absolute z-50 w-full mt-1 bg-popover text-popover-foreground rounded-md border shadow-md",
+            suggestionsContainerClassName
+          )}
+          onMouseDown={(e) => {
+            // Prevent the input from losing focus when clicking on suggestions
+            e.preventDefault()
+          }}
+        >
           <Command>
             <CommandList>
               <CommandGroup>
