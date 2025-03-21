@@ -64,7 +64,9 @@ export function SearchInput({
 
   const handleSuggestionClick = (value: string) => {
     setInputValue(value)
+    // Immediately close the suggestions dropdown
     setOpen(false)
+    setFilteredSuggestions([])
     
     // Create a synthetic event that accurately mimics a real input event
     const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
@@ -112,7 +114,12 @@ export function SearchInput({
           )}
           value={inputValue}
           onChange={handleInputChange}
-          onFocus={() => filteredSuggestions.length > 0 && setOpen(true)}
+          onFocus={() => {
+            // Only open suggestions if there are filtered suggestions and input has value
+            if (filteredSuggestions.length > 0 && inputValue.trim()) {
+              setOpen(true)
+            }
+          }}
           onBlur={() => {
             // Longer delay to allow clicking on suggestions
             setTimeout(() => setOpen(false), 300)
