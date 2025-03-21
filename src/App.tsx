@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -33,6 +32,8 @@ import DeleteWorker from '@/pages/DeleteWorker';
 import WorkerJobHistory from '@/pages/WorkerJobHistory';
 import MessageWorker from '@/pages/MessageWorker';
 import ContactWorker from '@/pages/ContactWorker';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   const queryClient = new QueryClient({
@@ -83,6 +84,8 @@ function App() {
             <Route path="/edit-job/:id" element={<RequireAuth><EditJob /></RequireAuth>} />
             <Route path="/apply-now/:jobId" element={<RequireAuth><ApplyNow /></RequireAuth>} />
             <Route path="/join-as-worker" element={<JoinAsWorker />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </QueryClientProvider>
