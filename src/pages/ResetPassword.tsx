@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Eye, EyeOff } from 'lucide-react';
@@ -35,26 +36,30 @@ const ResetPassword = () => {
     } else {
       // If we have an access token in the URL, we need to set the session
       // This is crucial for the password update to work
-      try {
-        // Set the session with the access token from the URL
-        const { data, error } = supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: params.get('refresh_token') || '',
-        });
-        
-        if (error) {
-          console.error('Error setting session:', error);
-          toast.error('Invalid or expired reset token');
+      const setSessionAsync = async () => {
+        try {
+          // Set the session with the access token from the URL
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: params.get('refresh_token') || '',
+          });
+          
+          if (error) {
+            console.error('Error setting session:', error);
+            toast.error('Invalid or expired reset token');
+            setTimeout(() => navigate('/forgot-password'), 3000);
+          } else {
+            console.log('Session set successfully', data);
+            setHashExists(true);
+          }
+        } catch (err) {
+          console.error('Exception when setting session:', err);
+          toast.error('An error occurred while processing your reset link');
           setTimeout(() => navigate('/forgot-password'), 3000);
-        } else {
-          console.log('Session set successfully');
-          setHashExists(true);
         }
-      } catch (err) {
-        console.error('Exception when setting session:', err);
-        toast.error('An error occurred while processing your reset link');
-        setTimeout(() => navigate('/forgot-password'), 3000);
-      }
+      };
+      
+      setSessionAsync();
     }
   }, [navigate]);
 
