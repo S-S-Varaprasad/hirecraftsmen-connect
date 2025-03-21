@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
@@ -80,37 +81,44 @@ const SignUp = () => {
     setActiveField(null);
   };
 
-  const passwordStrength = () => {
-    if (!password) return { width: '0%', color: 'bg-gray-200' };
+  const calculatePasswordStrength = (password: string): { strength: number, text: string, color: string } => {
+    if (!password) return { strength: 0, text: '', color: 'bg-gray-200' };
     
     let strength = 0;
-    if (password.length >= 8) strength += 1;
-    if (/[A-Z]/.test(password)) strength += 1;
-    if (/[0-9]/.test(password)) strength += 1;
-    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+    let checks = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      number: /[0-9]/.test(password),
+      special: /[^A-Za-z0-9]/.test(password)
+    };
     
-    const width = `${25 * strength}%`;
+    // Count passed checks
+    Object.values(checks).forEach(passed => {
+      if (passed) strength += 25;
+    });
     
-    let color = 'bg-red-500';
-    if (strength === 2) color = 'bg-orange-500';
-    if (strength === 3) color = 'bg-yellow-500';
-    if (strength === 4) color = 'bg-green-500';
+    // Determine text and color based on strength
+    let text = '';
+    let color = '';
     
-    return { width, color };
+    if (strength <= 25) {
+      text = 'Weak';
+      color = 'bg-red-500';
+    } else if (strength <= 50) {
+      text = 'Fair';
+      color = 'bg-orange-500';
+    } else if (strength <= 75) {
+      text = 'Good';
+      color = 'bg-yellow-500';
+    } else {
+      text = 'Strong';
+      color = 'bg-green-500';
+    }
+    
+    return { strength, text, color };
   };
 
-  const getPasswordStrengthText = () => {
-    if (!password) return '';
-    
-    const strength = passwordStrength().width;
-    
-    if (strength === '25%') return 'Weak';
-    if (strength === '50%') return 'Fair';
-    if (strength === '75%') return 'Good';
-    if (strength === '100%') return 'Strong';
-    
-    return '';
-  };
+  const { strength, text, color } = calculatePasswordStrength(password);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50/80 to-white">
@@ -272,10 +280,35 @@ const SignUp = () => {
                   </div>
                   {password && (
                     <div className="mt-2">
-                      <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
-                        <div className={`h-1.5 rounded-full ${passwordStrength().color}`} style={{ width: passwordStrength().width }}></div>
+                      <Progress value={strength} className="h-1.5 mb-1" />
+                      <div className="flex justify-between text-xs">
+                        <p className="text-gray-500">Password strength: <span className={`font-medium ${
+                          text === 'Weak' ? 'text-red-500' : 
+                          text === 'Fair' ? 'text-orange-500' : 
+                          text === 'Good' ? 'text-yellow-600' : 
+                          'text-green-500'
+                        }`}>{text}</span></p>
+                        
+                        <span className="text-gray-400">{strength}%</span>
                       </div>
-                      <p className="text-xs text-gray-500">Password strength: <span className="font-medium">{getPasswordStrengthText()}</span></p>
+                      <div className="mt-1 space-y-1">
+                        <p className={`text-xs flex items-center ${checks.length ? 'text-green-500' : 'text-gray-400'}`}>
+                          {checks.length ? <CheckCircle className="h-3 w-3 mr-1" /> : <span className="h-3 w-3 mr-1">•</span>}
+                          At least 8 characters
+                        </p>
+                        <p className={`text-xs flex items-center ${checks.uppercase ? 'text-green-500' : 'text-gray-400'}`}>
+                          {checks.uppercase ? <CheckCircle className="h-3 w-3 mr-1" /> : <span className="h-3 w-3 mr-1">•</span>}
+                          At least one uppercase letter
+                        </p>
+                        <p className={`text-xs flex items-center ${checks.number ? 'text-green-500' : 'text-gray-400'}`}>
+                          {checks.number ? <CheckCircle className="h-3 w-3 mr-1" /> : <span className="h-3 w-3 mr-1">•</span>}
+                          At least one number
+                        </p>
+                        <p className={`text-xs flex items-center ${checks.special ? 'text-green-500' : 'text-gray-400'}`}>
+                          {checks.special ? <CheckCircle className="h-3 w-3 mr-1" /> : <span className="h-3 w-3 mr-1">•</span>}
+                          At least one special character
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -370,30 +403,6 @@ const SignUp = () => {
                     Sign In
                   </Link>
                 </p>
-              </div>
-              
-              <div className="relative mt-8 pt-8 text-center">
-                <div className="absolute top-0 left-0 right-0 flex items-center justify-center">
-                  <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
-                  <div className="px-4 bg-white dark:bg-gray-800 text-sm text-gray-500 dark:text-gray-400">or</div>
-                  <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
-                </div>
-                
-                <div className="mt-4 flex flex-col space-y-3">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    className="w-full flex items-center justify-center py-5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
-                  >
-                    <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                    </svg>
-                    Continue with Google
-                  </Button>
-                </div>
               </div>
             </div>
           </div>
