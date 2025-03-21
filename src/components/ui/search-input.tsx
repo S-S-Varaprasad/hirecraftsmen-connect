@@ -46,6 +46,7 @@ export function SearchInput({
           suggestion.toLowerCase().includes(inputValue.toLowerCase())
         )
         setFilteredSuggestions(filtered.slice(0, 8)) // Limit to 8 suggestions
+        // Only show suggestions if we haven't just selected one
         setOpen(filtered.length > 0)
       } else {
         setFilteredSuggestions([])
@@ -64,7 +65,7 @@ export function SearchInput({
 
   const handleSuggestionClick = (value: string) => {
     setInputValue(value)
-    // Immediately close the suggestions dropdown
+    // Immediately close the suggestions dropdown and clear suggestions
     setOpen(false)
     setFilteredSuggestions([])
     
@@ -115,14 +116,15 @@ export function SearchInput({
           value={inputValue}
           onChange={handleInputChange}
           onFocus={() => {
-            // Only open suggestions if there are filtered suggestions and input has value
+            // Only open suggestions if there are filtered suggestions, input has value, 
+            // and we're not displaying a just-selected value
             if (filteredSuggestions.length > 0 && inputValue.trim()) {
               setOpen(true)
             }
           }}
           onBlur={() => {
-            // Longer delay to allow clicking on suggestions
-            setTimeout(() => setOpen(false), 300)
+            // Close the dropdown when the input loses focus
+            setTimeout(() => setOpen(false), 200)
           }}
         />
       </div>
