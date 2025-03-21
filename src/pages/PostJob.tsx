@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '@/context/AuthContext';
 import { createJob } from '@/services/jobService';
-import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -35,7 +34,6 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { Loader2, CheckCircle } from 'lucide-react';
 import { AutocompleteField, SuggestiveInputField } from '@/components/ui/form-field';
@@ -56,9 +54,6 @@ const formSchema = z.object({
   urgency: z.enum(['Low', 'Medium', 'High']),
   skills: z.string().min(3, 'Skills are required'),
   description: z.string().min(50, 'Description must be at least 50 characters'),
-  notifyWorkers: z.boolean().optional(),
-  sendEmail: z.boolean().optional(),
-  sendSms: z.boolean().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -67,7 +62,6 @@ const PostJob = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { notifyWorkers } = useWorkerProfiles();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   
@@ -97,9 +91,6 @@ const PostJob = () => {
       description: workerName ? 
         `I am looking to hire ${workerName} who is a ${workerProfession}. Please provide details about your requirements and expectations for this job.` : 
         '',
-      notifyWorkers: true,
-      sendEmail: true,
-      sendSms: false,
     },
   });
 
@@ -133,27 +124,6 @@ const PostJob = () => {
       });
       
       console.log('Job created successfully:', newJob);
-      
-      // Notify matched workers if option is selected
-      if (data.notifyWorkers && newJob) {
-        console.log('Notifying workers about new job');
-        
-        // Get profession from job title or skills
-        const jobCategory = workerProfession || 
-          skillsArray.length > 0 ? skillsArray[0] : 
-          null;
-        
-        await notifyWorkers(
-          newJob.id, 
-          newJob.title, 
-          skillsArray,
-          jobCategory,
-          data.sendEmail, // send email based on user selection
-          data.sendSms, // send SMS based on user selection
-          user.id
-        );
-        toast.success('Relevant workers have been notified about this job!');
-      }
       
       setIsSuccess(true);
       toast.success('Job posted successfully!');
@@ -259,12 +229,12 @@ const PostJob = () => {
                             <FormItem>
                               <FormLabel>Location</FormLabel>
                               <FormControl>
-                                <AutocompleteField
+                                <SuggestiveInputField
                                   name="location"
                                   control={form.control}
                                   label=""
                                   placeholder="e.g. Mumbai, Maharashtra"
-                                  options={locationOptions}
+                                  suggestions={[...popularLocations, ...allIndianRegions]}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -374,77 +344,6 @@ const PostJob = () => {
                           </FormItem>
                         )}
                       />
-                      
-                      <div className="space-y-4 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-                        <h3 className="font-medium">Notification Options</h3>
-                        
-                        <FormField
-                          control={form.control}
-                          name="notifyWorkers"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between space-y-0 rounded-md border p-3">
-                              <div className="space-y-0.5">
-                                <FormLabel>Notify Workers</FormLabel>
-                                <p className="text-sm text-gray-500">
-                                  Notify workers matching the job skills and category
-                                </p>
-                              </div>
-                              <FormControl>
-                                <Switch 
-                                  checked={field.value} 
-                                  onCheckedChange={field.onChange} 
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        {form.watch('notifyWorkers') && (
-                          <>
-                            <FormField
-                              control={form.control}
-                              name="sendEmail"
-                              render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between space-y-0 rounded-md border p-3 ml-4">
-                                  <div className="space-y-0.5">
-                                    <FormLabel>Send Email Notifications</FormLabel>
-                                    <p className="text-sm text-gray-500">
-                                      Email workers about this job opportunity
-                                    </p>
-                                  </div>
-                                  <FormControl>
-                                    <Switch 
-                                      checked={field.value} 
-                                      onCheckedChange={field.onChange} 
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <FormField
-                              control={form.control}
-                              name="sendSms"
-                              render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between space-y-0 rounded-md border p-3 ml-4">
-                                  <div className="space-y-0.5">
-                                    <FormLabel>Send SMS Notifications</FormLabel>
-                                    <p className="text-sm text-gray-500">
-                                      Text workers about this job opportunity
-                                    </p>
-                                  </div>
-                                  <FormControl>
-                                    <Switch 
-                                      checked={field.value} 
-                                      onCheckedChange={field.onChange} 
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                          </>
-                        )}
-                      </div>
                       
                       <CardFooter className="px-0 pb-0 pt-2">
                         <div className="w-full flex flex-col md:flex-row gap-3 justify-end">

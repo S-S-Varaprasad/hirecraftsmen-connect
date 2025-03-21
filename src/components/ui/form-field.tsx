@@ -88,13 +88,20 @@ export function SuggestiveInputField({
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{label}</FormLabel>
+          {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
             <SearchInput
               suggestions={suggestions}
               placeholder={placeholder}
               value={field.value}
-              onChange={(e) => field.onChange(e.target.value)}
+              onChange={(e) => {
+                if (typeof e === 'object' && e !== null && 'target' in e) {
+                  field.onChange(e.target.value);
+                } else {
+                  field.onChange(e);
+                }
+              }}
+              onSuggestionClick={(value) => field.onChange(value)}
               className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg"
             />
           </FormControl>

@@ -9,7 +9,6 @@ import {
   CommandItem,
   CommandList
 } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 
@@ -31,6 +30,14 @@ export function SearchInput({
   const [open, setOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState(props.value?.toString() || "")
   const [filteredSuggestions, setFilteredSuggestions] = React.useState<string[]>([])
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  // Update inputValue when props.value changes
+  React.useEffect(() => {
+    if (props.value !== undefined) {
+      setInputValue(props.value.toString());
+    }
+  }, [props.value]);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -67,6 +74,9 @@ export function SearchInput({
     
     props.onChange?.(syntheticEvent)
     onSuggestionClick?.(value)
+    
+    // Focus the input after selection
+    inputRef.current?.focus()
   }
 
   return (
@@ -75,6 +85,7 @@ export function SearchInput({
         {icon && <div className="absolute left-3 z-10">{icon}</div>}
         <Input
           {...props}
+          ref={inputRef}
           className={cn(
             "w-full",
             icon && "pl-10",
