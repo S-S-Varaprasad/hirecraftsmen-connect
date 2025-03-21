@@ -101,7 +101,11 @@ export function SuggestiveInputField({
                   field.onChange(e);
                 }
               }}
-              onSuggestionClick={(value) => field.onChange(value)}
+              onSuggestionClick={(value) => {
+                field.onChange(value);
+                // Trigger field.onBlur to mark the field as touched
+                setTimeout(() => field.onBlur(), 100);
+              }}
               className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg"
             />
           </FormControl>

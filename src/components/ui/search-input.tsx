@@ -66,17 +66,36 @@ export function SearchInput({
     setInputValue(value)
     setOpen(false)
     
-    // Call the parent onChange handler with a synthetic event
-    const syntheticEvent = {
-      target: { value },
-      currentTarget: { value }
-    } as React.ChangeEvent<HTMLInputElement>
+    // Create a synthetic event that accurately mimics a real input event
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      "value"
+    )?.set;
     
-    props.onChange?.(syntheticEvent)
-    onSuggestionClick?.(value)
+    if (inputRef.current && nativeInputValueSetter) {
+      nativeInputValueSetter.call(inputRef.current, value);
+      
+      const event = new Event('input', { bubbles: true });
+      inputRef.current.dispatchEvent(event);
+    }
+    
+    // Also call the custom handlers to ensure both React's synthetic events and custom handlers work
+    if (props.onChange) {
+      const syntheticEvent = {
+        target: { value },
+        currentTarget: { value }
+      } as React.ChangeEvent<HTMLInputElement>;
+      props.onChange(syntheticEvent);
+    }
+    
+    if (onSuggestionClick) {
+      onSuggestionClick(value);
+    }
     
     // Focus the input after selection
-    inputRef.current?.focus()
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
   }
 
   return (
@@ -95,8 +114,8 @@ export function SearchInput({
           onChange={handleInputChange}
           onFocus={() => filteredSuggestions.length > 0 && setOpen(true)}
           onBlur={() => {
-            // Small delay to allow clicking on suggestions
-            setTimeout(() => setOpen(false), 200)
+            // Longer delay to allow clicking on suggestions
+            setTimeout(() => setOpen(false), 300)
           }}
         />
       </div>
@@ -113,7 +132,7 @@ export function SearchInput({
                   <CommandItem
                     key={index}
                     onSelect={() => handleSuggestionClick(suggestion)}
-                    className="cursor-pointer"
+                    className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
                   >
                     {suggestion}
                   </CommandItem>
