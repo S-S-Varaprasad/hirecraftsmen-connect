@@ -15,7 +15,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { prompt, model = "gpt-4o-mini" } = await req.json();
+    const { prompt, systemPrompt = "You are a helpful assistant. Provide concise and accurate information.", model = "gpt-4o-mini" } = await req.json();
 
     if (!prompt) {
       return new Response(
@@ -35,7 +35,7 @@ serve(async (req: Request) => {
       body: JSON.stringify({
         model: model,
         messages: [
-          { role: "system", content: "You are a helpful assistant. Provide concise and accurate information." },
+          { role: "system", content: systemPrompt },
           { role: "user", content: prompt }
         ],
         temperature: 0.7,

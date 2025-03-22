@@ -12,17 +12,50 @@ interface AiChatProps {
   description?: string;
   placeholder?: string;
   systemPrompt?: string;
+  suggestions?: string[];
 }
 
 const AiChat: React.FC<AiChatProps> = ({
   title = "Ask AI Assistant",
   description = "Get information or help with your questions",
   placeholder = "Type your question here...",
-  systemPrompt = "You are a helpful assistant. Provide concise and accurate information."
+  systemPrompt = "You are a helpful assistant. Provide concise and accurate information.",
+  suggestions = [
+    "What skills should I look for in a plumber?",
+    "How do I write a job description for an electrician?",
+    "What's the average pay rate for carpenters in Delhi?",
+    "What questions should I ask in an interview?",
+    "How to verify the credentials of a skilled worker?",
+    "Tips for hiring reliable domestic help",
+  ]
 }) => {
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setPrompt(value);
+    
+    // Filter suggestions based on input
+    if (value.trim() !== "") {
+      const filtered = suggestions.filter(suggestion => 
+        suggestion.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredSuggestions(filtered);
+      setShowSuggestions(filtered.length > 0);
+    } else {
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setPrompt(suggestion);
+    setShowSuggestions(false); // Hide suggestions after selection
+    setFilteredSuggestions([]);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +67,7 @@ const AiChat: React.FC<AiChatProps> = ({
 
     setIsLoading(true);
     setResponse("");
+    setShowSuggestions(false); // Hide suggestions during API call
 
     try {
       const { data, error } = await supabase.functions.invoke("openai-chat", {
@@ -61,12 +95,41 @@ const AiChat: React.FC<AiChatProps> = ({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Textarea
-            placeholder={placeholder}
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            className="min-h-[100px]"
-          />
+          <div className="relative">
+            <Textarea
+              placeholder={placeholder}
+              value={prompt}
+              onChange={handleInputChange}
+              onFocus={() => {
+                if (prompt.trim() && filteredSuggestions.length > 0) {
+                  setShowSuggestions(true);
+                }
+              }}
+              onBlur={() => {
+                // Delay hiding suggestions to allow for clicks
+                setTimeout(() => setShowSuggestions(false), 200);
+              }}
+              className="min-h-[100px]"
+            />
+            
+            {showSuggestions && filteredSuggestions.length > 0 && (
+              <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg">
+                {filteredSuggestions.map((suggestion, index) => (
+                  <div
+                    key={index}
+                    className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // Prevent blur event from firing before click
+                      handleSuggestionClick(suggestion);
+                    }}
+                  >
+                    {suggestion}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
           <Button 
             type="submit" 
             disabled={isLoading}
