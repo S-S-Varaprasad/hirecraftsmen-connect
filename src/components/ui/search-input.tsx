@@ -1,6 +1,5 @@
 
 import * as React from "react"
-import { Search } from "lucide-react"
 import { 
   Command, 
   CommandEmpty, 
@@ -24,14 +23,14 @@ export function SearchInput({
   suggestions = [],
   onSuggestionClick,
   suggestionsContainerClassName,
-  icon = <Search className="h-5 w-5 text-gray-400" />,
+  icon,
   ...props
 }: SearchInputProps) {
   const [open, setOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState(props.value?.toString() || "")
   const [filteredSuggestions, setFilteredSuggestions] = React.useState<string[]>([])
-  const [justSelected, setJustSelected] = React.useState(false)
   const inputRef = React.useRef<HTMLInputElement>(null)
+  const suggestionsRef = React.useRef<HTMLDivElement>(null)
 
   // Update inputValue when props.value changes
   React.useEffect(() => {
@@ -42,7 +41,7 @@ export function SearchInput({
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      if (inputValue.trim() && !justSelected) {
+      if (inputValue.trim()) {
         const filtered = suggestions.filter(suggestion => 
           suggestion.toLowerCase().includes(inputValue.toLowerCase())
         )
@@ -55,22 +54,36 @@ export function SearchInput({
     }, 200)
 
     return () => clearTimeout(timer)
-  }, [inputValue, suggestions, justSelected])
+  }, [inputValue, suggestions])
+
+  // Close suggestions when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        suggestionsRef.current && 
+        !suggestionsRef.current.contains(event.target as Node) &&
+        inputRef.current && 
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setInputValue(value)
-    setJustSelected(false)
     props.onChange?.(e)
   }
 
   const handleSuggestionClick = (value: string) => {
     setInputValue(value)
-    setJustSelected(true)
-    
-    // Immediately close the suggestions dropdown and clear suggestions
     setOpen(false)
-    setFilteredSuggestions([])
     
     // Create a synthetic event that accurately mimics a real input event
     const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
@@ -97,32 +110,7 @@ export function SearchInput({
     if (onSuggestionClick) {
       onSuggestionClick(value);
     }
-    
-    // Focus the input after selection
-    setTimeout(() => {
-      inputRef.current?.focus();
-      // Add a longer justSelected state to prevent suggestions from showing again
-      setTimeout(() => setJustSelected(false), 500);
-    }, 0);
   }
-
-  // Reset justSelected state when component loses focus completely
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Check if we're not clicking on a suggestion
-    if (!e.relatedTarget || !e.relatedTarget.closest('.suggestions-container')) {
-      setTimeout(() => {
-        setOpen(false);
-        // Only reset justSelected when we're truly blurring to another field
-        if (document.activeElement !== inputRef.current) {
-          setJustSelected(false);
-        }
-      }, 150);
-    }
-    
-    if (props.onBlur) {
-      props.onBlur(e);
-    }
-  };
 
   return (
     <div className="relative w-full">
@@ -139,26 +127,20 @@ export function SearchInput({
           value={inputValue}
           onChange={handleInputChange}
           onFocus={() => {
-            // Only open suggestions if there are filtered suggestions, input has value, 
-            // and we're not displaying a just-selected value
-            if (filteredSuggestions.length > 0 && inputValue.trim() && !justSelected) {
+            if (filteredSuggestions.length > 0 && inputValue.trim()) {
               setOpen(true)
             }
           }}
-          onBlur={handleBlur}
         />
       </div>
 
       {open && filteredSuggestions.length > 0 && (
         <div 
+          ref={suggestionsRef}
           className={cn(
             "absolute z-50 w-full mt-1 bg-popover text-popover-foreground rounded-md border shadow-md suggestions-container",
             suggestionsContainerClassName
           )}
-          onMouseDown={(e) => {
-            // Prevent the input from losing focus when clicking on suggestions
-            e.preventDefault()
-          }}
         >
           <Command>
             <CommandList>
@@ -167,6 +149,9 @@ export function SearchInput({
                   <CommandItem
                     key={index}
                     onSelect={() => handleSuggestionClick(suggestion)}
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // Prevent blur before click
+                    }}
                     className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
                   >
                     {suggestion}

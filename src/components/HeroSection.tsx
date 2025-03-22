@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { MapPin } from 'lucide-react';
+import { MapPin, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchInput } from '@/components/ui/search-input';
 import { popularLocations } from '@/utils/suggestions';
@@ -61,13 +61,14 @@ const HeroSection = () => {
             
             <form onSubmit={handleSearch} className="max-w-3xl mx-auto">
               <div className="flex flex-col md:flex-row gap-3 w-full bg-white dark:bg-gray-800 p-3 rounded-xl shadow-xl">
-                <div className="flex-1">
+                <div className="flex-1 relative">
                   <SearchInput 
                     placeholder="What service are you looking for?" 
                     suggestions={serviceSearchTerms}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                    icon={<Search className="h-5 w-5 text-gray-400" />}
                   />
                 </div>
                 
