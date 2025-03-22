@@ -34,6 +34,7 @@ const AiChat: React.FC<AiChatProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const suggestionClickedRef = useRef(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -54,9 +55,15 @@ const AiChat: React.FC<AiChatProps> = ({
 
   const handleSuggestionClick = (suggestion: string) => {
     setPrompt(suggestion);
-    suggestionClickedRef.current = true;
     setShowSuggestions(false);
     setFilteredSuggestions([]);
+    
+    // Set focus back to textarea
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
+    }, 10);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,6 +106,7 @@ const AiChat: React.FC<AiChatProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
             <Textarea
+              ref={textareaRef}
               placeholder={placeholder}
               value={prompt}
               onChange={handleInputChange}
@@ -106,14 +114,6 @@ const AiChat: React.FC<AiChatProps> = ({
                 if (prompt.trim() && filteredSuggestions.length > 0) {
                   setShowSuggestions(true);
                 }
-              }}
-              onBlur={() => {
-                // Only hide suggestions if not clicked on a suggestion
-                if (!suggestionClickedRef.current) {
-                  setTimeout(() => setShowSuggestions(false), 200);
-                }
-                // Reset for next interaction
-                suggestionClickedRef.current = false;
               }}
               className="min-h-[100px]"
             />
@@ -124,10 +124,7 @@ const AiChat: React.FC<AiChatProps> = ({
                   <div
                     key={index}
                     className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
-                    onMouseDown={(e) => {
-                      e.preventDefault(); // Prevent blur event from firing before click
-                      handleSuggestionClick(suggestion);
-                    }}
+                    onClick={() => handleSuggestionClick(suggestion)}
                   >
                     {suggestion}
                   </div>

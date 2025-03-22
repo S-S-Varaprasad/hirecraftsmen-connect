@@ -4,7 +4,35 @@ import { useNavigate, Link } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchInput } from '@/components/ui/search-input';
-import { commonSearchTerms, popularLocations } from '@/utils/suggestions';
+import { popularLocations } from '@/utils/suggestions';
+
+// Create a dedicated list of service-related terms only
+const serviceSearchTerms = [
+  "Carpenter",
+  "Plumber",
+  "Electrician",
+  "Painter",
+  "Mason",
+  "Mechanic",
+  "Driver",
+  "Cleaner",
+  "Security Guard",
+  "Gardener",
+  "Tailor",
+  "Construction Worker",
+  "Welder",
+  "HVAC Technician",
+  "Roofer",
+  "Landscaper",
+  "Appliance Repair",
+  "Flooring Installer",
+  "Glass Installer",
+  "Handyman",
+  "Home Inspector",
+  "Interior Designer",
+  "Locksmith",
+  "Pest Control",
+];
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -36,7 +64,7 @@ const HeroSection = () => {
                 <div className="flex-1">
                   <SearchInput 
                     placeholder="What service are you looking for?" 
-                    suggestions={commonSearchTerms}
+                    suggestions={serviceSearchTerms}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
