@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,6 +34,7 @@ const AiChat: React.FC<AiChatProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const suggestionClickedRef = useRef(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -53,7 +54,8 @@ const AiChat: React.FC<AiChatProps> = ({
 
   const handleSuggestionClick = (suggestion: string) => {
     setPrompt(suggestion);
-    setShowSuggestions(false); // Hide suggestions after selection
+    suggestionClickedRef.current = true;
+    setShowSuggestions(false);
     setFilteredSuggestions([]);
   };
 
@@ -67,7 +69,7 @@ const AiChat: React.FC<AiChatProps> = ({
 
     setIsLoading(true);
     setResponse("");
-    setShowSuggestions(false); // Hide suggestions during API call
+    setShowSuggestions(false);
 
     try {
       const { data, error } = await supabase.functions.invoke("openai-chat", {
@@ -106,8 +108,12 @@ const AiChat: React.FC<AiChatProps> = ({
                 }
               }}
               onBlur={() => {
-                // Delay hiding suggestions to allow for clicks
-                setTimeout(() => setShowSuggestions(false), 200);
+                // Only hide suggestions if not clicked on a suggestion
+                if (!suggestionClickedRef.current) {
+                  setTimeout(() => setShowSuggestions(false), 200);
+                }
+                // Reset for next interaction
+                suggestionClickedRef.current = false;
               }}
               className="min-h-[100px]"
             />
