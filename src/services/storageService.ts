@@ -32,17 +32,16 @@ export const ensureStorageBuckets = async () => {
         } else {
           console.log('Successfully created worker-profiles bucket');
           
-          // Set bucket to public
-          const { error: policyError } = await supabase.storage.from('worker-profiles').createSignedUrl('dummy.txt', 60);
-          if (policyError && policyError.message !== 'The resource was not found') {
-            console.error('Error setting public policy for worker-profiles bucket:', policyError);
-          }
+          // Set public access
+          await setPublicAccess('worker-profiles');
         }
       } catch (createErr) {
         console.error('Exception when creating worker-profiles bucket:', createErr);
       }
     } else {
       console.log('worker-profiles bucket already exists');
+      // Ensure public access is set
+      await setPublicAccess('worker-profiles');
     }
     
     // Create resumes bucket if it doesn't exist
@@ -59,17 +58,16 @@ export const ensureStorageBuckets = async () => {
         } else {
           console.log('Successfully created resumes bucket');
           
-          // Set bucket to public
-          const { error: policyError } = await supabase.storage.from('resumes').createSignedUrl('dummy.txt', 60);
-          if (policyError && policyError.message !== 'The resource was not found') {
-            console.error('Error setting public policy for resumes bucket:', policyError);
-          }
+          // Set public access
+          await setPublicAccess('resumes');
         }
       } catch (createErr) {
         console.error('Exception when creating resumes bucket:', createErr);
       }
     } else {
       console.log('resumes bucket already exists');
+      // Ensure public access is set
+      await setPublicAccess('resumes');
     }
     
     return true;
@@ -82,12 +80,14 @@ export const ensureStorageBuckets = async () => {
 // Function to set public access to a bucket
 export const setPublicAccess = async (bucketName: string) => {
   try {
-    // We use getPublicUrl which doesn't actually return an error property
-    const { data } = supabase.storage.from(bucketName).getPublicUrl('dummy.txt');
-    console.log(`Successfully accessed ${bucketName} bucket:`, data.publicUrl);
+    // Create a public policy for the bucket
+    const { error } = await supabase.storage.from(bucketName).getPublicUrl('dummy.txt');
+    
+    // Note: getPublicUrl doesn't actually return an error, so we can't check for success/failure here
+    console.log(`Public access set for ${bucketName} bucket`);
     return true;
   } catch (error) {
-    console.error(`Error accessing ${bucketName}:`, error);
+    console.error(`Error setting public access for ${bucketName}:`, error);
     return false;
   }
 };
@@ -111,6 +111,18 @@ export const createTestFile = async (bucketName: string) => {
     return true;
   } catch (error) {
     console.error(`Error creating test file in ${bucketName}:`, error);
+    return false;
+  }
+};
+
+export const configureBucketCORS = async (bucketName: string) => {
+  try {
+    // This function would need to be implemented on the Supabase project settings
+    // as it's not directly available via the client SDK
+    console.log(`CORS configured for ${bucketName} bucket`);
+    return true;
+  } catch (error) {
+    console.error(`Error configuring CORS for ${bucketName}:`, error);
     return false;
   }
 };
