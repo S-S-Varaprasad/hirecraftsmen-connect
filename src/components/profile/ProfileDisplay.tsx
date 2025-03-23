@@ -2,7 +2,7 @@ import React from 'react';
 import { Worker } from '@/services/workerService';
 import { Button } from '@/components/ui/button';
 import { FileEdit } from 'lucide-react';
-import { MapPin, Clock, DollarSign, UserCheck, Award, Languages } from 'lucide-react';
+import { MapPin, Clock, IndianRupee, UserCheck, Award, Languages } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ProfileImageUpload from './ProfileImageUpload';
 
@@ -73,7 +73,7 @@ const ProfileDisplay = ({ worker, onEdit }: ProfileDisplayProps) => {
         <div>
           <h3 className="text-sm font-medium text-gray-500">Hourly Rate</h3>
           <div className="mt-1 flex items-center">
-            <DollarSign className="w-4 h-4 mr-1 text-gray-500" />
+            <IndianRupee className="w-4 h-4 mr-1 text-gray-500" />
             <span>{formattedHourlyRate()}</span>
           </div>
         </div>

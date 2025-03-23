@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Star, MapPin, Clock, Briefcase, Eye, BriefcaseBusiness, Upload, Check, X, Trash2 } from 'lucide-react';
+import { Star, MapPin, Clock, Briefcase, Eye, BriefcaseBusiness, Upload, Check, X, Trash2, IndianRupee } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -258,7 +258,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               <span className="text-gray-700 dark:text-gray-300">{experience}</span>
             </div>
             <div className="flex items-center">
-              <Clock className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+              <IndianRupee className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
               <span className="text-gray-700 dark:text-gray-300">{formattedHourlyRate()}</span>
             </div>
           </div>
