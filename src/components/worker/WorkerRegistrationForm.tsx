@@ -38,7 +38,8 @@ const WorkerRegistrationForm = ({
       skills: '',
       languages: '',
       about: '',
-    }
+    },
+    mode: 'onChange', // Validate on change to catch errors early
   });
 
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
@@ -58,9 +59,27 @@ const WorkerRegistrationForm = ({
     }
   };
 
-  // Properly handle form submission
+  // Properly handle form submission with error handling
   const onFormSubmit = (data: any) => {
-    onSubmit(data);
+    try {
+      // Validate data before submission
+      const validData = {
+        ...data,
+        // Ensure no undefined values
+        name: data.name || '',
+        profession: data.profession || '',
+        location: data.location || '',
+        experience: data.experience || '',
+        hourlyRate: data.hourlyRate || '',
+        skills: data.skills || '',
+        languages: data.languages || '',
+        about: data.about || '',
+      };
+      
+      onSubmit(validData);
+    } catch (error) {
+      console.error("Error in form submission:", error);
+    }
   };
 
   return (

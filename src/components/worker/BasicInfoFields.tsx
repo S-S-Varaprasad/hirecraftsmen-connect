@@ -26,7 +26,7 @@ const BasicInfoFields = ({
   languageOptions = [],
   skillSuggestions = []
 }: BasicInfoFieldsProps) => {
-  // Ensure all array props are valid arrays
+  // Ensure all array props are valid arrays - CRITICAL for preventing undefined is not iterable errors
   const safeProfessionOptions = Array.isArray(professionOptions) ? professionOptions : [];
   const safeLocationOptions = Array.isArray(locationOptions) ? locationOptions : [];
   const safeLanguageOptions = Array.isArray(languageOptions) ? languageOptions : [];

@@ -53,21 +53,29 @@ export function SuggestiveInputField({
                   placeholder={placeholder}
                   value={safeValue}
                   onChange={(e) => {
-                    if (typeof e === 'object' && e !== null && 'target' in e) {
-                      field.onChange(e.target.value || '');
-                    } else if (typeof e === 'string') {
-                      field.onChange(e);
-                    } else {
-                      field.onChange('');
+                    try {
+                      if (typeof e === 'object' && e !== null && 'target' in e) {
+                        field.onChange(e.target.value || '');
+                      } else if (typeof e === 'string') {
+                        field.onChange(e);
+                      } else {
+                        field.onChange('');
+                      }
+                    } catch (error) {
+                      console.error("Error in onChange handler:", error);
                     }
                   }}
                   onSuggestionClick={(value) => {
-                    field.onChange(value || '');
-                    setTimeout(() => {
-                      if (typeof field.onBlur === 'function') {
-                        field.onBlur();
-                      }
-                    }, 100);
+                    try {
+                      field.onChange(value || '');
+                      setTimeout(() => {
+                        if (typeof field.onBlur === 'function') {
+                          field.onBlur();
+                        }
+                      }, 100);
+                    } catch (error) {
+                      console.error("Error in onSuggestionClick:", error);
+                    }
                   }}
                   className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg"
                 />

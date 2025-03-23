@@ -23,7 +23,7 @@ const JoinAsWorker = () => {
   const [resume, setResume] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Validate all arrays to ensure they're always valid
+  // Validate all arrays to ensure they're always valid - critical for the "undefined is not iterable" error
   const safeIndianRegions = Array.isArray(allIndianRegions) ? allIndianRegions : [];
   const safeProfessions = Array.isArray(professions) ? professions : [];
   const safeIndianLanguages = Array.isArray(indianLanguages) ? indianLanguages : [];
@@ -65,7 +65,7 @@ const JoinAsWorker = () => {
     try {
       setIsUploading(true);
       
-      // Ensure we have valid data
+      // Ensure we have valid data with fallbacks
       const validatedData = {
         name: data.name || '',
         profession: data.profession || '',
@@ -76,6 +76,9 @@ const JoinAsWorker = () => {
         languages: data.languages || '',
         about: data.about || '',
       };
+      
+      // Log the data before submission to help with debugging
+      console.log('Submitting worker profile with data:', validatedData);
       
       const result = await createWorkerProfile.mutateAsync({
         name: validatedData.name,

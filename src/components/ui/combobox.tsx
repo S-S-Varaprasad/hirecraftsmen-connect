@@ -33,7 +33,7 @@ interface ComboboxProps {
 export function Combobox({
   placeholder = "Select option...",
   emptyMessage = "No results found.",
-  options,
+  options = [],
   value,
   onChange,
   triggerClassName,
@@ -42,10 +42,10 @@ export function Combobox({
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   
-  // Ensure options is always a valid array
+  // Ensure options is always a valid array - this is crucial to prevent the undefined is not iterable error
   const safeOptions = Array.isArray(options) ? options : [];
 
-  // Prevent form submission and event propagation
+  // Safely handle button click and prevent form submission
   const handleTriggerClick = (e: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
@@ -57,16 +57,30 @@ export function Combobox({
     }
   };
 
-  // Safely handle option selection and prevent event propagation
+  // Safely handle option selection
   const handleOptionSelect = (currentValue: string, optionValue: string) => {
-    if (onChange) {
-      onChange(optionValue === value ? "" : optionValue);
+    try {
+      if (onChange) {
+        onChange(optionValue === value ? "" : optionValue);
+      }
+      setOpen(false);
+    } catch (error) {
+      console.error("Error in handleOptionSelect:", error);
+      setOpen(false);
     }
-    setOpen(false);
+  };
+
+  // When PopoverContent opens/closes
+  const handleOpenChange = (newOpen: boolean) => {
+    try {
+      setOpen(newOpen);
+    } catch (error) {
+      console.error("Error in handleOpenChange:", error);
+    }
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -75,6 +89,7 @@ export function Combobox({
           className={cn("w-full justify-between", triggerClassName)}
           disabled={disabled}
           onClick={handleTriggerClick}
+          onMouseDown={(e) => e.stopPropagation()}
           type="button" // Explicitly set to prevent form submission
         >
           {value && safeOptions.length > 0
@@ -91,7 +106,7 @@ export function Combobox({
         side="bottom"
         sideOffset={4}
       >
-        <Command shouldFilter={true}>
+        <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandEmpty>{emptyMessage}</CommandEmpty>
           <CommandGroup className="max-h-60 overflow-y-auto">

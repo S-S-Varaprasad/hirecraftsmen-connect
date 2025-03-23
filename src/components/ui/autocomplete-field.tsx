@@ -20,21 +20,25 @@ export function AutocompleteField({
   label,
   placeholder,
   description,
-  options,
+  options = [],
   searchable = true,
 }: AutocompleteFieldProps) {
-  // Validate options to ensure it's always an array
+  // IMPORTANT: Validate options to ensure it's always an array
   const safeOptions = Array.isArray(options) ? options : [];
   
-  // Safer value change handler to prevent form submission
+  // Safer value change handler with additional error catching
   const handleValueChange = (field: any, value: string) => {
-    if (field && typeof field.onChange === 'function') {
-      field.onChange(value);
+    try {
+      if (field && typeof field.onChange === 'function') {
+        field.onChange(value);
+      }
+    } catch (error) {
+      console.error("Error in handleValueChange:", error);
     }
   };
   
   // Prevent event propagation to avoid form submission
-  const preventPropagation = (e: React.MouseEvent) => {
+  const preventPropagation = (e: React.MouseEvent | React.FormEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -45,58 +49,67 @@ export function AutocompleteField({
     <FormField
       control={control}
       name={name}
-      render={({ field }) => (
-        <FormItem className="w-full">
-          <FormLabel>{label}</FormLabel>
-          {searchable ? (
-            <FormControl>
-              <div 
-                onClick={preventPropagation}
-                onMouseDown={preventPropagation}
-                className="form-control-wrapper"
-              >
-                <Combobox
-                  options={safeOptions}
-                  value={field.value || ''}
-                  onChange={(value) => handleValueChange(field, value)}
-                  placeholder={placeholder}
-                  triggerClassName="w-full"
-                />
-              </div>
-            </FormControl>
-          ) : (
-            <Select 
-              onValueChange={(value) => handleValueChange(field, value)} 
-              defaultValue={field.value || ''}
-              onOpenChange={(open) => {
-                // Prevent form submission when opening/closing the select
-                if (open) {
-                  setTimeout(() => {
-                    if (field && typeof field.onBlur === 'function') {
-                      field.onBlur();
-                    }
-                  }, 100);
-                }
-              }}
-            >
+      render={({ field }) => {
+        // Ensure field value is always a string
+        const safeValue = field.value || '';
+        
+        return (
+          <FormItem className="w-full">
+            <FormLabel>{label}</FormLabel>
+            {searchable ? (
               <FormControl>
-                <SelectTrigger onClick={preventPropagation} onMouseDown={preventPropagation}>
-                  <SelectValue placeholder={placeholder} />
-                </SelectTrigger>
+                <div 
+                  onClick={preventPropagation}
+                  onMouseDown={preventPropagation}
+                  className="form-control-wrapper"
+                >
+                  <Combobox
+                    options={safeOptions}
+                    value={safeValue}
+                    onChange={(value) => handleValueChange(field, value)}
+                    placeholder={placeholder}
+                    triggerClassName="w-full"
+                  />
+                </div>
               </FormControl>
-              <SelectContent onClick={preventPropagation} onMouseDown={preventPropagation}>
-                {safeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          {description && <FormDescription>{description}</FormDescription>}
-          <FormMessage />
-        </FormItem>
-      )}
+            ) : (
+              <Select 
+                onValueChange={(value) => handleValueChange(field, value)} 
+                defaultValue={field.value || ''}
+                onOpenChange={(open) => {
+                  // Prevent form submission when opening/closing the select
+                  if (open) {
+                    setTimeout(() => {
+                      try {
+                        if (field && typeof field.onBlur === 'function') {
+                          field.onBlur();
+                        }
+                      } catch (error) {
+                        console.error("Error in onOpenChange:", error);
+                      }
+                    }, 100);
+                  }
+                }}
+              >
+                <FormControl>
+                  <SelectTrigger onClick={preventPropagation} onMouseDown={preventPropagation}>
+                    <SelectValue placeholder={placeholder} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent onClick={preventPropagation} onMouseDown={preventPropagation}>
+                  {safeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {description && <FormDescription>{description}</FormDescription>}
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 }
