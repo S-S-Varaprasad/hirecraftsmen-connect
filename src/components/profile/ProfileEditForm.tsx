@@ -52,8 +52,7 @@ const ProfileEditForm = ({
   const formatHourlyRate = (rate: string) => {
     if (!rate) return '';
     
-    const cleanedRate = rate.replace(/[₹$€£]/g, '').trim();
-    return cleanedRate;
+    return rate.replace(/[₹$€£]/g, '').trim();
   };
 
   const form = useForm<ProfileFormValues>({

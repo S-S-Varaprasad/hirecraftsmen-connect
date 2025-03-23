@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Star, MapPin, Clock, Briefcase, Eye, BriefcaseBusiness, Upload, Check, X, Trash2 } from 'lucide-react';
@@ -136,6 +135,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     navigate(`/workers/${id}`);
   };
 
+  const formattedHourlyRate = () => {
+    if (!hourlyRate) return '₹0';
+    
+    if (hourlyRate.includes('₹')) return hourlyRate;
+    
+    return `₹${hourlyRate}`;
+  };
+
   return (
     <div className={`group relative rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-card hover:shadow-elevated transition-all duration-300 animate-in ${className || ''}`}>
       <div className="absolute top-4 right-4 z-10">
@@ -252,7 +259,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             </div>
             <div className="flex items-center">
               <Clock className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-              <span className="text-gray-700 dark:text-gray-300">{hourlyRate}/hr</span>
+              <span className="text-gray-700 dark:text-gray-300">{formattedHourlyRate()}</span>
             </div>
           </div>
         </div>

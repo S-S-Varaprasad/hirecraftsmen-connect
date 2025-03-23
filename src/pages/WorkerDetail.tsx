@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -18,7 +17,6 @@ import { motion } from 'framer-motion';
 import { Canvas } from '@react-three/fiber';
 import { Stars, PerspectiveCamera } from '@react-three/drei';
 
-// 3D floating particles background component
 const Background3D = () => {
   return (
     <div className="absolute inset-0 -z-10 h-full w-full overflow-hidden opacity-70">
@@ -43,8 +41,15 @@ const WorkerDetail = () => {
     enabled: !!id,
   });
 
-  // Check if the logged-in user is viewing their own profile
   const isOwnProfile = user && worker && worker.user_id === user.id;
+
+  const formattedHourlyRate = (rate: string) => {
+    if (!rate) return '₹0';
+    
+    if (rate.includes('₹')) return rate;
+    
+    return `₹${rate}`;
+  };
 
   const handleMessageClick = () => {
     window.location.href = `/message/${id}`;
@@ -73,7 +78,6 @@ const WorkerDetail = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Worker Profile Information Section */}
               <motion.div 
                 ref={profileRef}
                 className="bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-xl overflow-hidden backdrop-blur-sm border border-white/20 dark:border-gray-700/30 transition-all duration-300"
@@ -152,7 +156,7 @@ const WorkerDetail = () => {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600 dark:text-gray-400">Hourly Rate</span>
-                            <span className="font-medium text-gray-800 dark:text-white">{worker.hourly_rate}</span>
+                            <span className="font-medium text-gray-800 dark:text-white">{formattedHourlyRate(worker.hourly_rate)}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600 dark:text-gray-400">Availability</span>
@@ -230,7 +234,6 @@ const WorkerDetail = () => {
                 </div>
               </motion.div>
               
-              {/* Worker Profile Content Tabs */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

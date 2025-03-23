@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Worker } from '@/services/workerService';
 import { Button } from '@/components/ui/button';
@@ -15,16 +14,15 @@ interface ProfileDisplayProps {
 const ProfileDisplay = ({ worker, onEdit }: ProfileDisplayProps) => {
   const navigate = useNavigate();
 
-  // Format hourly rate to show Indian Rupee symbol
+  // Format hourly rate to ensure proper display of Indian Rupee symbol
   const formattedHourlyRate = () => {
     if (!worker.hourly_rate) return '₹0';
     
     // If already has ₹ symbol, return as is
     if (worker.hourly_rate.includes('₹')) return worker.hourly_rate;
     
-    // If has $ or other currency symbols, replace with ₹
-    const cleanedRate = worker.hourly_rate.replace(/[$€£]/g, '').trim();
-    return `₹${cleanedRate}`;
+    // Otherwise, add ₹ symbol
+    return `₹${worker.hourly_rate}`;
   };
 
   return (
