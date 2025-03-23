@@ -162,11 +162,11 @@ export const notifyWorkersAboutJob = async (
   sendSms: boolean = false
 ) => {
   try {
-    const response = await fetch(`${process.env.SUPABASE_URL}/functions/v1/notify-workers`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-workers`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify({
         jobId,

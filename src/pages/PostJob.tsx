@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -41,6 +42,7 @@ import {
   professions,
   allIndianRegions
 } from '@/utils/suggestions';
+import { notifyWorkersAboutJob } from '@/services/notificationService';
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters').max(100),
@@ -118,6 +120,27 @@ const PostJob = () => {
       });
       
       console.log('Job created successfully:', newJob);
+      
+      // Send notifications to workers with matching skills
+      try {
+        console.log('Notifying workers about new job...');
+        // Extract category/profession from the job title if possible
+        const possibleCategory = data.title.replace(/Need a /i, '').split(' ')[0];
+        
+        await notifyWorkersAboutJob(
+          newJob.id, 
+          newJob.title, 
+          skillsArray,
+          possibleCategory,
+          true, // Send email
+          false  // Don't send SMS
+        );
+        console.log('Worker notifications sent successfully');
+      } catch (notifyError) {
+        console.error('Error notifying workers:', notifyError);
+        // Don't fail the job creation if notifications fail
+        toast.error('Job posted successfully but failed to notify workers');
+      }
       
       setIsSuccess(true);
       toast.success('Job posted successfully!');
