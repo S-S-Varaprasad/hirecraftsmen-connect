@@ -1,383 +1,253 @@
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { 
-  Notification, 
   getNotifications, 
-  markNotificationAsRead,
+  getUnreadNotificationCount, 
+  Notification, 
+  markNotificationAsRead, 
+  markAllNotificationsAsRead, 
   deleteNotification,
   deleteExpiredNotifications,
-  markAllNotificationsAsRead
+  updateNotificationReadStatus
 } from '@/services/notificationService';
+import { useAuth } from '@/context/AuthContext';
+import { useQueryRefresh } from './useQueryRefresh';
 
-// Sound notification
-const NOTIFICATION_SOUNDS = {
-  default: '/sounds/notification.mp3',
-  critical: '/sounds/notification-critical.mp3'
-};
-
-export interface NotificationOptions {
-  type?: string;
-  isRead?: boolean;
-  category?: string;
+interface UseNotificationsOptions {
   limit?: number;
-  offset?: number;
+  type?: string;
+  category?: string;
+  isRead?: boolean;
+  refreshInterval?: number;
 }
 
-export const useNotifications = () => {
+export const useNotifications = (options: UseNotificationsOptions = {}) => {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
-  const [filter, setFilter] = useState<NotificationOptions>({});
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(
-    localStorage.getItem('notificationSoundEnabled') !== 'false'
-  );
-  const notificationSound = useRef<HTMLAudioElement | null>(null);
-  const criticalSound = useRef<HTMLAudioElement | null>(null);
-
-  // Initialize audio elements for notification sounds
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      notificationSound.current = new Audio(NOTIFICATION_SOUNDS.default);
-      criticalSound.current = new Audio(NOTIFICATION_SOUNDS.critical);
-    }
-    
-    return () => {
-      notificationSound.current = null;
-      criticalSound.current = null;
-    };
-  }, []);
-
-  // Toggle notification sound
-  const toggleSound = useCallback(() => {
-    const newValue = !soundEnabled;
-    setSoundEnabled(newValue);
-    localStorage.setItem('notificationSoundEnabled', String(newValue));
-  }, [soundEnabled]);
-
-  // Play notification sound based on priority
-  const playNotificationSound = useCallback((priority: string = 'medium') => {
-    if (!soundEnabled) return;
-    
-    try {
-      if (priority === 'high' && criticalSound.current) {
-        criticalSound.current.play();
-      } else if (notificationSound.current) {
-        notificationSound.current.play();
-      }
-    } catch (error) {
-      console.error('Error playing notification sound:', error);
-    }
-  }, [soundEnabled]);
-
-  // Update filters and refetch notifications
-  const updateFilters = useCallback((newFilters: NotificationOptions) => {
-    setFilter(prev => ({ ...prev, ...newFilters }));
-  }, []);
-
-  // Reset filters
-  const resetFilters = useCallback(() => {
-    setFilter({});
-  }, []);
-
-  // Apply filters to notifications
-  useEffect(() => {
-    if (!notifications.length) {
-      setFilteredNotifications([]);
-      return;
-    }
-
-    let filtered = [...notifications];
-    
-    if (filter.type) {
-      filtered = filtered.filter(n => n.type === filter.type);
-    }
-    
-    if (filter.category) {
-      filtered = filtered.filter(n => n.category === filter.category);
-    }
-    
-    if (filter.isRead !== undefined) {
-      filtered = filtered.filter(n => n.is_read === filter.isRead);
-    }
-    
-    setFilteredNotifications(filtered);
-  }, [notifications, filter]);
-
-  // Fetch notifications when user logs in or filters change
-  useEffect(() => {
-    if (!user) {
-      setNotifications([]);
-      setFilteredNotifications([]);
-      setUnreadCount(0);
-      setLoading(false);
-      return;
-    }
-
-    const fetchNotifications = async () => {
-      try {
-        setLoading(true);
-        
-        // Cleanup expired notifications first
-        await deleteExpiredNotifications(user.id);
-        
-        // Use our service with filter options
-        const options = {
-          ...filter,
-          limit: 20, // Default limit
-          offset: 0  // Initial offset
-        };
-        
-        const notificationsList = await getNotifications(user.id, options);
-        
-        setNotifications(notificationsList);
-        setHasMore(notificationsList.length === options.limit);
-        
-        // Count unread notifications
-        const unread = notificationsList.filter(n => !n.is_read).length;
-        setUnreadCount(unread);
-        
-        console.log(`Fetched ${notificationsList.length} notifications, ${unread} unread`);
-      } catch (error: any) {
-        console.error('Error fetching notifications:', error);
+  const queryClient = useQueryClient();
+  const [isLoadingAction, setIsLoadingAction] = useState(false);
+  const [playSound, setPlaySound] = useState(false);
+  
+  // Set up real-time updates for notifications table
+  useQueryRefresh(['notifications'], [['notifications'], ['unreadCount']]);
+  
+  // Query to fetch notifications
+  const { 
+    data: notifications = [], 
+    isLoading,
+    error,
+    refetch,
+    isFetching 
+  } = useQuery({
+    queryKey: ['notifications', options],
+    queryFn: () => user ? getNotifications(user.id, options) : Promise.resolve([]),
+    enabled: !!user,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    retry: 3,
+    meta: {
+      onError: (err: any) => {
+        console.error('Error fetching notifications:', err);
         toast.error('Failed to load notifications');
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetchNotifications();
-
-    // Set up real-time subscription for new notifications
-    const channel = supabase
-      .channel('public:notifications')
-      .on(
-        'postgres_changes' as any, 
-        { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}` 
-        },
-        (payload: { new: Notification }) => {
-          console.log('New notification received:', payload.new);
-          setNotifications(prev => [payload.new, ...prev]);
-          setUnreadCount(prev => prev + 1);
-          
-          // Play sound based on notification priority
-          playNotificationSound(payload.new.priority);
-          
-          // Show toast notification
-          toast.info(payload.new.message, {
-            description: new Date(payload.new.created_at).toLocaleString(),
-            action: {
-              label: "View",
-              onClick: () => markAsRead(payload.new.id)
-            }
-          });
-        }
-      )
-      .subscribe();
-
-    // Subscription for when notifications are marked as read or deleted
-    const updateChannel = supabase
-      .channel('public:notifications:updates')
-      .on(
-        'postgres_changes' as any, 
-        { 
-          event: 'UPDATE', 
-          schema: 'public', 
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}` 
-        },
-        (payload: { new: Notification, old: Notification }) => {
-          console.log('Notification updated:', payload.new);
-          
-          // Update the notification in our state
-          setNotifications(prev => 
-            prev.map(n => n.id === payload.new.id ? payload.new : n)
-          );
-          
-          // If it was marked as read, update the unread count
-          if (!payload.old.is_read && payload.new.is_read) {
-            setUnreadCount(prev => Math.max(0, prev - 1));
-          }
-        }
-      )
-      .subscribe();
-
-    // Subscription for when notifications are deleted
-    const deleteChannel = supabase
-      .channel('public:notifications:deletes')
-      .on(
-        'postgres_changes' as any, 
-        { 
-          event: 'DELETE', 
-          schema: 'public', 
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}` 
-        },
-        (payload: { old: Notification }) => {
-          console.log('Notification deleted:', payload.old);
-          
-          // Remove the deleted notification from our state
-          setNotifications(prev => 
-            prev.filter(n => n.id !== payload.old.id)
-          );
-          
-          // If it was unread, update the unread count
-          if (!payload.old.is_read) {
-            setUnreadCount(prev => Math.max(0, prev - 1));
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-      supabase.removeChannel(updateChannel);
-      supabase.removeChannel(deleteChannel);
-    };
-  }, [user, filter, playNotificationSound]);
-
-  // Load more notifications (for infinite scrolling)
-  const loadMore = useCallback(async () => {
-    if (!user || loading || !hasMore) return;
-    
-    try {
-      setLoading(true);
-      
-      const options = {
-        ...filter,
-        limit: 20,
-        offset: notifications.length
-      };
-      
-      const moreNotifications = await getNotifications(user.id, options);
-      
-      if (moreNotifications.length === 0) {
-        setHasMore(false);
-      } else {
-        setNotifications(prev => [...prev, ...moreNotifications]);
-        setHasMore(moreNotifications.length === options.limit);
-      }
-    } catch (error: any) {
-      console.error('Error loading more notifications:', error);
-      toast.error('Failed to load more notifications');
-    } finally {
-      setLoading(false);
     }
-  }, [user, filter, notifications.length, loading, hasMore]);
-
-  // Mark notification as read
+  });
+  
+  // Query to fetch unread count
+  const {
+    data: unreadCount = 0,
+    isLoading: isLoadingUnreadCount,
+    refetch: refetchUnreadCount
+  } = useQuery({
+    queryKey: ['unreadCount'],
+    queryFn: () => user ? getUnreadNotificationCount(user.id) : Promise.resolve(0),
+    enabled: !!user,
+    staleTime: 1000 * 60, // 1 minute
+    meta: {
+      onError: (err: any) => {
+        console.error('Error fetching unread count:', err);
+      }
+    }
+  });
+  
+  // Refresh data manually
+  const refreshNotifications = useCallback(() => {
+    if (user) {
+      refetch();
+      refetchUnreadCount();
+    }
+  }, [user, refetch, refetchUnreadCount]);
+  
+  // Play notification sound when unread count increases
+  useEffect(() => {
+    if (playSound && unreadCount > 0) {
+      const audio = new Audio('/sounds/notification.mp3');
+      audio.play();
+      setPlaySound(false);
+    }
+  }, [unreadCount, playSound]);
+  
+  // Mark a notification as read
   const markAsRead = useCallback(async (notificationId: string) => {
+    if (!user) return;
+    
+    setIsLoadingAction(true);
     try {
-      if (!user) return;
-      
       await markNotificationAsRead(notificationId);
-
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId ? { ...n, is_read: true } : n
-        )
-      );
       
-      // Only decrement if it was previously unread
-      const notification = notifications.find(n => n.id === notificationId);
-      if (notification && !notification.is_read) {
-        setUnreadCount(prev => Math.max(0, prev - 1));
-      }
-    } catch (error: any) {
-      console.error('Error marking notification as read:', error);
-      toast.error('Failed to mark notification as read');
-    }
-  }, [user, notifications]);
-
-  // Delete notification
-  const removeNotification = useCallback(async (notificationId: string) => {
-    try {
-      if (!user) return;
-      
-      // Get notification before deletion to check if it's unread
-      const notification = notifications.find(n => n.id === notificationId);
-      
-      await deleteNotification(notificationId);
-
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
-      
-      // If it was unread, decrement the counter
-      if (notification && !notification.is_read) {
-        setUnreadCount(prev => Math.max(0, prev - 1));
-      }
-      
-      toast.success('Notification removed');
-    } catch (error: any) {
-      console.error('Error deleting notification:', error);
-      toast.error('Failed to delete notification');
-    }
-  }, [user, notifications]);
-
-  // Mark all notifications as read
-  const markAllAsRead = useCallback(async (options?: { type?: string; category?: string }) => {
-    try {
-      if (!user || unreadCount === 0) return;
-      
-      await markAllNotificationsAsRead(user.id, options);
-
-      setNotifications(prev => 
-        prev.map(n => {
-          // Apply filters if provided
-          if (options?.type && n.type !== options.type) return n;
-          if (options?.category && n.category !== options.category) return n;
-          
-          return { ...n, is_read: true };
-        })
-      );
-      
-      // If filters are applied, only count notifications that match the filters
-      if (options?.type || options?.category) {
-        let count = 0;
-        notifications.forEach(n => {
-          if (!n.is_read && 
-              (!options.type || n.type === options.type) && 
-              (!options.category || n.category === options.category)) {
-            count++;
-          }
-        });
-        setUnreadCount(prev => Math.max(0, prev - count));
-      } else {
-        setUnreadCount(0);
-      }
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
       
       return true;
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      toast.error('Failed to mark notification as read');
+      return false;
+    } finally {
+      setIsLoadingAction(false);
+    }
+  }, [user, queryClient]);
+  
+  // Mark all notifications as read
+  const markAllAsRead = useCallback(async (options?: { type?: string; category?: string }) => {
+    if (!user) return;
+    
+    setIsLoadingAction(true);
+    try {
+      await markAllNotificationsAsRead(user.id, options);
+      
+      toast.success('All notifications marked as read');
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
+      
+      return true;
+    } catch (error) {
       console.error('Error marking all notifications as read:', error);
       toast.error('Failed to mark all notifications as read');
-      throw error;
+      return false;
+    } finally {
+      setIsLoadingAction(false);
     }
-  }, [user, unreadCount, notifications]);
+  }, [user, queryClient]);
+  
+  // Remove a notification
+  const removeNotification = useCallback(async (notificationId: string) => {
+    if (!user) return;
+    
+    setIsLoadingAction(true);
+    try {
+      await deleteNotification(notificationId);
+      
+      toast.success('Notification removed');
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
+      
+      return true;
+    } catch (error) {
+      console.error('Error removing notification:', error);
+      toast.error('Failed to remove notification');
+      return false;
+    } finally {
+      setIsLoadingAction(false);
+    }
+  }, [user, queryClient]);
+  
+  // Toggle read status of a notification
+  const toggleReadStatus = useCallback(async (notificationId: string, currentReadStatus: boolean) => {
+    if (!user) return;
+    
+    setIsLoadingAction(true);
+    try {
+      const success = await updateNotificationReadStatus(notificationId, !currentReadStatus);
+      
+      if (success) {
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
+      }
+      
+      return success;
+    } catch (error) {
+      console.error('Error toggling notification read status:', error);
+      return false;
+    } finally {
+      setIsLoadingAction(false);
+    }
+  }, [user, queryClient]);
+  
+  // Filter notifications by type
+  const filterByType = useCallback((type: string) => {
+    return notifications.filter(notification => notification.type === type);
+  }, [notifications]);
+  
+  // Filter notifications by category
+  const filterByCategory = useCallback((category: string) => {
+    return notifications.filter(notification => notification.category === category);
+  }, [notifications]);
+  
+  // Filter notifications by priority
+  const filterByPriority = useCallback((priority: string) => {
+    return notifications.filter(notification => notification.priority === priority);
+  }, [notifications]);
+  
+  // Group notifications by date
+  const groupByDate = useCallback(() => {
+    const groups: { [key: string]: Notification[] } = {};
+    
+    notifications.forEach(notification => {
+      const date = new Date(notification.created_at).toLocaleDateString();
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(notification);
+    });
+    
+    return groups;
+  }, [notifications]);
+  
+  // Auto-refresh on mount and periodically if refreshInterval is provided
+  useEffect(() => {
+    if (!user) return;
+    
+    // Initial fetch
+    refreshNotifications();
+    
+    // Set up periodic refresh if refreshInterval is provided
+    if (options.refreshInterval && options.refreshInterval > 0) {
+      const intervalId = setInterval(() => {
+        refreshNotifications();
+      }, options.refreshInterval);
+      
+      return () => clearInterval(intervalId);
+    }
+  }, [user, options.refreshInterval, refreshNotifications]);
+  
+  const notificationsWithReadStatus = notifications.map(notification => ({
+    ...notification,
+    isRead: notification.is_read,
+  }));
 
+  console.log(`Fetched ${notifications.length} notifications, ${unreadCount} unread`);
+  
   return {
-    notifications: filteredNotifications,
-    allNotifications: notifications,
+    notifications: notificationsWithReadStatus,
     unreadCount,
-    loading,
-    hasMore,
-    filter,
-    soundEnabled,
+    isLoading: isLoading || isLoadingUnreadCount || isLoadingAction,
+    isFetching,
+    error,
+    refreshNotifications,
     markAsRead,
     markAllAsRead,
-    updateFilters,
-    resetFilters,
-    loadMore,
     removeNotification,
-    toggleSound
+    toggleReadStatus,
+    filterByType,
+    filterByCategory,
+    filterByPriority,
+    groupByDate,
   };
 };
-
-export type { Notification };

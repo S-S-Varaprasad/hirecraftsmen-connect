@@ -11,7 +11,7 @@ export interface Notification {
   created_at: string;
   related_id?: string;
   additional_data?: any;
-  // Add the missing properties that were referenced in the code
+  // Add these properties to fix the TypeScript errors
   priority?: string;
   category?: string;
 }

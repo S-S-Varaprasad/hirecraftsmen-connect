@@ -29,8 +29,6 @@ import ContactEmployer from './pages/ContactEmployer';
 import DeleteWorker from './pages/DeleteWorker';
 import DeactivateWorker from './pages/DeactivateWorker';
 import MessageWorker from './pages/MessageWorker';
-
-// Update the routes to include NotificationSettings page
 import NotificationSettings from './pages/NotificationSettings';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
@@ -48,13 +46,22 @@ function App() {
     },
   }));
 
-  // Check saved theme preference
+  // Check and apply saved theme preference on application load
   useEffect(() => {
     const savedTheme = localStorage.getItem('hire-ease-ui-theme');
     if (savedTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else if (savedTheme === 'light') {
       document.documentElement.classList.remove('dark');
+    } else {
+      // Set default theme based on system preference
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('hire-ease-ui-theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('hire-ease-ui-theme', 'light');
+      }
     }
   }, []);
 
