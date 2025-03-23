@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@/components/theme-provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
@@ -47,23 +47,6 @@ function App() {
       },
     },
   }));
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('hire-ease-ui-theme');
-    if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else if (savedTheme === 'light') {
-      document.documentElement.classList.remove('dark');
-    } else {
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('hire-ease-ui-theme', 'dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('hire-ease-ui-theme', 'light');
-      }
-    }
-  }, []);
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="hire-ease-ui-theme">
