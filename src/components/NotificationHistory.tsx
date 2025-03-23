@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -35,9 +34,9 @@ interface NotificationHistoryProps {
   onClose?: () => void;
 }
 
-// All notification types
+// All notification types - changed empty string to "all" for these filter options
 const NOTIFICATION_TYPES = [
-  { value: '', label: 'All Types' },
+  { value: 'all', label: 'All Types' },
   { value: 'application', label: 'Applications' },
   { value: 'job_accepted', label: 'Job Accepted' },
   { value: 'job_completed', label: 'Job Completed' },
@@ -47,9 +46,9 @@ const NOTIFICATION_TYPES = [
   { value: 'system', label: 'System' }
 ];
 
-// All notification categories
+// All notification categories - changed empty string to "all" for these filter options
 const NOTIFICATION_CATEGORIES = [
-  { value: '', label: 'All Categories' },
+  { value: 'all', label: 'All Categories' },
   { value: 'job', label: 'Jobs' },
   { value: 'message', label: 'Messages' },
   { value: 'application', label: 'Applications' },
@@ -126,12 +125,12 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
     }
   };
 
-  // Apply filter
+  // Apply filter - Updated to handle "all" value instead of empty string
   const applyFilter = (type: string, value: string | boolean) => {
     if (type === 'type') {
-      updateFilters({ type: value as string });
+      updateFilters({ type: value === 'all' ? undefined : value as string });
     } else if (type === 'category') {
-      updateFilters({ category: value as string });
+      updateFilters({ category: value === 'all' ? undefined : value as string });
     } else if (type === 'read') {
       updateFilters({ isRead: value as boolean });
     }
@@ -199,7 +198,7 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
                 <div className="p-2">
                   <Label className="text-xs text-gray-500 mb-1 block">By Type</Label>
                   <Select 
-                    value={filter.type || ''} 
+                    value={filter.type || 'all'} 
                     onValueChange={(value) => applyFilter('type', value)}
                   >
                     <SelectTrigger className="w-full text-xs h-8">
@@ -216,7 +215,7 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
                 <div className="p-2">
                   <Label className="text-xs text-gray-500 mb-1 block">By Category</Label>
                   <Select 
-                    value={filter.category || ''} 
+                    value={filter.category || 'all'} 
                     onValueChange={(value) => applyFilter('category', value)}
                   >
                     <SelectTrigger className="w-full text-xs h-8">

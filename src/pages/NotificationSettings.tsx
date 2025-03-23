@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -16,7 +15,6 @@ import { Bell, BellOff, Mail, MessageSquare, Briefcase, Clock, Volume2, VolumeX,
 import { useAuth } from '@/context/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 
-// Sample notification settings (In a real app, these would be stored in the database)
 interface NotificationSetting {
   id: string;
   name: string;
@@ -116,7 +114,6 @@ const NotificationSettings = () => {
   };
 
   const handleDeleteAllNotifications = () => {
-    // This would normally connect to a backend API
     toast.success('All notifications deleted');
   };
 
@@ -146,7 +143,6 @@ const NotificationSettings = () => {
                 <TabsTrigger value="management">Management</TabsTrigger>
               </TabsList>
               
-              {/* Notification Preferences Tab */}
               <TabsContent value="preferences">
                 <Card>
                   <CardHeader>
@@ -205,7 +201,6 @@ const NotificationSettings = () => {
                 </Card>
               </TabsContent>
               
-              {/* Notification Delivery Tab */}
               <TabsContent value="delivery">
                 <Card>
                   <CardHeader>
@@ -324,7 +319,6 @@ const NotificationSettings = () => {
                 </Card>
               </TabsContent>
               
-              {/* Notification Management Tab */}
               <TabsContent value="management">
                 <Card>
                   <CardHeader>
