@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider, RequireAuth } from '@/context/AuthContext';
 import CookieConsent from "react-cookie-consent";
+import ScrollToTop from '@/components/ScrollToTop';
 
 // Import pages individually instead of from a barrel file
 import Index from '@/pages/Index';
@@ -59,6 +60,7 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <QueryClientProvider client={queryClient}>
           <Toaster position="top-right" richColors />
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />

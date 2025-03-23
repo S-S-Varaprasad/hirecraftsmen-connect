@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useEffect } from "react";
 import HeroSection from "@/components/HeroSection";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
@@ -10,6 +9,10 @@ import CategoryCard from "@/components/CategoryCard";
 import { Bot, ChevronRight, Search } from "lucide-react";
 
 const Index = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -72,8 +71,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) throw error;
       
-      // Navigate to the top of the home page instead
       navigate('/', { replace: true });
+      window.scrollTo(0, 0);
       
       return { error: null };
     } catch (error) {
@@ -85,6 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut();
     navigate('/login');
+    window.scrollTo(0, 0);
   };
 
   const resetPassword = async (email: string) => {
