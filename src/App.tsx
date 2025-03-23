@@ -38,10 +38,24 @@ import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 
 function App() {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 2,
+        retryDelay: attempt => Math.min(attempt > 1 ? 2000 : 1000, 10000),
+        staleTime: 60 * 1000, // 1 minute
+      },
+    },
+  }));
 
+  // Check saved theme preference
   useEffect(() => {
-    document.documentElement.classList.add('dark');
+    const savedTheme = localStorage.getItem('hire-ease-ui-theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (savedTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+    }
   }, []);
 
   return (
@@ -79,7 +93,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
-        <Toaster />
+        <Toaster position="top-right" richColors closeButton />
       </QueryClientProvider>
     </ThemeProvider>
   );

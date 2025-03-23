@@ -1,342 +1,246 @@
 
-// Import necessary dependencies
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export interface Notification {
   id: string;
   user_id: string;
   message: string;
   type: string;
-  category?: string;
-  related_id?: string;
-  priority?: string;
   is_read: boolean;
   created_at: string;
+  related_id?: string;
+  additional_data?: any;
 }
 
-export interface NotificationFilter {
-  type?: string;
-  category?: string;
-  isRead?: boolean;
-  limit?: number;
-  before?: string;
-}
-
-// Fetch notifications for a user with pagination
-export const getNotifications = async (
-  userId: string,
-  filter?: NotificationFilter
-): Promise<Notification[]> => {
+/**
+ * Get notifications for a specific user
+ */
+export const getNotifications = async (userId: string): Promise<Notification[]> => {
   try {
-    if (!userId) {
-      console.warn('No user ID provided for notifications');
-      return [];
+    console.log(`Fetching notifications for user ${userId}`);
+    
+    // First, delete old notifications (older than 30 days)
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const { error: deleteError } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', userId)
+        .lt('created_at', thirtyDaysAgo.toISOString());
+      
+      if (deleteError) {
+        console.error('Error deleting old notifications:', deleteError);
+      } else {
+        console.log(`Deleted notifications older than 30 days for user ${userId}`);
+      }
+    } catch (err) {
+      console.error('Error in notification cleanup:', err);
+      // Continue with fetching even if cleanup fails
     }
-
-    // Using type assertion to avoid type instantiation depth issues
-    const builder = supabase
+    
+    const { data, error } = await (supabase as any)
       .from('notifications')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false }) as any;
-
-    if (filter?.type) {
-      builder.eq('type', filter.type);
-    }
-
-    if (filter?.category) {
-      builder.eq('category', filter.category);
-    }
-
-    if (filter?.isRead !== undefined) {
-      builder.eq('is_read', filter.isRead);
-    }
-
-    if (filter?.before) {
-      builder.lt('created_at', filter.before);
-    }
-
-    if (filter?.limit) {
-      builder.limit(filter.limit);
-    } else {
-      builder.limit(20); // Default limit
-    }
-
-    const { data, error } = await builder;
-
+      .order('created_at', { ascending: false });
+    
     if (error) {
       console.error('Error fetching notifications:', error);
       throw error;
     }
-
-    return (data || []) as Notification[];
-  } catch (error) {
-    console.error('Exception in getNotifications:', error);
+    
+    return data || [];
+  } catch (err) {
+    console.error('Exception in getNotifications:', err);
+    // Return empty array instead of throwing to avoid cascading errors
     return [];
   }
 };
 
-// Delete expired notifications (older than 30 days by default)
-export const deleteExpiredNotifications = async (
-  userId: string,
-  daysToKeep: number = 30
-): Promise<void> => {
+/**
+ * Get unread notification count for a specific user
+ */
+export const getUnreadNotificationCount = async (userId: string): Promise<number> => {
   try {
-    if (!userId) return;
-    
-    // Calculate the cutoff date (30 days ago by default)
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
-    
-    const { error } = await supabase
-      .from('notifications')
-      .delete()
-      .eq('user_id', userId)
-      .lt('created_at', cutoffDate.toISOString());
-    
-    if (error) {
-      console.error('Error deleting expired notifications:', error);
-      throw error;
-    }
-    
-    console.log(`Deleted notifications older than ${daysToKeep} days for user ${userId}`);
-  } catch (error) {
-    console.error('Exception in deleteExpiredNotifications:', error);
-  }
-};
-
-// Count unread notifications
-export const countUnreadNotifications = async (userId: string): Promise<number> => {
-  try {
-    if (!userId) return 0;
-
     const { count, error } = await supabase
       .from('notifications')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId)
       .eq('is_read', false);
-
+    
     if (error) {
-      console.error('Error counting unread notifications:', error);
-      return 0;
+      console.error('Error fetching unread notification count:', error);
+      throw error;
     }
-
+    
     return count || 0;
-  } catch (error) {
-    console.error('Exception in countUnreadNotifications:', error);
+  } catch (err) {
+    console.error('Exception in getUnreadNotificationCount:', err);
     return 0;
   }
 };
 
-// Mark a notification as read
-export const markNotificationAsRead = async (notificationId: string): Promise<void> => {
+/**
+ * Create a new notification
+ */
+export const createNotification = async (notification: Omit<Notification, 'id' | 'created_at'>): Promise<Notification> => {
   try {
-    const { error } = await supabase
+    const { data, error } = await supabase
+      .from('notifications')
+      .insert([notification])
+      .select();
+    
+    if (error) {
+      console.error('Error creating notification:', error);
+      throw error;
+    }
+    
+    return data?.[0] as Notification;
+  } catch (err) {
+    console.error('Exception in createNotification:', err);
+    throw err;
+  }
+};
+
+/**
+ * Mark a specific notification as read
+ */
+export const markNotificationAsRead = async (notificationId: string): Promise<Notification> => {
+  try {
+    const { data, error } = await supabase
       .from('notifications')
       .update({ is_read: true })
-      .eq('id', notificationId);
-
+      .eq('id', notificationId)
+      .select();
+    
     if (error) {
       console.error('Error marking notification as read:', error);
       throw error;
     }
-  } catch (error) {
-    console.error('Exception in markNotificationAsRead:', error);
-    throw error;
+    
+    return data?.[0] as Notification;
+  } catch (err) {
+    console.error('Exception in markNotificationAsRead:', err);
+    throw err;
   }
 };
 
-// Mark all notifications as read
-export const markAllNotificationsAsRead = async (
-  userId: string,
-  filter?: NotificationFilter
-): Promise<void> => {
+/**
+ * Mark all notifications for a user as read
+ */
+export const markAllNotificationsAsRead = async (userId: string): Promise<void> => {
   try {
-    if (!userId) return;
-
-    // Using type assertion to avoid type instantiation depth issues
-    let query = supabase
+    const { error } = await (supabase as any)
       .from('notifications')
       .update({ is_read: true })
-      .eq('user_id', userId)
-      .eq('is_read', false) as any;
-
-    if (filter?.type) {
-      query = query.eq('type', filter.type);
-    }
-
-    if (filter?.category) {
-      query = query.eq('category', filter.category);
-    }
-
-    const { error } = await query;
-
+      .eq('user_id', userId);
+    
     if (error) {
       console.error('Error marking all notifications as read:', error);
       throw error;
     }
-  } catch (error) {
-    console.error('Exception in markAllNotificationsAsRead:', error);
-    throw error;
+  } catch (err) {
+    console.error('Exception in markAllNotificationsAsRead:', err);
+    throw err;
   }
 };
 
-// Delete a notification
+/**
+ * Delete a specific notification
+ */
 export const deleteNotification = async (notificationId: string): Promise<void> => {
   try {
     const { error } = await supabase
       .from('notifications')
       .delete()
       .eq('id', notificationId);
-
+    
     if (error) {
       console.error('Error deleting notification:', error);
       throw error;
     }
-  } catch (error) {
-    console.error('Exception in deleteNotification:', error);
-    throw error;
+  } catch (err) {
+    console.error('Exception in deleteNotification:', err);
+    throw err;
   }
 };
 
-// Create a notification
-export const createNotification = async (notification: {
-  user_id: string;
-  message: string;
-  type: string;
-  category?: string;
-  related_id?: string;
-  priority?: string;
-  is_read?: boolean;
-}): Promise<Notification> => {
+/**
+ * Delete all notifications for a user
+ */
+export const deleteAllNotifications = async (userId: string): Promise<void> => {
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('notifications')
-      .insert([notification])
-      .select();
-
+      .delete()
+      .eq('user_id', userId);
+    
     if (error) {
-      console.error('Error creating notification:', error);
+      console.error('Error deleting all notifications:', error);
       throw error;
     }
-
-    return data?.[0] as Notification;
-  } catch (error) {
-    console.error('Exception in createNotification:', error);
-    throw error;
+  } catch (err) {
+    console.error('Exception in deleteAllNotifications:', err);
+    throw err;
   }
 };
 
-// Notify workers about a new job
-export const notifyWorkersAboutJob = async (
-  jobId: string,
-  jobTitle: string,
-  jobSkills: string[],
-  jobCategory: string = 'General',
-  sendEmail: boolean = false,
-  sendSms: boolean = false
-): Promise<{ success: boolean, matched_workers: number }> => {
+/**
+ * Update notification read status with error handling and user feedback
+ */
+export const updateNotificationReadStatus = async (
+  notificationId: string,
+  isRead: boolean,
+  showToast: boolean = true
+): Promise<boolean> => {
   try {
-    // Call the edge function to notify workers
-    const { data, error } = await supabase.functions.invoke('notify-workers', {
-      body: {
-        jobId,
-        jobTitle,
-        jobSkills,
-        jobCategory,
-        sendEmail,
-        sendSms
-      }
-    });
-
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: isRead })
+      .eq('id', notificationId);
+    
     if (error) {
-      console.error('Error notifying workers:', error);
-      return { success: false, matched_workers: 0 };
+      console.error('Error updating notification status:', error);
+      if (showToast) {
+        toast.error(`Failed to mark notification as ${isRead ? 'read' : 'unread'}`);
+      }
+      return false;
     }
-
-    return { 
-      success: true, 
-      matched_workers: data?.matched_workers || 0 
-    };
-  } catch (error) {
-    console.error('Exception in notifyWorkersAboutJob:', error);
-    return { success: false, matched_workers: 0 };
+    
+    if (showToast) {
+      toast.success(`Notification marked as ${isRead ? 'read' : 'unread'}`);
+    }
+    
+    return true;
+  } catch (err) {
+    console.error('Exception in updateNotificationReadStatus:', err);
+    if (showToast) {
+      toast.error(`Failed to mark notification as ${isRead ? 'read' : 'unread'}`);
+    }
+    return false;
   }
 };
 
-// Wrapper function to maintain compatibility with existing code
-export const notifyWorkersAboutJobUpdate = async (
-  jobId: string,
-  jobTitle: string,
-  jobSkills: string[],
-  jobCategory?: string,
-  sendEmail: boolean = false,
-  sendSms: boolean = false
-): Promise<{ success: boolean, matched_workers: number }> => {
-  return notifyWorkersAboutJob(
-    jobId,
-    jobTitle,
-    jobSkills,
-    jobCategory || 'General',
-    sendEmail,
-    sendSms
-  );
-};
-
-export interface NotificationSettings {
-  email_notifications: boolean;
-  sms_notifications: boolean;
-  push_notifications: boolean;
-  application_updates: boolean;
-  job_posted: boolean;
-  payment_updates: boolean;
-  marketing_emails: boolean;
-}
-
-// Since notification_settings table doesn't exist in the database schema, 
-// we'll use a dummy implementation that returns default settings
-export const getUserNotificationSettings = async (userId: string): Promise<NotificationSettings | null> => {
+/**
+ * Delete notifications by type for a user
+ */
+export const deleteNotificationsByType = async (userId: string, type: string): Promise<void> => {
   try {
-    if (!userId) return null;
-
-    // Return default settings
-    return {
-      email_notifications: true,
-      sms_notifications: false,
-      push_notifications: true,
-      application_updates: true,
-      job_posted: true,
-      payment_updates: true,
-      marketing_emails: false
-    };
-  } catch (error) {
-    console.error('Exception in getUserNotificationSettings:', error);
-    return null;
-  }
-};
-
-// Stub implementation for updateUserNotificationSettings
-export const updateUserNotificationSettings = async (
-  userId: string,
-  settings: Partial<NotificationSettings>
-): Promise<NotificationSettings | null> => {
-  try {
-    if (!userId) return null;
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', userId)
+      .eq('type', type);
     
-    console.log(`Would update notification settings for user ${userId} with:`, settings);
-    
-    // For now, just return the settings as if they were saved
-    return {
-      email_notifications: settings.email_notifications ?? true,
-      sms_notifications: settings.sms_notifications ?? false,
-      push_notifications: settings.push_notifications ?? true,
-      application_updates: settings.application_updates ?? true,
-      job_posted: settings.job_posted ?? true,
-      payment_updates: settings.payment_updates ?? true,
-      marketing_emails: settings.marketing_emails ?? false
-    };
-  } catch (error) {
-    console.error('Exception in updateUserNotificationSettings:', error);
-    return null;
+    if (error) {
+      console.error(`Error deleting notifications of type ${type}:`, error);
+      throw error;
+    }
+  } catch (err) {
+    console.error(`Exception in deleteNotificationsByType for type ${type}:`, err);
+    throw err;
   }
 };

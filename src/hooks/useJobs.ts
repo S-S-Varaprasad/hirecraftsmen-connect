@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getJobs, getJobsBySearch, Job } from '@/services/jobService';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQueryRefresh } from '@/hooks/useQueryRefresh';
 import { toast } from 'sonner';
 
@@ -9,8 +9,9 @@ export const useJobs = () => {
   const [filters, setFilters] = useState<any>(null);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Set up real-time updates for jobs table
-  useQueryRefresh(['jobs'], [['jobs'], ['applications']]);
+  // Set up real-time updates for jobs table and applications table
+  // This ensures that when a job application is accepted, the job is removed from the list
+  useQueryRefresh(['jobs', 'applications'], [['jobs'], ['filteredJobs']]);
 
   // Query to fetch all jobs
   const { 
@@ -73,20 +74,28 @@ export const useJobs = () => {
     }
   };
 
-  // Listen for changes in applications table
-  useEffect(() => {
-    // Force refresh on component mount to ensure we have latest data
-    refreshJobs();
-  }, []);
-
   // Manually refresh the data
-  const refreshJobs = () => {
+  const refreshJobs = useCallback(() => {
     if (filters) {
       refetchFiltered();
     } else {
       refetch();
     }
-  };
+  }, [filters, refetch, refetchFiltered]);
+
+  // Auto-refresh on mount and when dependencies change
+  useEffect(() => {
+    // Force refresh when component mounts
+    refreshJobs();
+    
+    // Set up interval to refresh job data periodically
+    const intervalId = setInterval(() => {
+      refreshJobs();
+    }, 60000); // Refresh every minute
+    
+    // Clean up interval on unmount
+    return () => clearInterval(intervalId);
+  }, [refreshJobs]);
 
   return {
     jobs: filters ? filteredJobs : allJobs,

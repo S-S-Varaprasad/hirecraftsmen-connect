@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 /**
  * A hook that sets up real-time listeners for database tables and automatically
@@ -68,9 +69,21 @@ export const useQueryRefresh = (
       );
     });
     
-    // Subscribe to all channels
+    // Subscribe to all channels with error handling
     channel.subscribe((status) => {
       console.log(`Realtime subscription status: ${status}`);
+      
+      if (status === 'CHANNEL_ERROR') {
+        // When there's an error with the channel, use polling as a fallback
+        const intervalId = setInterval(() => {
+          queryKeys.forEach(key => {
+            queryClient.invalidateQueries({ queryKey: key });
+          });
+        }, 30000); // Poll every 30 seconds
+        
+        // Clean up interval on unmount
+        return () => clearInterval(intervalId);
+      }
     });
     
     // Clean up on unmount

@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SearchFilters from '@/components/SearchFilters';
 import JobCard from '@/components/JobCard';
-import { Briefcase, Filter, SearchX } from 'lucide-react';
+import { Briefcase, Filter, SearchX, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Canvas } from '@react-three/fiber';
@@ -28,22 +28,38 @@ const Background3D = () => {
 };
 
 const Jobs = () => {
-  const { jobs, isLoading, error, handleSearch, refreshJobs } = useJobs();
+  const { jobs, isLoading, error, handleSearch, refreshJobs, isFiltered } = useJobs();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { theme } = useTheme();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Refresh jobs on component mount
-  useEffect(() => {
-    refreshJobs();
-  }, []);
-
-  // Add additional effect to handle theme persistence
+  // Ensure the correct theme is applied
   useEffect(() => {
     const root = window.document.documentElement;
-    if (theme === 'dark' && !root.classList.contains('dark')) {
-      root.classList.add('dark');
+    if (theme === 'dark') {
+      if (!root.classList.contains('dark')) {
+        root.classList.add('dark');
+      }
+    } else if (theme === 'light') {
+      if (root.classList.contains('dark')) {
+        root.classList.remove('dark');
+      }
     }
   }, [theme]);
+  
+  // Handle manual refresh with animation
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshJobs();
+      toast.success('Job listings refreshed');
+    } catch (error) {
+      console.error('Error refreshing jobs:', error);
+      toast.error('Failed to refresh jobs');
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 1000); // Keep spinner for at least 1 second for UI feedback
+    }
+  };
 
   if (isLoading) {
     return (
@@ -76,9 +92,16 @@ const Jobs = () => {
         <main className="flex-grow bg-gradient-to-b from-orange-50/40 to-white dark:from-gray-900 dark:to-gray-800 pt-24 flex justify-center items-center">
           <div className="text-center py-20 glass dark:glass-dark rounded-xl shadow-lg max-w-md mx-auto px-4 backdrop-blur-sm">
             <h3 className="text-xl font-semibold mb-2">Error loading jobs</h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              There was a problem fetching the job data. Please try again later.
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              There was a problem fetching the job data.
             </p>
+            <button 
+              onClick={handleManualRefresh} 
+              className="flex items-center mx-auto px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Try Again
+            </button>
           </div>
         </main>
         <Footer />
@@ -123,7 +146,23 @@ const Jobs = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-medium">Search Filters</h2>
+              <button 
+                onClick={handleManualRefresh}
+                disabled={isRefreshing}
+                className="flex items-center text-sm text-primary hover:text-primary/80"
+              >
+                <RefreshCw className={`w-4 h-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Refreshing...' : 'Refresh Jobs'}
+              </button>
+            </div>
             <SearchFilters onSearch={handleSearch} />
+            {isFiltered && (
+              <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                Showing filtered results. {jobs.length} job(s) found.
+              </div>
+            )}
           </motion.div>
           
           {isLoading ? (
@@ -188,9 +227,19 @@ const Jobs = () => {
                     <SearchX className="w-10 h-10" />
                   </div>
                   <h3 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">No jobs found</h3>
-                  <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                    Try adjusting your search filters or criteria to find more opportunities
+                  <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-4">
+                    {isFiltered ? 
+                      "Try adjusting your search filters or criteria to find more opportunities" : 
+                      "There are currently no available jobs. New opportunities will appear here when posted."}
                   </p>
+                  {isFiltered && (
+                    <button
+                      onClick={() => handleSearch({})}
+                      className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                    >
+                      Clear Filters
+                    </button>
+                  )}
                 </motion.div>
               )}
             </>

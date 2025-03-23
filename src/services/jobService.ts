@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export interface Job {
   id: string;
@@ -33,9 +34,10 @@ const convertToJob = (job: any): Job => {
   };
 };
 
-export const getJobs = async (): Promise<Job[]> => {
+// Helper function to filter out jobs with accepted applications
+const filterJobsWithAcceptedApplications = async (jobs: Job[]): Promise<Job[]> => {
   try {
-    // First, get list of jobs with accepted applications
+    // Get list of jobs with accepted applications
     const { data: acceptedApplicationJobs, error: appError } = await supabase
       .from('applications')
       .select('job_id')
@@ -43,32 +45,43 @@ export const getJobs = async (): Promise<Job[]> => {
     
     if (appError) {
       console.error('Error fetching accepted applications:', appError);
-      // Continue with the job fetch even if this fails
+      return jobs; // Return all jobs if we can't determine which have accepted applications
     }
     
     // Get the job IDs that have accepted applications
     const jobIdsWithAcceptedApplications = (acceptedApplicationJobs || []).map(app => app.job_id);
     console.log('Jobs with accepted applications:', jobIdsWithAcceptedApplications);
     
-    // Fetch all jobs, excluding those with accepted applications
-    let query = supabase
+    // Filter out jobs with accepted applications
+    if (jobIdsWithAcceptedApplications.length > 0) {
+      return jobs.filter(job => !jobIdsWithAcceptedApplications.includes(job.id));
+    }
+    
+    return jobs;
+  } catch (error) {
+    console.error('Error in filterJobsWithAcceptedApplications:', error);
+    return jobs; // Return all jobs in case of error
+  }
+};
+
+export const getJobs = async (): Promise<Job[]> => {
+  try {
+    // Fetch all jobs
+    const { data, error } = await supabase
       .from('jobs')
       .select('*')
       .order('created_at', { ascending: false });
-    
-    // If we have jobs with accepted applications, filter them out
-    if (jobIdsWithAcceptedApplications.length > 0) {
-      query = query.not('id', 'in', `(${jobIdsWithAcceptedApplications.join(',')})`);
-    }
-    
-    const { data, error } = await query;
     
     if (error) {
       console.error('Error fetching jobs:', error);
       throw error;
     }
     
-    return (data || []).map(convertToJob) as Job[];
+    // Convert data to Job type
+    const jobList = (data || []).map(convertToJob) as Job[];
+    
+    // Filter out jobs with accepted applications
+    return await filterJobsWithAcceptedApplications(jobList);
   } catch (error) {
     console.error('Exception in getJobs:', error);
     // Return empty array instead of throwing to avoid cascading errors
@@ -83,30 +96,11 @@ export const getJobsBySearch = async (searchParams: {
   urgency?: string[];
 }): Promise<Job[]> => {
   try {
-    // First, get list of jobs with accepted applications
-    const { data: acceptedApplicationJobs, error: appError } = await supabase
-      .from('applications')
-      .select('job_id')
-      .eq('status', 'accepted');
-    
-    if (appError) {
-      console.error('Error fetching accepted applications:', appError);
-      // Continue with the job fetch even if this fails
-    }
-    
-    // Get the job IDs that have accepted applications
-    const jobIdsWithAcceptedApplications = (acceptedApplicationJobs || []).map(app => app.job_id);
-    
     // Start building the query
     let query = supabase
       .from('jobs')
       .select('*')
       .order('created_at', { ascending: false });
-    
-    // If we have jobs with accepted applications, filter them out
-    if (jobIdsWithAcceptedApplications.length > 0) {
-      query = query.not('id', 'in', `(${jobIdsWithAcceptedApplications.join(',')})`);
-    }
     
     if (searchParams.searchTerm) {
       const term = searchParams.searchTerm.toLowerCase();
@@ -132,7 +126,11 @@ export const getJobsBySearch = async (searchParams: {
       throw error;
     }
     
-    return (data || []).map(convertToJob) as Job[];
+    // Convert data to Job type
+    const jobList = (data || []).map(convertToJob) as Job[];
+    
+    // Filter out jobs with accepted applications
+    return await filterJobsWithAcceptedApplications(jobList);
   } catch (error) {
     console.error('Exception in getJobsBySearch:', error);
     // Return empty array instead of throwing
