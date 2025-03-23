@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -157,83 +158,85 @@ const WorkerDetail = () => {
                           <div className="flex justify-between">
                             <span className="text-gray-600 dark:text-gray-400">Hourly Rate</span>
                             <span className="font-medium text-gray-800 dark:text-white flex items-center">
-                          <IndianRupee className="w-4 h-4 mr-1 text-gray-500" />
-                          {formattedHourlyRate(worker.hourly_rate).replace('₹', '')}
-                        </span>
+                              <IndianRupee className="w-4 h-4 mr-1 text-gray-500" />
+                              {formattedHourlyRate(worker.hourly_rate).replace('₹', '')}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-400">Availability</span>
+                            <span className={`font-medium ${worker.is_available ? 'text-green-500' : 'text-gray-500'}`}>
+                              {worker.is_available ? 'Available Now' : 'Currently Unavailable'}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Availability</span>
-                        <span className={`font-medium ${worker.is_available ? 'text-green-500' : 'text-gray-500'}`}>
-                          {worker.is_available ? 'Available Now' : 'Currently Unavailable'}
-                        </span>
-                      </div>
+                      
+                      {worker.about && (
+                        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">About</h3>
+                          <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{worker.about}</p>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  
-                  {worker.about && (
-                    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
-                      <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">About</h3>
-                      <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{worker.about}</p>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="space-y-6">
-                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
-                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
-                      <Award className="w-5 h-5 mr-2 text-primary" />
-                      Skills
-                    </h3>
                     
-                    <div className="flex flex-wrap gap-2">
-                      {worker.skills.map((skill, index) => (
-                        <Badge 
-                          key={index} 
-                          variant="secondary" 
-                          className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-foreground py-1 px-3"
-                        >
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {worker.languages && worker.languages.length > 0 && (
-                    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
-                      <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Languages</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {worker.languages.map((language, index) => (
-                          <Badge 
-                            key={index} 
-                            variant="outline" 
-                            className="border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300"
-                          >
-                            {language}
-                          </Badge>
-                        ))}
+                    <div className="space-y-6">
+                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+                          <Award className="w-5 h-5 mr-2 text-primary" />
+                          Skills
+                        </h3>
+                        
+                        <div className="flex flex-wrap gap-2">
+                          {worker.skills.map((skill, index) => (
+                            <Badge 
+                              key={index} 
+                              variant="secondary" 
+                              className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-foreground py-1 px-3"
+                            >
+                              {skill}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  
-                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
-                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
-                      <Clock className="w-5 h-5 mr-2 text-primary" />
-                      Contact Information
-                    </h3>
-                    
-                    <div className="space-y-3">
-                      <div className="flex items-center">
-                        <Mail className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-                        <span className="text-gray-700 dark:text-gray-300">Email: Not Available</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Phone className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
-                        <span className="text-gray-700 dark:text-gray-300">Phone: Not Available</span>
+                      
+                      {worker.languages && worker.languages.length > 0 && (
+                        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Languages</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {worker.languages.map((language, index) => (
+                              <Badge 
+                                key={index} 
+                                variant="outline" 
+                                className="border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300"
+                              >
+                                {language}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+                          <Clock className="w-5 h-5 mr-2 text-primary" />
+                          Contact Information
+                        </h3>
+                        
+                        <div className="space-y-3">
+                          <div className="flex items-center">
+                            <Mail className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                            <span className="text-gray-700 dark:text-gray-300">Email: Not Available</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Phone className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
+                            <span className="text-gray-700 dark:text-gray-300">Phone: Not Available</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
               
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
