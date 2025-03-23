@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Notification {
@@ -163,22 +164,22 @@ export const notifyWorkersAboutJob = async (
   try {
     console.log('Notifying workers about job:', { jobId, jobTitle, skills, category });
     
-    // Get Supabase URL and anon key from client configuration
-    const supabaseUrl = supabase.supabaseUrl;
-    const supabaseAnonKey = supabase.supabaseKey;
+    // Get Supabase URL and anon key from environment
+    const SUPABASE_URL = "https://myrztsvambwrkusxxatm.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15cnp0c3ZhbWJ3cmt1c3h4YXRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwMjExMjMsImV4cCI6MjA1NzU5NzEyM30.e4ZArV9YTi84rsQu9hXqVVlGAVCPu2e88_rrng49Yes";
     
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       console.error('Missing Supabase URL or anon key');
       throw new Error('Configuration error: Missing Supabase credentials');
     }
     
-    console.log('Making request to notify-workers function with URL:', supabaseUrl);
+    console.log('Making request to notify-workers function with URL:', SUPABASE_URL);
     
-    const response = await fetch(`${supabaseUrl}/functions/v1/notify-workers`, {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/notify-workers`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseAnonKey}`
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify({
         jobId,
@@ -214,11 +215,15 @@ export const notifyWorkersAboutJobUpdate = async (
   sendSms: boolean = false
 ) => {
   try {
-    const response = await fetch(`${process.env.SUPABASE_URL}/functions/v1/notify-workers`, {
+    // Get Supabase URL and anon key from environment
+    const SUPABASE_URL = "https://myrztsvambwrkusxxatm.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15cnp0c3ZhbWJ3cmt1c3h4YXRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwMjExMjMsImV4cCI6MjA1NzU5NzEyM30.e4ZArV9YTi84rsQu9hXqVVlGAVCPu2e88_rrng49Yes";
+    
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/notify-workers`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify({
         jobId,
@@ -261,11 +266,15 @@ export const notifyEmployerAboutApplication = async (
     
     if (sendEmail) {
       try {
-        const response = await fetch(`${process.env.SUPABASE_URL}/functions/v1/send-notification`, {
+        // Get Supabase URL and anon key from environment
+        const SUPABASE_URL = "https://myrztsvambwrkusxxatm.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15cnp0c3ZhbWJ3cmt1c3h4YXRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwMjExMjMsImV4cCI6MjA1NzU5NzEyM30.e4ZArV9YTi84rsQu9hXqVVlGAVCPu2e88_rrng49Yes";
+        
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/send-notification`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
           },
           body: JSON.stringify({
             userId: employerId,
