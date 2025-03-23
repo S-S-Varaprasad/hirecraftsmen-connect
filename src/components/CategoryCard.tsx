@@ -1,25 +1,78 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LucideIcon } from 'lucide-react';
 import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
 import { getIndianWorkers } from '@/utils/workerFilters';
+import { 
+  Wrench, 
+  Zap, 
+  PaintBucket, 
+  Shield, 
+  Settings, 
+  HardHat,
+  Utensils,
+  Droplet,
+  Hammer,
+  Search
+} from 'lucide-react';
+
+type IconType = 
+  | 'Wrench' 
+  | 'Zap' 
+  | 'PaintBucket' 
+  | 'Shield' 
+  | 'Settings' 
+  | 'HardHat'
+  | 'Utensils'
+  | 'Droplet'
+  | 'Hammer'
+  | 'Search';
 
 interface CategoryCardProps {
   title: string;
-  icon: LucideIcon;
+  icon: IconType;
   description: string;
   slug: string;
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({
   title,
-  icon: Icon,
+  icon,
   description,
   slug,
 }) => {
   const { workers } = useWorkerProfiles();
   const [availableWorkers, setAvailableWorkers] = useState(0);
+  
+  // Render the appropriate icon based on the icon prop
+  const renderIcon = () => {
+    const iconProps = { className: "h-5 w-5 text-primary" };
+    
+    switch (icon) {
+      case 'Wrench':
+        return <Wrench {...iconProps} />;
+      case 'Zap':
+        return <Zap {...iconProps} />;
+      case 'PaintBucket':
+        return <PaintBucket {...iconProps} />;
+      case 'Shield':
+        return <Shield {...iconProps} />;
+      case 'Settings':
+        return <Settings {...iconProps} />;
+      case 'HardHat':
+        return <HardHat {...iconProps} />;
+      case 'Utensils':
+        return <Utensils {...iconProps} />;
+      case 'Droplet':
+        return <Droplet {...iconProps} />;
+      case 'Hammer':
+        return <Hammer {...iconProps} />;
+      case 'Search':
+        return <Search {...iconProps} />;
+      default:
+        return <Wrench {...iconProps} />;
+    }
+  };
   
   // Update count whenever workers data changes
   useEffect(() => {
@@ -44,25 +97,27 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   return (
     <Link 
       to={`/workers/category/${slug}`}
-      className="group relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-card hover:shadow-elevated transition-all duration-300 animate-in"
+      className="group block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      
       <div className="p-6">
-        <div className="mb-4 w-12 h-12 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary dark:text-primary/90">
-          <Icon className="w-6 h-6" />
+        <div className="mb-4 w-14 h-14 flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 rounded-full">
+          {renderIcon()}
         </div>
         
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors duration-300">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
           {title}
         </h3>
         
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
           {description}
         </p>
         
-        <div className="text-sm font-medium text-primary dark:text-primary/90">
-          {availableWorkers} available worker{availableWorkers !== 1 ? 's' : ''}
+        <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
+          {availableWorkers > 0 ? (
+            <>{availableWorkers} available worker{availableWorkers !== 1 ? 's' : ''}</>
+          ) : (
+            <>No available workers</>
+          )}
         </div>
       </div>
     </Link>
