@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { User, Lock, Eye, EyeOff, Mail, Phone, Briefcase, UserPlus, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +31,7 @@ const SignUp = () => {
   const [activeField, setActiveField] = useState<string | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const { signUp, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   // Redirect if already logged in
   if (isAuthenticated) {
@@ -55,7 +56,10 @@ const SignUp = () => {
       } else {
         toast.success('Account created successfully! Please check your email to confirm your account.');
         
-        // Suggest next steps based on role
+        // Always redirect to login page after successful registration
+        navigate('/login');
+        
+        // Show role-based suggestions as toasts
         if (role === 'worker') {
           toast.info('Complete your worker profile to start receiving job offers', {
             action: {
@@ -271,7 +275,7 @@ const SignUp = () => {
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
-                      className={`pl-10 pr-10 transition-all duration-300 ${activeField === 'password' ? 'border-app-blue ring-1 ring-app-blue/30' : ''}`}
+                      className={`pl-10 transition-all duration-300 ${activeField === 'password' ? 'border-app-blue ring-1 ring-app-blue/30' : ''}`}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       onFocus={() => handleFocus('password')}
@@ -427,4 +431,3 @@ const SignUp = () => {
 };
 
 export default SignUp;
-

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -132,7 +131,8 @@ const JoinAsWorker = () => {
 
       setIsUploading(false);
       toast.success('Profile created successfully! Please login to access your account.');
-      // Navigate to login page after creating profile
+      
+      // Always navigate to login page after creating profile
       navigate('/login');
     } catch (error: any) {
       setIsUploading(false);
