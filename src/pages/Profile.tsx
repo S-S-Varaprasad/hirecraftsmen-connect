@@ -11,7 +11,7 @@ import { getWorkerByUserId, Worker } from '@/services/workerService';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
-// Import our new components
+// Import our components
 import ProfileDashboard from '@/components/profile/ProfileDashboard';
 import ProfileDisplay from '@/components/profile/ProfileDisplay';
 import ProfileEditForm from '@/components/profile/ProfileEditForm';

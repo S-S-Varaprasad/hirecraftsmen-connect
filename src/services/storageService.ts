@@ -15,6 +15,7 @@ export const ensureStorageBuckets = async () => {
     
     const workerProfilesBucket = buckets?.find(bucket => bucket.name === 'worker-profiles');
     const resumesBucket = buckets?.find(bucket => bucket.name === 'resumes');
+    const userProfilesBucket = buckets?.find(bucket => bucket.name === 'user-profiles');
     
     console.log('Existing buckets:', buckets?.map(b => b.name));
     
@@ -70,6 +71,32 @@ export const ensureStorageBuckets = async () => {
       await setPublicAccess('resumes');
     }
     
+    // Create user-profiles bucket if it doesn't exist
+    if (!userProfilesBucket) {
+      try {
+        console.log('Creating user-profiles bucket...');
+        const { error: createError } = await supabase.storage.createBucket('user-profiles', {
+          public: true,
+          fileSizeLimit: 5242880, // 5MB limit for profile images
+        });
+        
+        if (createError) {
+          console.error('Error creating user-profiles bucket:', createError);
+        } else {
+          console.log('Successfully created user-profiles bucket');
+          
+          // Set public access
+          await setPublicAccess('user-profiles');
+        }
+      } catch (createErr) {
+        console.error('Exception when creating user-profiles bucket:', createErr);
+      }
+    } else {
+      console.log('user-profiles bucket already exists');
+      // Ensure public access is set
+      await setPublicAccess('user-profiles');
+    }
+    
     return true;
   } catch (error) {
     console.error('Error ensuring storage buckets:', error);
@@ -77,11 +104,11 @@ export const ensureStorageBuckets = async () => {
   }
 };
 
-// Function to set public access to a bucket
+// Function to set public access to a bucket - FIX: Remove error property usage
 export const setPublicAccess = async (bucketName: string) => {
   try {
     // Create a public policy for the bucket
-    const { error } = await supabase.storage.from(bucketName).getPublicUrl('dummy.txt');
+    const { data } = supabase.storage.from(bucketName).getPublicUrl('dummy.txt');
     
     // Note: getPublicUrl doesn't actually return an error, so we can't check for success/failure here
     console.log(`Public access set for ${bucketName} bucket`);
