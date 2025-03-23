@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -16,10 +16,21 @@ export const useQueryRefresh = (
   queryKeys: string[][]
 ) => {
   const queryClient = useQueryClient();
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const isSubscribedRef = useRef(false);
 
   useEffect(() => {
+    // Clean up any existing channel before creating a new one
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+      isSubscribedRef.current = false;
+    }
+    
     // Create a channel for real-time updates
     const channel = supabase.channel('db-changes');
+    channelRef.current = channel;
+    
     let fallbackIntervalId: ReturnType<typeof setInterval> | null = null;
     let isChannelActive = false;
     
@@ -75,50 +86,61 @@ export const useQueryRefresh = (
     });
     
     // Subscribe to all channels with error handling
-    channel.subscribe((status) => {
-      console.log(`Realtime subscription status: ${status}`);
-      
-      if (status === 'SUBSCRIBED') {
-        isChannelActive = true;
-        // If we have a fallback interval, clear it as the channel is now active
-        if (fallbackIntervalId) {
-          clearInterval(fallbackIntervalId);
-          fallbackIntervalId = null;
-        }
-      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-        isChannelActive = false;
-        console.warn(`Realtime channel error: ${status}. Using polling fallback.`);
+    if (!isSubscribedRef.current) {
+      channel.subscribe((status) => {
+        console.log(`Realtime subscription status: ${status}`);
         
-        // When there's an error with the channel, use polling as a fallback
-        if (!fallbackIntervalId) {
-          fallbackIntervalId = setInterval(() => {
-            console.log('Polling for data updates (fallback)');
-            queryKeys.forEach(key => {
-              queryClient.invalidateQueries({ queryKey: key });
-            });
-            
-            // Try to reconnect the channel if it's not active
-            if (!isChannelActive) {
-              try {
-                channel.unsubscribe();
-                setTimeout(() => {
-                  channel.subscribe();
-                }, 1000);
-              } catch (err) {
-                console.error('Error reconnecting channel:', err);
+        if (status === 'SUBSCRIBED') {
+          isChannelActive = true;
+          isSubscribedRef.current = true;
+          // If we have a fallback interval, clear it as the channel is now active
+          if (fallbackIntervalId) {
+            clearInterval(fallbackIntervalId);
+            fallbackIntervalId = null;
+          }
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          isChannelActive = false;
+          console.warn(`Realtime channel error: ${status}. Using polling fallback.`);
+          
+          // When there's an error with the channel, use polling as a fallback
+          if (!fallbackIntervalId) {
+            fallbackIntervalId = setInterval(() => {
+              console.log('Polling for data updates (fallback)');
+              queryKeys.forEach(key => {
+                queryClient.invalidateQueries({ queryKey: key });
+              });
+              
+              // Try to reconnect the channel if it's not active
+              if (!isChannelActive && !isSubscribedRef.current) {
+                try {
+                  // Only try to resubscribe if we haven't already
+                  isSubscribedRef.current = true;
+                  setTimeout(() => {
+                    if (channelRef.current) {
+                      channelRef.current.subscribe();
+                    }
+                  }, 1000);
+                } catch (err) {
+                  console.error('Error reconnecting channel:', err);
+                  isSubscribedRef.current = false;
+                }
               }
-            }
-          }, 10000); // Poll every 10 seconds as fallback
+            }, 10000); // Poll every 10 seconds as fallback
+          }
         }
-      }
-    });
+      });
+    }
     
     // Clean up on unmount
     return () => {
       if (fallbackIntervalId) {
         clearInterval(fallbackIntervalId);
       }
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+        isSubscribedRef.current = false;
+      }
     };
   }, [queryClient, JSON.stringify(tableNames), JSON.stringify(queryKeys)]);
 };

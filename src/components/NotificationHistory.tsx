@@ -11,7 +11,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useNotifications, Notification } from '@/hooks/useNotifications';
+import { useNotifications } from '@/hooks/useNotifications';
+import { Notification } from '@/services/notificationService';
 import { formatDistanceToNow } from 'date-fns';
 import { 
   Dialog, DialogContent, DialogDescription, 
@@ -58,7 +59,7 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
   const {
     notifications,
     unreadCount,
-    loading,
+    isLoading,
     hasMore,
     filter,
     markAsRead,
@@ -75,7 +76,7 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
   const [showFilterMenu, setShowFilterMenu] = useState(false);
 
   const handleScroll = () => {
-    if (!scrollAreaRef.current || loading || !hasMore) return;
+    if (!scrollAreaRef.current || isLoading || !hasMore) return;
     
     const { scrollTop, scrollHeight, clientHeight } = scrollAreaRef.current;
     
@@ -130,7 +131,11 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
     }
   };
 
-  const getNotificationIcon = (type: string, priority?: string) => {
+  const getNotificationIcon = (type: string | undefined, priority?: string) => {
+    if (!type) {
+      return <Bell className="h-4 w-4 text-gray-500" />;
+    }
+    
     const baseClass = priority === 'high' 
       ? "h-4 w-4 text-red-500" 
       : priority === 'low'
@@ -284,7 +289,7 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
             onScroll={handleScroll}
           >
             <AnimatePresence>
-              {loading && notifications.length === 0 ? (
+              {isLoading && notifications.length === 0 ? (
                 <motion.div 
                   className="p-8 text-center"
                   initial={{ opacity: 0 }}
@@ -364,7 +369,7 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
                       </div>
                     </motion.div>
                   ))}
-                  {loading && notifications.length > 0 && (
+                  {isLoading && notifications.length > 0 && (
                     <div className="p-4 text-center">
                       <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
                     </div>

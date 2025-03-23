@@ -11,7 +11,7 @@ import { Toggle } from '@/components/ui/toggle';
 import { useNavigate } from 'react-router-dom';
 
 export const NotificationBell = () => {
-  const { unreadCount, soundEnabled, toggleSound } = useNotifications();
+  const { unreadCount, soundEnabled = true, toggleSound = () => {} } = useNotifications();
   const [open, setOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const navigate = useNavigate();
