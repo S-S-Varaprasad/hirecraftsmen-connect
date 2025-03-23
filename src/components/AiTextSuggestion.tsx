@@ -56,22 +56,55 @@ const AiTextSuggestion: React.FC<AiTextSuggestionProps> = ({
     try {
       const { systemPrompt, userPrompt } = generatePrompt();
       
+      console.log("Generating suggestion for:", fieldType);
+      console.log("System prompt:", systemPrompt);
+      console.log("User prompt:", userPrompt);
+      
+      // Add fallback text in case API fails
+      let fallbackText = "";
+      if (fieldType === 'message') {
+        fallbackText = `Hello,\n\nI'm writing to express my interest in the ${contextData?.title || 'position'} you've posted. My experience and skills align well with the requirements you've outlined, and I'm excited about the opportunity to contribute to your team.\n\nI'd appreciate the chance to discuss this position further and learn more about your specific needs. Please let me know if you require any additional information from me.\n\nThank you for your consideration.\n\nBest regards`;
+      } else if (fieldType === 'subject') {
+        fallbackText = `Interested in your ${contextData?.title || 'job'} posting`;
+      }
+      
       const { data, error } = await supabase.functions.invoke("openai-chat", {
         body: { 
           prompt: userPrompt,
-          systemPrompt: systemPrompt
+          systemPrompt: systemPrompt,
+          model: "gpt-4o-mini" // Ensure the model is specified
         },
       });
       
       if (error) {
+        console.error("Supabase function error:", error);
         throw new Error(error.message || "Failed to generate suggestion");
+      }
+      
+      if (!data || !data.response) {
+        console.error("Invalid response format:", data);
+        throw new Error("Invalid response from AI service");
       }
       
       onSuggestionSelect(data.response);
       toast.success("AI suggestion added");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating suggestion:", error);
-      toast.error("Failed to generate suggestion. Please try again.");
+      
+      // Use fallback text if API fails
+      if (fieldType === 'message') {
+        const fallbackMessage = `Hello,\n\nI'm writing to express my interest in the ${contextData?.title || 'position'} you've posted. My experience and skills align well with the requirements you've outlined, and I'm excited about the opportunity to contribute to your team.\n\nI'd appreciate the chance to discuss this position further and learn more about your specific needs. Please let me know if you require any additional information from me.\n\nThank you for your consideration.\n\nBest regards`;
+        
+        onSuggestionSelect(fallbackMessage);
+        toast.success("AI suggestion added (using local template)");
+      } else if (fieldType === 'subject') {
+        const fallbackSubject = `Interested in your ${contextData?.title || 'job'} posting`;
+        
+        onSuggestionSelect(fallbackSubject);
+        toast.success("AI suggestion added (using local template)");
+      } else {
+        toast.error("Failed to generate suggestion. Please try again.");
+      }
     } finally {
       setIsGenerating(false);
     }
