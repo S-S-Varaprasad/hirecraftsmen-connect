@@ -42,6 +42,14 @@ export function Combobox({
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
 
+  // Handler to prevent default event behavior
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!disabled) {
+      setOpen(!open);
+    }
+  }
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -51,6 +59,8 @@ export function Combobox({
           aria-expanded={open}
           className={cn("w-full justify-between", triggerClassName)}
           disabled={disabled}
+          onClick={handleTriggerClick}
+          type="button" // Explicitly set button type to prevent form submission
         >
           {value
             ? options.find((option) => option.value === value)?.label || placeholder
@@ -67,9 +77,9 @@ export function Combobox({
               <CommandItem
                 key={option.value}
                 value={option.value}
-                onSelect={() => {
-                  onChange(option.value === value ? "" : option.value)
-                  setOpen(false)
+                onSelect={(currentValue) => {
+                  onChange(option.value === value ? "" : option.value);
+                  setOpen(false);
                 }}
               >
                 <Check

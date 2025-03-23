@@ -141,6 +141,12 @@ const JoinAsWorker = () => {
     }
   };
 
+  const preventDefaultSubmit = (e: React.FormEvent) => {
+    if (e.target !== e.currentTarget) {
+      e.stopPropagation();
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -150,7 +156,7 @@ const JoinAsWorker = () => {
           <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
             <div className="px-8 py-12">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">Join as a Worker</h2>
-              <form onSubmit={handleSubmit(onSubmit)}>
+              <form onSubmit={handleSubmit(onSubmit)} onClick={preventDefaultSubmit}>
                 <div className="flex justify-center mb-6">
                   <div className="relative group cursor-pointer">
                     <Avatar className="w-24 h-24 border-4 border-gray-100">
@@ -285,7 +291,11 @@ const JoinAsWorker = () => {
                   )}
                 </div>
 
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isUploading}>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-primary hover:bg-primary/90" 
+                  disabled={isUploading}
+                >
                   {isUploading ? 'Creating Profile...' : 'Create Profile'}
                 </Button>
               </form>

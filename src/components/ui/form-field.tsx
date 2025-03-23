@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -30,6 +31,11 @@ export function AutocompleteField({
   options,
   searchable = true,
 }: AutocompleteFieldProps) {
+  // Handle value change without triggering form submission
+  const handleValueChange = (field: any, value: string) => {
+    field.onChange(value);
+  };
+  
   return (
     <FormField
       control={control}
@@ -42,12 +48,21 @@ export function AutocompleteField({
               <Combobox
                 options={options}
                 value={field.value}
-                onChange={field.onChange}
+                onChange={(value) => handleValueChange(field, value)}
                 placeholder={placeholder}
               />
             </FormControl>
           ) : (
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select 
+              onValueChange={field.onChange} 
+              defaultValue={field.value}
+              onOpenChange={(open) => {
+                // Prevent event propagation when opening/closing the select
+                if (open) {
+                  setTimeout(() => field.onBlur(), 100);
+                }
+              }}
+            >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder={placeholder} />
