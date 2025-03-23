@@ -20,7 +20,7 @@ export const getNotifications = async (userId: string, options?: {
   category?: string;
   limit?: number;
   offset?: number;
-}) => {
+}): Promise<Notification[]> => {
   let query = supabase
     .from('notifications')
     .select('*')
@@ -54,7 +54,7 @@ export const getNotifications = async (userId: string, options?: {
     throw error;
   }
   
-  return data as Notification[];
+  return (data || []) as Notification[];
 };
 
 export const getUnreadNotificationsCount = async (userId: string, options?: { type?: string; category?: string }) => {
