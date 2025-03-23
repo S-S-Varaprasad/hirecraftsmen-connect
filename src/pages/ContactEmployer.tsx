@@ -28,7 +28,6 @@ import { Link } from 'react-router-dom';
 import { FormProvider } from 'react-hook-form';
 import AiTextSuggestion from '@/components/AiTextSuggestion';
 
-// Form validation schema
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -44,10 +43,10 @@ const ContactEmployer = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [workerProfile, setWorkerProfile] = useState<any>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Initialize form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -60,7 +59,6 @@ const ContactEmployer = () => {
 
   console.log('JobId from params:', jobId);
 
-  // Fetch job details when component mounts
   useEffect(() => {
     const fetchJobDetails = async () => {
       if (!jobId) {
@@ -84,12 +82,10 @@ const ContactEmployer = () => {
         
         setJobDetails(job);
         
-        // Pre-fill subject with job title
         if (job && job.title) {
           form.setValue('subject', `Regarding job: ${job.title}`);
         }
         
-        // Pre-fill user data if logged in
         if (user) {
           try {
             const { data } = await supabase
@@ -107,7 +103,6 @@ const ContactEmployer = () => {
             form.setValue('email', user.email || '');
           } catch (e) {
             console.error('Error fetching worker data:', e);
-            // Still set available user data even if worker fetch fails
             form.setValue('name', user.user_metadata?.name || '');
             form.setValue('email', user.email || '');
           }
@@ -124,6 +119,47 @@ const ContactEmployer = () => {
     fetchJobDetails();
   }, [jobId, user, form]);
 
+  useEffect(() => {
+    const fetchWorkerProfile = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('workers')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+          
+        if (error) {
+          console.error('Error fetching worker profile:', error);
+          return;
+        }
+        
+        if (data) {
+          console.log('Worker profile found:', data);
+          setWorkerProfile(data);
+        }
+      } catch (err) {
+        console.error('Error in worker profile fetch:', err);
+      }
+    };
+    
+    fetchWorkerProfile();
+  }, [user]);
+
+  const getEnhancedContextData = () => {
+    const enhancedData = { ...jobDetails };
+    
+    if (workerProfile) {
+      enhancedData.workerName = workerProfile.name;
+      enhancedData.profession = workerProfile.profession;
+      enhancedData.experience = workerProfile.experience;
+      enhancedData.workerSkills = workerProfile.skills;
+    }
+    
+    return enhancedData;
+  };
+
   const onSubmit = async (data: FormValues) => {
     if (!jobDetails) {
       toast.error('No job details available');
@@ -136,7 +172,6 @@ const ContactEmployer = () => {
       console.log('Submitting contact form:', data);
       console.log('Job details for message:', jobDetails);
       
-      // Insert message into the messages table
       const { error: messageError } = await supabase
         .from('messages')
         .insert({
@@ -154,7 +189,6 @@ const ContactEmployer = () => {
         throw messageError;
       }
       
-      // Create a notification for the employer
       if (jobDetails.employer_id) {
         const { error: notificationError } = await supabase
           .from('notifications')
@@ -168,7 +202,6 @@ const ContactEmployer = () => {
           
         if (notificationError) {
           console.error('Error creating notification:', notificationError);
-          // Continue even if notification fails
         }
       }
 
@@ -196,7 +229,6 @@ const ContactEmployer = () => {
         </Button>
         
         <div className="grid md:grid-cols-5 gap-6 max-w-6xl mx-auto">
-          {/* Left column - Job details */}
           <div className="md:col-span-2">
             <Card className="h-full shadow-md hover:shadow-lg transition-shadow duration-300 border-t-4 border-t-app-orange">
               <CardHeader className="pb-2">
@@ -285,7 +317,6 @@ const ContactEmployer = () => {
             </Card>
           </div>
           
-          {/* Right column - Contact form */}
           <div className="md:col-span-3">
             <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 border-t-4 border-t-app-blue">
               <CardHeader className="pb-2">
@@ -382,7 +413,7 @@ const ContactEmployer = () => {
                                 <FormLabel>Subject</FormLabel>
                                 <AiTextSuggestion 
                                   fieldType="subject" 
-                                  contextData={jobDetails} 
+                                  contextData={getEnhancedContextData()} 
                                   onSuggestionSelect={(suggestion) => form.setValue('subject', suggestion)}
                                 />
                               </div>
@@ -403,7 +434,7 @@ const ContactEmployer = () => {
                                 <FormLabel>Message</FormLabel>
                                 <AiTextSuggestion 
                                   fieldType="message" 
-                                  contextData={jobDetails} 
+                                  contextData={getEnhancedContextData()} 
                                   onSuggestionSelect={(suggestion) => form.setValue('message', suggestion)}
                                 />
                               </div>

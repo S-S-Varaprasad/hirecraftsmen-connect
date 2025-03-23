@@ -22,29 +22,70 @@ const AiTextSuggestion: React.FC<AiTextSuggestionProps> = ({
     let systemPrompt = "You are a helpful assistant that generates professional and concise text for form fields.";
     let userPrompt = "";
     
+    // Extract job and worker details for more personalized content
+    const jobTitle = contextData?.title || 'this position';
+    const jobCompany = contextData?.company || 'the company';
+    const jobLocation = contextData?.location || 'the location';
+    const jobSkills = contextData?.skills ? contextData.skills.join(', ') : 'the required skills';
+    const workerName = contextData?.workerName || '';
+    const workerProfession = contextData?.profession || '';
+    const workerExperience = contextData?.experience || '';
+    
     switch (fieldType) {
       case 'message':
         systemPrompt += " Generate a professional message to send to an employer about a job.";
-        userPrompt = `Generate a professional message to send to an employer regarding their job post for ${contextData?.title || 'this position'}. The message should express interest, highlight relevant skills, and inquire about the opportunity. Keep it under 200 words, professional, and friendly.`;
+        userPrompt = `Generate a professional message to send to an employer regarding their job post for ${jobTitle} at ${jobCompany} in ${jobLocation}.`;
+        
+        if (jobSkills) {
+          userPrompt += ` The job requires skills in ${jobSkills}.`;
+        }
+        
+        if (workerName && workerProfession) {
+          userPrompt += ` As ${workerName}, a ${workerProfession} with ${workerExperience} experience, I want to express my interest.`;
+        }
+        
+        userPrompt += ` The message should express interest, highlight relevant skills, and inquire about the opportunity. Keep it under 200 words, professional, and friendly.`;
         break;
         
       case 'subject':
         systemPrompt += " Generate a clear and concise email subject line.";
-        userPrompt = `Generate a professional subject line for an email regarding the job post for ${contextData?.title || 'this position'}. Keep it under 10 words, clear, and relevant.`;
+        userPrompt = `Generate a professional subject line for an email regarding the job post for ${jobTitle} at ${jobCompany}.`;
+        
+        if (workerProfession) {
+          userPrompt += ` The applicant is a ${workerProfession} with ${workerExperience} experience.`;
+        }
+        
+        userPrompt += ` Keep it under 10 words, clear, and relevant.`;
         break;
         
       case 'description':
         systemPrompt += " Generate detailed and informative descriptions.";
         userPrompt = `Generate a description for ${contextData?.context || 'this item'}. Make it informative, detailed, and well-structured.`;
+        if (contextData?.skills) {
+          userPrompt += ` Include these keywords: ${contextData.skills.join(', ')}.`;
+        }
         break;
         
       case 'email':
         systemPrompt += " Generate professional email templates.";
-        userPrompt = `Generate a professional email template for ${contextData?.purpose || 'business communication'}. Include appropriate greeting, body, and closing.`;
+        userPrompt = `Generate a professional email template for ${contextData?.purpose || 'business communication'}.`;
+        
+        if (jobTitle && jobCompany) {
+          userPrompt += ` This is regarding the ${jobTitle} position at ${jobCompany}.`;
+        }
+        
+        if (workerName && workerProfession) {
+          userPrompt += ` The sender is ${workerName}, a ${workerProfession} with ${workerExperience} experience.`;
+        }
+        
+        userPrompt += ` Include appropriate greeting, body, and closing.`;
         break;
         
       default:
         userPrompt = `Generate appropriate text for a ${fieldType} field related to ${contextData?.context || 'this context'}.`;
+        if (contextData?.skills) {
+          userPrompt += ` Include references to: ${contextData.skills.join(', ')}.`;
+        }
     }
     
     return { systemPrompt, userPrompt };
@@ -63,16 +104,21 @@ const AiTextSuggestion: React.FC<AiTextSuggestionProps> = ({
       // Add fallback text in case API fails
       let fallbackText = "";
       if (fieldType === 'message') {
-        fallbackText = `Hello,\n\nI'm writing to express my interest in the ${contextData?.title || 'position'} you've posted. My experience and skills align well with the requirements you've outlined, and I'm excited about the opportunity to contribute to your team.\n\nI'd appreciate the chance to discuss this position further and learn more about your specific needs. Please let me know if you require any additional information from me.\n\nThank you for your consideration.\n\nBest regards`;
+        const jobTitle = contextData?.title || 'position';
+        const company = contextData?.company || 'company';
+        fallbackText = `Hello,\n\nI'm writing to express my interest in the ${jobTitle} at ${company} you've posted. My experience and skills align well with the requirements you've outlined, and I'm excited about the opportunity to contribute to your team.\n\nI'd appreciate the chance to discuss this position further and learn more about your specific needs. Please let me know if you require any additional information from me.\n\nThank you for your consideration.\n\nBest regards`;
       } else if (fieldType === 'subject') {
-        fallbackText = `Interested in your ${contextData?.title || 'job'} posting`;
+        const jobTitle = contextData?.title || 'job';
+        const company = contextData?.company || '';
+        fallbackText = `Interested in your ${jobTitle} ${company ? 'at ' + company : 'posting'}`;
       }
       
       const { data, error } = await supabase.functions.invoke("openai-chat", {
         body: { 
           prompt: userPrompt,
           systemPrompt: systemPrompt,
-          model: "gpt-4o-mini" // Ensure the model is specified
+          model: "gpt-4o-mini", // Ensure the model is specified
+          contextData: contextData // Pass the context data to the edge function
         },
       });
       
@@ -93,12 +139,16 @@ const AiTextSuggestion: React.FC<AiTextSuggestionProps> = ({
       
       // Use fallback text if API fails
       if (fieldType === 'message') {
-        const fallbackMessage = `Hello,\n\nI'm writing to express my interest in the ${contextData?.title || 'position'} you've posted. My experience and skills align well with the requirements you've outlined, and I'm excited about the opportunity to contribute to your team.\n\nI'd appreciate the chance to discuss this position further and learn more about your specific needs. Please let me know if you require any additional information from me.\n\nThank you for your consideration.\n\nBest regards`;
+        const jobTitle = contextData?.title || 'position';
+        const company = contextData?.company || 'company';
+        const fallbackMessage = `Hello,\n\nI'm writing to express my interest in the ${jobTitle} at ${company} you've posted. My experience and skills align well with the requirements you've outlined, and I'm excited about the opportunity to contribute to your team.\n\nI'd appreciate the chance to discuss this position further and learn more about your specific needs. Please let me know if you require any additional information from me.\n\nThank you for your consideration.\n\nBest regards`;
         
         onSuggestionSelect(fallbackMessage);
         toast.success("AI suggestion added (using local template)");
       } else if (fieldType === 'subject') {
-        const fallbackSubject = `Interested in your ${contextData?.title || 'job'} posting`;
+        const jobTitle = contextData?.title || 'job';
+        const company = contextData?.company || '';
+        const fallbackSubject = `Interested in your ${jobTitle} ${company ? 'at ' + company : 'posting'}`;
         
         onSuggestionSelect(fallbackSubject);
         toast.success("AI suggestion added (using local template)");

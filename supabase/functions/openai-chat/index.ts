@@ -15,7 +15,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { prompt, systemPrompt = "You are a helpful assistant. Provide concise and accurate information.", model = "gpt-4o-mini" } = await req.json();
+    const { prompt, systemPrompt = "You are a helpful assistant. Provide concise and accurate information.", model = "gpt-4o-mini", contextData = {} } = await req.json();
 
     if (!prompt) {
       return new Response(
@@ -25,6 +25,7 @@ serve(async (req: Request) => {
     }
 
     console.log(`Processing request with model: ${model}, prompt: ${prompt.substring(0, 50)}...`);
+    console.log(`Context data: ${JSON.stringify(contextData).substring(0, 100)}...`);
     
     // Check if OpenAI API key is available
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
@@ -34,6 +35,23 @@ serve(async (req: Request) => {
     }
 
     try {
+      // Enhance the system prompt with more context if available
+      let enhancedSystemPrompt = systemPrompt;
+      
+      if (contextData) {
+        if (contextData.title && contextData.company) {
+          enhancedSystemPrompt += ` The context is about a job position for ${contextData.title} at ${contextData.company}.`;
+        }
+        
+        if (contextData.skills && Array.isArray(contextData.skills) && contextData.skills.length > 0) {
+          enhancedSystemPrompt += ` The job requires skills in: ${contextData.skills.join(', ')}.`;
+        }
+        
+        if (contextData.workerName && contextData.profession) {
+          enhancedSystemPrompt += ` The application is from ${contextData.workerName}, a ${contextData.profession} with ${contextData.experience || 'relevant'} experience.`;
+        }
+      }
+      
       const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -43,7 +61,7 @@ serve(async (req: Request) => {
         body: JSON.stringify({
           model: model,
           messages: [
-            { role: "system", content: systemPrompt },
+            { role: "system", content: enhancedSystemPrompt },
             { role: "user", content: prompt }
           ],
           temperature: 0.7,
@@ -68,12 +86,18 @@ serve(async (req: Request) => {
     } catch (error) {
       console.error("OpenAI API call failed:", error);
       
-      // Return a generic response based on the prompt type
+      // Return a generic response based on the prompt type and context
       let fallbackResponse = "";
       if (prompt.includes("subject line")) {
-        fallbackResponse = "Interested in your job posting";
+        const jobTitle = contextData?.title || "position";
+        const company = contextData?.company || "";
+        fallbackResponse = `Interested in your ${jobTitle} ${company ? 'at ' + company : 'posting'}`;
       } else if (prompt.includes("message to send to an employer")) {
-        fallbackResponse = "Hello,\n\nI'm writing to express my interest in the position you've posted. My experience and skills align well with the requirements you've outlined, and I'm excited about the opportunity to contribute to your team.\n\nI'd appreciate the chance to discuss this position further and learn more about your specific needs. Please let me know if you require any additional information from me.\n\nThank you for your consideration.\n\nBest regards";
+        const jobTitle = contextData?.title || "position";
+        const company = contextData?.company || "company";
+        const skills = contextData?.skills ? ` I have experience with ${contextData.skills.join(', ')}, which align with your requirements.` : "";
+        
+        fallbackResponse = `Hello,\n\nI'm writing to express my interest in the ${jobTitle} at ${company} you've posted. My experience and skills align well with the requirements you've outlined, and I'm excited about the opportunity to contribute to your team.${skills}\n\nI'd appreciate the chance to discuss this position further and learn more about your specific needs. Please let me know if you require any additional information from me.\n\nThank you for your consideration.\n\nBest regards`;
       } else {
         fallbackResponse = "Sorry, I couldn't generate a specific response at this time.";
       }
