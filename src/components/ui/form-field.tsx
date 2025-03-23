@@ -6,9 +6,10 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { SearchInput } from '@/components/ui/search-input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Wand2 } from 'lucide-react';
+import { Wand2, Loader2 } from 'lucide-react';
 import { professions } from '@/utils/suggestions';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AutocompleteFieldProps {
   name: string;
@@ -152,7 +153,7 @@ export function JobDescriptionGenerator({
     ) || "";
   };
 
-  const generateDescription = (title: string, setValue: (value: string) => void, currentValue: string) => {
+  const generateDescription = async (title: string, setValue: (value: string) => void, currentValue: string) => {
     setIsGenerating(true);
     
     const profession = extractProfession(title);
@@ -162,7 +163,26 @@ export function JobDescriptionGenerator({
       return;
     }
     
-    setTimeout(() => {
+    try {
+      const { data, error } = await supabase.functions.invoke("openai-chat", {
+        body: { 
+          prompt: `Generate a detailed, professional job description for a ${profession} position. Include required skills, responsibilities, and qualifications. The description should be comprehensive but concise, around 200 words.`,
+          systemPrompt: "You are a professional job description writer with expertise in skilled trades and labor positions. Create detailed, accurate, and appealing job descriptions."
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message || "Failed to generate description");
+      }
+      
+      const newValue = currentValue ? `${currentValue}\n\n${data.response}` : data.response;
+      setValue(newValue);
+      toast.success(`Generated description for ${profession} position!`);
+    } catch (error) {
+      console.error("Error generating description:", error);
+      toast.error("Failed to generate description. Please try again.");
+
+      // Fallback to hardcoded descriptions if AI generation fails
       let generatedDescription = "";
       
       switch(profession.toLowerCase()) {
@@ -187,10 +207,9 @@ export function JobDescriptionGenerator({
       
       const newValue = currentValue ? `${currentValue}\n\n${generatedDescription}` : generatedDescription;
       setValue(newValue);
-      
+    } finally {
       setIsGenerating(false);
-      toast.success(`Generated description for ${profession} position!`);
-    }, 1000);
+    }
   };
 
   return (
@@ -209,8 +228,17 @@ export function JobDescriptionGenerator({
               disabled={isGenerating || !jobTitle}
               className="flex items-center gap-1 text-xs h-7 px-2"
             >
-              <Wand2 className="h-3 w-3" />
-              {isGenerating ? "Generating..." : "Generate Description"}
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="h-3 w-3" />
+                  Generate Description
+                </>
+              )}
             </Button>
           </div>
           <FormControl>

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Send, User, Bot } from "lucide-react";
+import { Loader2, Send, User, Bot, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface AiChatProps {
@@ -30,11 +30,11 @@ const AiChat: React.FC<AiChatProps> = ({
   ]
 }) => {
   const [prompt, setPrompt] = useState("");
-  const [response, setResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const [messages, setMessages] = useState<Array<{type: 'user' | 'ai', content: string}>>([]);
+  const [isGeneratingSuggestion, setIsGeneratingSuggestion] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -62,6 +62,32 @@ const AiChat: React.FC<AiChatProps> = ({
     // Focus back to textarea after selection
     if (textareaRef.current) {
       textareaRef.current.focus();
+    }
+  };
+
+  const generateSuggestion = async () => {
+    if (isGeneratingSuggestion) return;
+    
+    setIsGeneratingSuggestion(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke("openai-chat", {
+        body: { 
+          prompt: "Generate a thoughtful question to ask about hiring skilled workers or finding jobs. Make it specific, concise and under 100 characters. Respond with only the question text.",
+          systemPrompt: "You are a helpful assistant that creates concise, relevant queries about employment, hiring, and skilled labor."
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message || "Failed to generate suggestion");
+      }
+
+      setPrompt(data.response);
+    } catch (error) {
+      console.error("Error generating suggestion:", error);
+      toast.error("Failed to generate a suggestion");
+    } finally {
+      setIsGeneratingSuggestion(false);
     }
   };
 
@@ -177,7 +203,7 @@ const AiChat: React.FC<AiChatProps> = ({
         {/* Input area */}
         <div className="border-t p-4">
           <form onSubmit={handleSubmit} className="relative">
-            <div className="relative">
+            <div className="relative mb-2">
               <Textarea
                 ref={textareaRef}
                 placeholder={placeholder}
@@ -202,6 +228,29 @@ const AiChat: React.FC<AiChatProps> = ({
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={generateSuggestion}
+                disabled={isGeneratingSuggestion || isLoading}
+                className="h-8 flex items-center gap-1 text-xs"
+              >
+                {isGeneratingSuggestion ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="h-3 w-3" />
+                    AI Suggest Question
+                  </>
                 )}
               </Button>
             </div>

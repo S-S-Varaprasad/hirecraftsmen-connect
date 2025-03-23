@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -27,6 +26,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { FormProvider } from 'react-hook-form';
+import AiTextSuggestion from '@/components/AiTextSuggestion';
 
 // Form validation schema
 const formSchema = z.object({
@@ -362,10 +362,12 @@ const ContactEmployer = () => {
                                   <Mail className="mr-2 h-4 w-4" />
                                   Email Address
                                 </FormLabel>
-                                <FormControl>
-                                  <Input type="email" placeholder="Your email address" {...field} className="bg-gray-50 dark:bg-gray-800" />
-                                </FormControl>
-                                <FormMessage />
+                                <div className="space-y-2">
+                                  <FormControl>
+                                    <Input type="email" placeholder="Your email address" {...field} className="bg-gray-50 dark:bg-gray-800" />
+                                  </FormControl>
+                                  <FormMessage />
+                                </div>
                               </FormItem>
                             )}
                           />
@@ -376,7 +378,14 @@ const ContactEmployer = () => {
                           name="subject"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Subject</FormLabel>
+                              <div className="flex justify-between items-center">
+                                <FormLabel>Subject</FormLabel>
+                                <AiTextSuggestion 
+                                  fieldType="subject" 
+                                  contextData={jobDetails} 
+                                  onSuggestionSelect={(suggestion) => form.setValue('subject', suggestion)}
+                                />
+                              </div>
                               <FormControl>
                                 <Input placeholder="Message subject" {...field} className="bg-gray-50 dark:bg-gray-800" />
                               </FormControl>
@@ -390,7 +399,14 @@ const ContactEmployer = () => {
                           name="message"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Message</FormLabel>
+                              <div className="flex justify-between items-center">
+                                <FormLabel>Message</FormLabel>
+                                <AiTextSuggestion 
+                                  fieldType="message" 
+                                  contextData={jobDetails} 
+                                  onSuggestionSelect={(suggestion) => form.setValue('message', suggestion)}
+                                />
+                              </div>
                               <FormControl>
                                 <Textarea 
                                   placeholder="Write your message here..."
