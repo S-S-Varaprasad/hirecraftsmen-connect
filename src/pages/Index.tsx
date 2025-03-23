@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import AiChat from "@/components/AiChat";
 import CategoryCard from "@/components/CategoryCard";
-import { Bot, ChevronRight } from "lucide-react";
+import { Bot, ChevronRight, Search } from "lucide-react";
 
 const Index = () => {
   return (
@@ -96,11 +96,12 @@ const Index = () => {
             <div className="text-center mt-10">
               <Button 
                 asChild
-                variant="outline"
-                className="rounded-full px-6 flex items-center gap-2 border-primary/20 hover:border-primary/60 transition-all"
+                variant="blue"
+                className="rounded-full px-8 py-6 flex items-center gap-2 font-medium text-base shadow-md hover:shadow-lg transition-all"
+                size="lg"
               >
-                <Link to="/search">
-                  View All Categories <ChevronRight className="h-4 w-4" />
+                <Link to="/workers">
+                  View All Categories <Search className="h-5 w-5 ml-1" />
                 </Link>
               </Button>
             </div>

@@ -96,7 +96,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
 
   return (
     <Link 
-      to={`/workers/category/${slug}`}
+      to={`/workers/by-category/${slug}`}
       className="group block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
     >
       <div className="p-6">
