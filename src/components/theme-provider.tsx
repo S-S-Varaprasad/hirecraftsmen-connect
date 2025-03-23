@@ -23,27 +23,63 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
+// Add a script to prevent theme flickering on page load
+const themeScript = `
+  (function() {
+    try {
+      const storageKey = "vite-ui-theme";
+      const theme = localStorage.getItem(storageKey) || "light";
+      
+      // Apply theme immediately before any render to prevent flickering
+      const root = document.documentElement;
+      root.classList.remove("light", "dark");
+      
+      if (theme === "system") {
+        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        root.classList.add(systemTheme);
+      } else {
+        root.classList.add(theme);
+      }
+      
+      root.style.colorScheme = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches) 
+        ? "dark" 
+        : "light";
+    } catch (e) {
+      console.error("Failed to set initial theme:", e);
+    }
+  })();
+`;
+
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
+  defaultTheme = "light", // Changed default to light explicitly
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(defaultTheme);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // Add the theme script to the head only on client-side
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.innerHTML = themeScript;
+    document.head.appendChild(script);
+    
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
   // Load theme from localStorage on component mount, but only once
   useEffect(() => {
     try {
-      const storedTheme = localStorage.getItem(storageKey) as Theme | null;
-      if (storedTheme) {
-        setTheme(storedTheme);
+      const storedTheme = localStorage.getItem(storageKey);
+      if (storedTheme && (storedTheme === "light" || storedTheme === "dark" || storedTheme === "system")) {
+        setTheme(storedTheme as Theme);
       } else {
-        // If no theme is stored, use system preference or fallback to light theme
-        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        const systemTheme = prefersDark ? "dark" : "light";
-        setTheme(systemTheme);
-        localStorage.setItem(storageKey, systemTheme);
+        // If no valid theme is stored, use the default theme
+        localStorage.setItem(storageKey, defaultTheme);
+        setTheme(defaultTheme);
       }
     } catch (error) {
       console.error("Failed to get theme from localStorage:", error);
@@ -59,24 +95,14 @@ export function ThemeProvider({
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
 
+    let effectiveTheme = theme;
+    
     if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-
-      root.classList.add(systemTheme);
-      
-      // Store the resolved system theme for persistence
-      try {
-        localStorage.setItem(storageKey, systemTheme);
-      } catch (error) {
-        console.error("Failed to save system theme to localStorage:", error);
-      }
-      return;
+      effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     }
 
-    root.classList.add(theme);
+    root.classList.add(effectiveTheme);
+    root.style.colorScheme = effectiveTheme;
     
     // Store in localStorage whenever theme changes (after initialization)
     try {
@@ -97,6 +123,7 @@ export function ThemeProvider({
         const newTheme = mediaQuery.matches ? "dark" : "light";
         document.documentElement.classList.remove("light", "dark");
         document.documentElement.classList.add(newTheme);
+        document.documentElement.style.colorScheme = newTheme;
       }
     };
     
@@ -106,8 +133,8 @@ export function ThemeProvider({
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      setTheme(theme);
+    setTheme: (newTheme: Theme) => {
+      setTheme(newTheme);
     },
   };
 
