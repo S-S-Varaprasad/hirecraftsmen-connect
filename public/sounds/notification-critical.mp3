@@ -1,0 +1,5 @@
+
+// This is a placeholder. In a real project, you would upload an actual MP3 file.
+// Since we can't upload binary files through the chat, please add appropriate notification sounds to:
+// - public/sounds/notification.mp3
+// - public/sounds/notification-critical.mp3

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Notification {
@@ -9,14 +8,45 @@ export interface Notification {
   related_id: string | null;
   is_read: boolean;
   created_at: string;
+  priority?: 'low' | 'medium' | 'high';
+  category?: 'job' | 'message' | 'application' | 'system';
+  expires_at?: string;
 }
 
-export const getNotifications = async (userId: string) => {
-  const { data, error } = await supabase
+export const getNotifications = async (userId: string, options?: {
+  type?: string; 
+  isRead?: boolean;
+  category?: string;
+  limit?: number;
+  offset?: number;
+}) => {
+  let query = supabase
     .from('notifications')
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
+  
+  if (options?.type) {
+    query = query.eq('type', options.type);
+  }
+  
+  if (options?.isRead !== undefined) {
+    query = query.eq('is_read', options.isRead);
+  }
+  
+  if (options?.category) {
+    query = query.eq('category', options.category);
+  }
+  
+  if (options?.limit) {
+    query = query.limit(options.limit);
+  }
+  
+  if (options?.offset) {
+    query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+  }
+  
+  const { data, error } = await query;
   
   if (error) {
     console.error('Error fetching notifications:', error);
@@ -26,12 +56,22 @@ export const getNotifications = async (userId: string) => {
   return data || [] as Notification[];
 };
 
-export const getUnreadNotificationsCount = async (userId: string) => {
-  const { data, error, count } = await supabase
+export const getUnreadNotificationsCount = async (userId: string, options?: { type?: string; category?: string }) => {
+  let query = supabase
     .from('notifications')
     .select('*', { count: 'exact' })
     .eq('user_id', userId)
     .eq('is_read', false);
+  
+  if (options?.type) {
+    query = query.eq('type', options.type);
+  }
+  
+  if (options?.category) {
+    query = query.eq('category', options.category);
+  }
+  
+  const { count, error } = await query;
   
   if (error) {
     console.error('Error fetching unread notifications count:', error);
@@ -56,12 +96,35 @@ export const markNotificationAsRead = async (id: string) => {
   return data?.[0] as Notification;
 };
 
+export const deleteNotification = async (id: string) => {
+  const { error } = await supabase
+    .from('notifications')
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error('Error deleting notification:', error);
+    throw error;
+  }
+  
+  return true;
+};
+
 export const createNotification = async (
   userId: string,
   message: string,
   type: string,
-  relatedId?: string
+  relatedId?: string,
+  options?: {
+    priority?: 'low' | 'medium' | 'high';
+    category?: 'job' | 'message' | 'application' | 'system';
+    expiresInDays?: number;
+  }
 ) => {
+  const expiresAt = options?.expiresInDays
+    ? new Date(Date.now() + options.expiresInDays * 24 * 60 * 60 * 1000).toISOString()
+    : null;
+    
   const { data, error } = await supabase
     .from('notifications')
     .insert([
@@ -70,6 +133,9 @@ export const createNotification = async (
         message,
         type,
         related_id: relatedId || null,
+        priority: options?.priority || 'medium',
+        category: options?.category || 'system',
+        expires_at: expiresAt
       }
     ])
     .select();
@@ -82,12 +148,22 @@ export const createNotification = async (
   return data?.[0] as Notification;
 };
 
-export const markAllNotificationsAsRead = async (userId: string) => {
-  const { error } = await supabase
+export const markAllNotificationsAsRead = async (userId: string, options?: { type?: string; category?: string }) => {
+  let query = supabase
     .from('notifications')
     .update({ is_read: true })
     .eq('user_id', userId)
     .eq('is_read', false);
+  
+  if (options?.type) {
+    query = query.eq('type', options.type);
+  }
+  
+  if (options?.category) {
+    query = query.eq('category', options.category);
+  }
+  
+  const { error } = await query;
   
   if (error) {
     console.error('Error marking all notifications as read:', error);
@@ -95,6 +171,79 @@ export const markAllNotificationsAsRead = async (userId: string) => {
   }
   
   return true;
+};
+
+export const deleteExpiredNotifications = async (userId: string) => {
+  const { error } = await supabase
+    .from('notifications')
+    .delete()
+    .eq('user_id', userId)
+    .lt('expires_at', new Date().toISOString());
+  
+  if (error) {
+    console.error('Error deleting expired notifications:', error);
+    throw error;
+  }
+  
+  return true;
+};
+
+export const deleteAllNotifications = async (userId: string, options?: { type?: string; category?: string }) => {
+  let query = supabase
+    .from('notifications')
+    .delete()
+    .eq('user_id', userId);
+  
+  if (options?.type) {
+    query = query.eq('type', options.type);
+  }
+  
+  if (options?.category) {
+    query = query.eq('category', options.category);
+  }
+  
+  const { error } = await query;
+  
+  if (error) {
+    console.error('Error deleting all notifications:', error);
+    throw error;
+  }
+  
+  return true;
+};
+
+export const batchCreateNotifications = async (notifications: Array<{
+  userId: string;
+  message: string;
+  type: string;
+  relatedId?: string;
+  priority?: 'low' | 'medium' | 'high';
+  category?: 'job' | 'message' | 'application' | 'system';
+  expiresInDays?: number;
+}>) => {
+  const notificationsToInsert = notifications.map(n => ({
+    user_id: n.userId,
+    message: n.message,
+    type: n.type,
+    related_id: n.relatedId || null,
+    priority: n.priority || 'medium',
+    category: n.category || 'system',
+    expires_at: n.expiresInDays
+      ? new Date(Date.now() + n.expiresInDays * 24 * 60 * 60 * 1000).toISOString()
+      : null
+  }));
+  
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert(notificationsToInsert)
+    .select();
+  
+  if (error) {
+    console.error('Error batch creating notifications:', error);
+    throw error;
+  }
+  
+  return data as Notification[];
 };
 
 export const createWorkerApplicationNotification = async (
@@ -164,7 +313,6 @@ export const notifyWorkersAboutJob = async (
   try {
     console.log('Notifying workers about job:', { jobId, jobTitle, skills, category });
     
-    // Get Supabase URL and anon key from environment
     const SUPABASE_URL = "https://myrztsvambwrkusxxatm.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15cnp0c3ZhbWJ3cmt1c3h4YXRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwMjExMjMsImV4cCI6MjA1NzU5NzEyM30.e4ZArV9YTi84rsQu9hXqVVlGAVCPu2e88_rrng49Yes";
     
@@ -215,7 +363,6 @@ export const notifyWorkersAboutJobUpdate = async (
   sendSms: boolean = false
 ) => {
   try {
-    // Get Supabase URL and anon key from environment
     const SUPABASE_URL = "https://myrztsvambwrkusxxatm.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15cnp0c3ZhbWJ3cmt1c3h4YXRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwMjExMjMsImV4cCI6MjA1NzU5NzEyM30.e4ZArV9YTi84rsQu9hXqVVlGAVCPu2e88_rrng49Yes";
     
@@ -266,7 +413,6 @@ export const notifyEmployerAboutApplication = async (
     
     if (sendEmail) {
       try {
-        // Get Supabase URL and anon key from environment
         const SUPABASE_URL = "https://myrztsvambwrkusxxatm.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15cnp0c3ZhbWJ3cmt1c3h4YXRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwMjExMjMsImV4cCI6MjA1NzU5NzEyM30.e4ZArV9YTi84rsQu9hXqVVlGAVCPu2e88_rrng49Yes";
         

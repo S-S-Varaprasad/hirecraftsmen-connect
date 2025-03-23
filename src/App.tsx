@@ -1,143 +1,87 @@
-
-import React, { useEffect, useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { Toaster } from 'sonner';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import { ThemeProvider } from '@/components/theme-provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from "@/components/theme-provider"
-import { AuthProvider, RequireAuth } from '@/context/AuthContext';
-import CookieConsent from "react-cookie-consent";
-import ScrollToTop from '@/components/ScrollToTop';
-import { FormProvider, useForm } from 'react-hook-form';
+import { ToastContainer, Toast } from '@/components/ui/sonner';
+import { AuthProvider } from '@/context/AuthContext';
 
-// Import pages individually instead of from a barrel file
-import Index from '@/pages/Index';
-import About from '@/pages/About';
-import Contact from '@/pages/Contact';
-import Login from '@/pages/Login';
-import SignUp from '@/pages/SignUp';
-import Terms from '@/pages/Terms';
-import Privacy from '@/pages/Privacy';
-import Profile from '@/pages/Profile';
-import Settings from '@/pages/Settings';
-import Workers from '@/pages/Workers';
-import WorkerDetail from '@/pages/WorkerDetail';
-import Jobs from '@/pages/Jobs';
-import JobDetail from '@/pages/JobDetail';
-import PostJob from '@/pages/PostJob';
-import EditJob from '@/pages/EditJob';
-import ApplyNow from '@/pages/ApplyNow';
-import JoinAsWorker from '@/pages/JoinAsWorker';
-import NotFound from '@/pages/NotFound';
-import WorkersByCategory from '@/pages/WorkersByCategory';
-import ContactEmployer from '@/pages/ContactEmployer';
-import DeactivateWorker from '@/pages/DeactivateWorker';
-import DeleteWorker from '@/pages/DeleteWorker';
-import WorkerJobHistory from '@/pages/WorkerJobHistory';
-import MessageWorker from '@/pages/MessageWorker';
-import ContactWorker from '@/pages/ContactWorker';
+import Index from './pages/Index';
+import Workers from './pages/Workers';
+import WorkerDetail from './pages/WorkerDetail';
+import WorkersByCategory from './pages/WorkersByCategory';
+import Jobs from './pages/Jobs';
+import JobDetail from './pages/JobDetail';
+import PostJob from './pages/PostJob';
+import ApplyNow from './pages/ApplyNow';
+import Contact from './pages/Contact';
+import About from './pages/About';
+import Login from './pages/Login';
+import SignUp from './pages/SignUp';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Profile from './pages/Profile';
+import JoinAsWorker from './pages/JoinAsWorker';
+import EditJob from './pages/EditJob';
+import WorkerJobHistory from './pages/WorkerJobHistory';
+import ContactWorker from './pages/ContactWorker';
+import ContactEmployer from './pages/ContactEmployer';
+import DeleteWorker from './pages/DeleteWorker';
+import DeactivateWorker from './pages/DeactivateWorker';
+import ContactWorker from './pages/ContactWorker';
+import MessageWorker from './pages/MessageWorker';
+
+// Update the routes to include NotificationSettings page
+import NotificationSettings from './pages/NotificationSettings';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
 
 function App() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 60 * 1000, // 1 minute
-      },
-    },
-  });
+  const [queryClient] = useState(() => new QueryClient());
 
-  // Check if the cookie consent is already stored
-  const [cookieConsentAccepted, setCookieConsentAccepted] = useState(() => {
-    return localStorage.getItem("handyHelpers-cookie-consent") === "true";
-  });
-
-  const handleCookieAccept = () => {
-    localStorage.setItem("handyHelpers-cookie-consent", "true");
-    setCookieConsentAccepted(true);
-  };
-
-  // This is a global form methods object that will only be used as a fallback
-  // Each page should define its own form context as needed
-  const formMethods = useForm();
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
 
   return (
-    <AuthProvider>
-      <ThemeProvider defaultTheme="light">
-        <QueryClientProvider client={queryClient}>
-          <FormProvider {...formMethods}>
-            <Toaster position="top-right" richColors />
-            <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
-              <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
-              <Route path="/contact-employer/:employerId" element={<RequireAuth><ContactEmployer /></RequireAuth>} />
-              <Route path="/contact/:workerId" element={<RequireAuth><ContactWorker /></RequireAuth>} />
-              <Route path="/message/:workerId" element={<RequireAuth><MessageWorker /></RequireAuth>} />
-              <Route path="/workers" element={<Workers />} />
-              <Route path="/workers/by-category/:category" element={<WorkersByCategory />} />
-              <Route path="/workers/:id" element={<WorkerDetail />} />
-              <Route path="/workers/deactivate/:id" element={<RequireAuth><DeactivateWorker /></RequireAuth>} />
-              <Route path="/workers/delete/:id" element={<RequireAuth><DeleteWorker /></RequireAuth>} />
-              <Route path="/worker-job-history" element={<RequireAuth><WorkerJobHistory /></RequireAuth>} />
-              <Route path="/jobs" element={<Jobs />} />
-              <Route path="/jobs/:id" element={<JobDetail />} />
-              <Route path="/post-job" element={<RequireAuth><PostJob /></RequireAuth>} />
-              <Route path="/edit-job/:id" element={<RequireAuth><EditJob /></RequireAuth>} />
-              <Route path="/apply-now/:jobId" element={<RequireAuth><ApplyNow /></RequireAuth>} />
-              <Route path="/join-as-worker" element={<JoinAsWorker />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </FormProvider>
-        </QueryClientProvider>
-        
-        {!cookieConsentAccepted && (
-          <CookieConsent
-            location="bottom"
-            buttonText="Accept Cookies"
-            cookieName="handyHelpers-cookie-consent"
-            style={{ 
-              background: "rgba(43, 55, 59, 0.95)",
-              backdropFilter: "blur(8px)",
-              borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-              maxWidth: "1200px",
-              margin: "0 auto",
-              left: "50%",
-              transform: "translateX(-50%)",
-              borderRadius: "8px 8px 0 0"
-            }}
-            buttonStyle={{ 
-              backgroundColor: "#f97316", 
-              color: "white", 
-              fontSize: "14px", 
-              borderRadius: "6px", 
-              padding: "10px 16px",
-              fontWeight: "500",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)"
-            }}
-            contentStyle={{
-              flex: "1",
-              margin: "15px"
-            }}
-            expires={150}
-            onAccept={handleCookieAccept}
-            hideOnAccept={true}
-            acceptOnScroll={false}
-          >
-            <span style={{ fontWeight: "500" }}>This website uses cookies</span> to enhance your browsing experience and provide personalized services. By continuing to use our site, you consent to our use of cookies.
-          </CookieConsent>
-        )}
-      </ThemeProvider>
-    </AuthProvider>
+    <ThemeProvider defaultTheme="light" storageKey="hire-ease-ui-theme">
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/workers" element={<Workers />} />
+            <Route path="/workers/:workerId" element={<WorkerDetail />} />
+            <Route path="/workers/category/:category" element={<WorkersByCategory />} />
+            <Route path="/jobs" element={<Jobs />} />
+            <Route path="/jobs/:jobId" element={<JobDetail />} />
+            <Route path="/post-job" element={<PostJob />} />
+            <Route path="/apply-now/:jobId" element={<ApplyNow />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/join-as-worker" element={<JoinAsWorker />} />
+            <Route path="/edit-job/:jobId" element={<EditJob />} />
+            <Route path="/worker-job-history" element={<WorkerJobHistory />} />
+            <Route path="/contact-worker/:workerId" element={<ContactWorker />} />
+            <Route path="/contact-employer/:employerId" element={<ContactEmployer />} />
+            <Route path="/delete-worker/:workerId" element={<DeleteWorker />} />
+            <Route path="/deactivate-worker/:workerId" element={<DeactivateWorker />} />
+            <Route path="/message-worker/:workerId" element={<MessageWorker />} />
+            <Route path="/notification-settings" element={<NotificationSettings />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
+        <ToastContainer />
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 
