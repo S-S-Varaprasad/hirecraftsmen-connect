@@ -1,3 +1,4 @@
+
 // Import necessary dependencies
 import { supabase } from '@/integrations/supabase/client';
 
@@ -153,11 +154,12 @@ export const markAllNotificationsAsRead = async (
   try {
     if (!userId) return;
 
+    // Using type assertion to avoid type instantiation depth issues
     let query = supabase
       .from('notifications')
       .update({ is_read: true })
       .eq('user_id', userId)
-      .eq('is_read', false);
+      .eq('is_read', false) as any;
 
     if (filter?.type) {
       query = query.eq('type', filter.type);
