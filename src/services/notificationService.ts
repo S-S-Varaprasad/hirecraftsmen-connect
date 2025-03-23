@@ -1,4 +1,3 @@
-
 // Import necessary dependencies
 import { supabase } from '@/integrations/supabase/client';
 
@@ -33,36 +32,36 @@ export const getNotifications = async (
       return [];
     }
 
-    // Fix: Explicitly type the query to avoid deep type instantiation
-    let query = supabase
+    // Using type assertion to avoid type instantiation depth issues
+    const builder = supabase
       .from('notifications')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false }) as any;
 
     if (filter?.type) {
-      query = query.eq('type', filter.type);
+      builder.eq('type', filter.type);
     }
 
     if (filter?.category) {
-      query = query.eq('category', filter.category);
+      builder.eq('category', filter.category);
     }
 
     if (filter?.isRead !== undefined) {
-      query = query.eq('is_read', filter.isRead);
+      builder.eq('is_read', filter.isRead);
     }
 
     if (filter?.before) {
-      query = query.lt('created_at', filter.before);
+      builder.lt('created_at', filter.before);
     }
 
     if (filter?.limit) {
-      query = query.limit(filter.limit);
+      builder.limit(filter.limit);
     } else {
-      query = query.limit(20); // Default limit
+      builder.limit(20); // Default limit
     }
 
-    const { data, error } = await query;
+    const { data, error } = await builder;
 
     if (error) {
       console.error('Error fetching notifications:', error);
