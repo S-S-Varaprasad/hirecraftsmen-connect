@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   MapPin,
   Briefcase,
@@ -19,9 +19,11 @@ import { Separator } from '@/components/ui/separator';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { getJobById } from '@/services/jobService';
+import { toast } from 'sonner';
 
 const JobDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { jobId } = useParams<{ jobId: string }>();
+  const navigate = useNavigate();
   const [job, setJob] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,18 +33,32 @@ const JobDetail = () => {
       setIsLoading(true);
       setError(null);
       try {
-        if (!id) throw new Error("Job ID is required");
-        const jobData = await getJobById(id);
+        if (!jobId) {
+          console.error("Job ID is missing from URL parameters");
+          throw new Error("Job ID is required");
+        }
+        
+        console.log('Fetching job with ID:', jobId);
+        const jobData = await getJobById(jobId);
+        
+        if (!jobData) {
+          console.error("No job found with ID:", jobId);
+          throw new Error("Job not found");
+        }
+        
+        console.log('Job data retrieved:', jobData);
         setJob(jobData);
       } catch (err: any) {
+        console.error('Error loading job:', err);
         setError(err.message || 'Failed to load job');
+        toast.error('Error loading job details. Please try again.');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchJob();
-  }, [id]);
+  }, [jobId]);
 
   const getBadgeColor = (urgency: string) => {
     switch (urgency) {

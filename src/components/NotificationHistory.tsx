@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useNotifications } from '@/hooks/useNotifications';
-import { Notification } from '@/services/notificationService';
+import type { Notification } from '@/services/notificationService';
 import { formatDistanceToNow } from 'date-fns';
 import { 
   Dialog, DialogContent, DialogDescription, 
@@ -88,33 +88,43 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
   const handleNotificationClick = (notification: Notification) => {
     markAsRead(notification.id);
     
+    console.log('Handling notification click:', notification);
+    
     if (notification.related_id) {
-      if (notification.type === 'application' || notification.type === 'new_application') {
-        navigate(`/jobs/${notification.related_id}`);
-      } else if (notification.type === 'job_accepted' || notification.type === 'job_application' || notification.type === 'job_completed') {
-        navigate(`/worker-job-history`);
-      } else if (notification.type === 'new_job' || notification.type === 'job_updated') {
-        navigate(`/jobs/${notification.related_id}`);
-      } else if (notification.type === 'message') {
-        if (notification.category === 'message_to_worker') {
-          navigate(`/message-worker/${notification.related_id}`);
-        } else if (notification.category === 'message_from_worker') {
-          navigate(`/messages/${notification.related_id}`);
-        } else {
-          navigate(`/messages`);
-        }
-      } else if (notification.type === 'system') {
-        if (notification.category === 'job') {
-          navigate(`/jobs`);
-        } else if (notification.category === 'worker') {
-          navigate(`/workers`);
-        } else if (notification.category === 'profile') {
-          navigate(`/profile`);
+      try {
+        if (notification.type === 'application' || notification.type === 'new_application') {
+          navigate(`/jobs/${notification.related_id}`);
+        } else if (notification.type === 'job_accepted' || notification.type === 'job_application' || notification.type === 'job_completed') {
+          navigate(`/worker-job-history`);
+        } else if (notification.type === 'new_job' || notification.type === 'job_updated') {
+          console.log('Navigating to job details:', `/jobs/${notification.related_id}`);
+          navigate(`/jobs/${notification.related_id}`);
+          if (onClose) onClose();
+          return;
+        } else if (notification.type === 'message') {
+          if (notification.category === 'message_to_worker') {
+            navigate(`/message-worker/${notification.related_id}`);
+          } else if (notification.category === 'message_from_worker') {
+            navigate(`/messages/${notification.related_id}`);
+          } else {
+            navigate(`/messages`);
+          }
+        } else if (notification.type === 'system') {
+          if (notification.category === 'job') {
+            navigate(`/jobs`);
+          } else if (notification.category === 'worker') {
+            navigate(`/workers`);
+          } else if (notification.category === 'profile') {
+            navigate(`/profile`);
+          } else {
+            navigate(`/`);
+          }
         } else {
           navigate(`/`);
         }
-      } else {
-        navigate(`/`);
+      } catch (error) {
+        console.error('Navigation error:', error);
+        toast.error('Error navigating to content');
       }
     } else {
       if (notification.category === 'job') {

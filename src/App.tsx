@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -74,6 +75,7 @@ function App() {
             <Route path="/workers/:workerId" element={<WorkerDetail />} />
             <Route path="/workers/category/:category" element={<WorkersByCategory />} />
             <Route path="/jobs" element={<Jobs />} />
+            {/* Fix: Change jobId param name to match what's used in JobDetail component */}
             <Route path="/jobs/:jobId" element={<JobDetail />} />
             <Route path="/post-job" element={<PostJob />} />
             <Route path="/apply-now/:jobId" element={<ApplyNow />} />
