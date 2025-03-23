@@ -93,17 +93,14 @@ const Index = () => {
               />
             </div>
             
-            <div className="text-center mt-10">
-              <Button 
-                asChild
-                variant="blue"
-                className="rounded-full px-8 py-6 flex items-center gap-2 font-medium text-base shadow-md hover:shadow-lg transition-all"
-                size="lg"
+            <div className="flex justify-center mt-12">
+              <Link 
+                to="/workers" 
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 text-blue-600 bg-white border border-blue-100 rounded-lg shadow-sm hover:bg-blue-50 transition-all duration-200"
               >
-                <Link to="/workers">
-                  View All Categories <Search className="h-5 w-5 ml-1" />
-                </Link>
-              </Button>
+                View All Categories
+                <ChevronRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </div>
