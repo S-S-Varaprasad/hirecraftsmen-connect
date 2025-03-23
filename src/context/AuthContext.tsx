@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -70,7 +71,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       if (error) throw error;
-      navigate('/');
+      
+      // Navigate to the top of the home page instead
+      navigate('/', { replace: true });
+      
       return { error: null };
     } catch (error) {
       console.error('Error signing in:', error);
