@@ -33,6 +33,9 @@ export function SearchInput({
   const inputRef = React.useRef<HTMLInputElement>(null)
   const suggestionsRef = React.useRef<HTMLDivElement>(null)
 
+  // Ensure suggestions is always an array
+  const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
+
   // Update inputValue when props.value changes
   React.useEffect(() => {
     if (props.value !== undefined) {
@@ -43,7 +46,7 @@ export function SearchInput({
   React.useEffect(() => {
     const timer = setTimeout(() => {
       if (inputValue.trim()) {
-        const filtered = suggestions.filter(suggestion => 
+        const filtered = safeSuggestions.filter(suggestion => 
           suggestion.toLowerCase().includes(inputValue.toLowerCase())
         )
         setFilteredSuggestions(filtered.slice(0, 8)) // Limit to 8 suggestions
@@ -56,7 +59,7 @@ export function SearchInput({
     }, 200)
 
     return () => clearTimeout(timer)
-  }, [inputValue, suggestions])
+  }, [inputValue, safeSuggestions])
 
   // Close suggestions when clicking outside
   React.useEffect(() => {

@@ -33,14 +33,15 @@ interface ComboboxProps {
 export function Combobox({
   placeholder = "Select option...",
   emptyMessage = "No results found.",
-  options,
+  options = [], // Ensure options has a default empty array
   value,
   onChange,
   triggerClassName,
   searchPlaceholder = "Search...",
   disabled = false,
 }: ComboboxProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
+  const safeOptions = Array.isArray(options) ? options : []; // Ensure options is an array
 
   // Handler to prevent default event behavior
   const handleTriggerClick = (e: React.MouseEvent) => {
@@ -63,7 +64,7 @@ export function Combobox({
           type="button" // Explicitly set button type to prevent form submission
         >
           {value
-            ? options.find((option) => option.value === value)?.label || placeholder
+            ? safeOptions.find((option) => option.value === value)?.label || placeholder
             : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -73,7 +74,7 @@ export function Combobox({
           <CommandInput placeholder={searchPlaceholder} />
           <CommandEmpty>{emptyMessage}</CommandEmpty>
           <CommandGroup className="max-h-60 overflow-y-auto">
-            {options.map((option) => (
+            {safeOptions.map((option) => (
               <CommandItem
                 key={option.value}
                 value={option.value}

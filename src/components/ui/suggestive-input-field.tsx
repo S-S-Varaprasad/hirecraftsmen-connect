@@ -18,8 +18,11 @@ export function SuggestiveInputField({
   label,
   placeholder,
   description,
-  suggestions = [],
+  suggestions = [], // Ensure suggestions has a default empty array
 }: SuggestiveInputFieldProps) {
+  // Ensure suggestions is always an array
+  const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
+
   return (
     <FormField
       control={control}
@@ -30,7 +33,7 @@ export function SuggestiveInputField({
             {label && <FormLabel>{label}</FormLabel>}
             <FormControl>
               <SearchInput
-                suggestions={suggestions}
+                suggestions={safeSuggestions}
                 placeholder={placeholder}
                 value={field.value}
                 onChange={(e) => {

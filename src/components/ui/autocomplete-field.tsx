@@ -20,7 +20,7 @@ export function AutocompleteField({
   label,
   placeholder,
   description,
-  options,
+  options = [], // Ensure options has a default empty array
   searchable = true,
 }: AutocompleteFieldProps) {
   // Handle value change without triggering form submission
@@ -38,7 +38,7 @@ export function AutocompleteField({
           {searchable ? (
             <FormControl>
               <Combobox
-                options={options}
+                options={options || []} // Ensure options is never undefined
                 value={field.value}
                 onChange={(value) => handleValueChange(field, value)}
                 placeholder={placeholder}
@@ -61,7 +61,7 @@ export function AutocompleteField({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {options.map((option) => (
+                {(options || []).map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
