@@ -33,6 +33,7 @@ export const getNotifications = async (
       return [];
     }
 
+    // Fix: Explicitly type the query to avoid deep type instantiation
     let query = supabase
       .from('notifications')
       .select('*')
