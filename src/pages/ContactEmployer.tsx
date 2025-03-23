@@ -26,6 +26,7 @@ import { ArrowLeft, Briefcase, Building, Mail, MapPin, Send, User, AlertTriangle
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
+import { FormProvider } from 'react-hook-form';
 
 // Form validation schema
 const formSchema = z.object({
@@ -57,10 +58,13 @@ const ContactEmployer = () => {
     },
   });
 
+  console.log('JobId from params:', jobId);
+
   // Fetch job details when component mounts
   useEffect(() => {
     const fetchJobDetails = async () => {
       if (!jobId) {
+        console.error('No job ID provided');
         setError('No job ID provided');
         setIsLoading(false);
         return;
@@ -73,6 +77,11 @@ const ContactEmployer = () => {
         console.log('Fetching job details for ID:', jobId);
         const job = await getJobById(jobId);
         console.log('Job details received:', job);
+        
+        if (!job) {
+          throw new Error('Job not found');
+        }
+        
         setJobDetails(job);
         
         // Pre-fill subject with job title
@@ -87,7 +96,7 @@ const ContactEmployer = () => {
               .from('workers')
               .select('name')
               .eq('user_id', user.id)
-              .single();
+              .maybeSingle();
               
             if (data) {
               form.setValue('name', data.name);
@@ -124,6 +133,9 @@ const ContactEmployer = () => {
     setIsSending(true);
     
     try {
+      console.log('Submitting contact form:', data);
+      console.log('Job details for message:', jobDetails);
+      
       // Insert message into the messages table
       const { error: messageError } = await supabase
         .from('messages')
@@ -137,7 +149,10 @@ const ContactEmployer = () => {
           sender_id: user?.id || null,
         });
         
-      if (messageError) throw messageError;
+      if (messageError) {
+        console.error('Error inserting message:', messageError);
+        throw messageError;
+      }
       
       // Create a notification for the employer
       if (jobDetails.employer_id) {
@@ -317,20 +332,53 @@ const ContactEmployer = () => {
                     </Button>
                   </div>
                 ) : (
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                      <div className="grid md:grid-cols-2 gap-4">
+                  <FormProvider {...form}>
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="flex items-center">
+                                  <User className="mr-2 h-4 w-4" />
+                                  Your Name
+                                </FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Your full name" {...field} className="bg-gray-50 dark:bg-gray-800" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="flex items-center">
+                                  <Mail className="mr-2 h-4 w-4" />
+                                  Email Address
+                                </FormLabel>
+                                <FormControl>
+                                  <Input type="email" placeholder="Your email address" {...field} className="bg-gray-50 dark:bg-gray-800" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        
                         <FormField
                           control={form.control}
-                          name="name"
+                          name="subject"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="flex items-center">
-                                <User className="mr-2 h-4 w-4" />
-                                Your Name
-                              </FormLabel>
+                              <FormLabel>Subject</FormLabel>
                               <FormControl>
-                                <Input placeholder="Your full name" {...field} className="bg-gray-50 dark:bg-gray-800" />
+                                <Input placeholder="Message subject" {...field} className="bg-gray-50 dark:bg-gray-800" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -339,82 +387,51 @@ const ContactEmployer = () => {
                         
                         <FormField
                           control={form.control}
-                          name="email"
+                          name="message"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="flex items-center">
-                                <Mail className="mr-2 h-4 w-4" />
-                                Email Address
-                              </FormLabel>
+                              <FormLabel>Message</FormLabel>
                               <FormControl>
-                                <Input type="email" placeholder="Your email address" {...field} className="bg-gray-50 dark:bg-gray-800" />
+                                <Textarea 
+                                  placeholder="Write your message here..."
+                                  className="min-h-[150px] bg-gray-50 dark:bg-gray-800" 
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                      </div>
-                      
-                      <FormField
-                        control={form.control}
-                        name="subject"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Subject</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Message subject" {...field} className="bg-gray-50 dark:bg-gray-800" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="message"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Message</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Write your message here..."
-                                className="min-h-[150px] bg-gray-50 dark:bg-gray-800" 
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <div className="flex justify-end pt-4">
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          className="mr-3 bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
-                          onClick={() => navigate(-1)}
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          type="submit"
-                          disabled={isLoading || isSending}
-                          className="bg-app-blue hover:bg-app-blue/90 text-white gap-2"
-                        >
-                          {isSending ? (
-                            <>
-                              <div className="animate-spin h-4 w-4 border-2 border-b-transparent rounded-full"></div>
-                              Sending...
-                            </>
-                          ) : (
-                            <>
-                              <Send className="h-4 w-4" /> Send Message
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
+                        
+                        <div className="flex justify-end pt-4">
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            className="mr-3 bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
+                            onClick={() => navigate(-1)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            type="submit"
+                            disabled={isLoading || isSending}
+                            className="bg-app-blue hover:bg-app-blue/90 text-white gap-2"
+                          >
+                            {isSending ? (
+                              <>
+                                <div className="animate-spin h-4 w-4 border-2 border-b-transparent rounded-full"></div>
+                                Sending...
+                              </>
+                            ) : (
+                              <>
+                                <Send className="h-4 w-4" /> Send Message
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </FormProvider>
                 )}
               </CardContent>
             </Card>
