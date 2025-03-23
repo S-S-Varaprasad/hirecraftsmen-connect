@@ -41,11 +41,14 @@ export function Combobox({
   disabled = false,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
-  const safeOptions = Array.isArray(options) ? options : []; // Ensure options is an array
+  
+  // Ensure options is always an array and never undefined/null
+  const safeOptions = Array.isArray(options) ? options : [];
 
-  // Handler to prevent default event behavior
+  // Handler to prevent default event behavior and form submission
   const handleTriggerClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // Stop event propagation to prevent form submission
     if (!disabled) {
       setOpen(!open);
     }
@@ -69,8 +72,8 @@ export function Combobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <Command>
+      <PopoverContent className="w-full p-0" onClick={(e) => e.stopPropagation()}>
+        <Command shouldFilter={true}>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandEmpty>{emptyMessage}</CommandEmpty>
           <CommandGroup className="max-h-60 overflow-y-auto">
@@ -82,6 +85,7 @@ export function Combobox({
                   onChange(option.value === value ? "" : option.value);
                   setOpen(false);
                 }}
+                onClick={(e) => e.stopPropagation()}
               >
                 <Check
                   className={cn(

@@ -23,9 +23,18 @@ export function AutocompleteField({
   options = [], // Ensure options has a default empty array
   searchable = true,
 }: AutocompleteFieldProps) {
+  // Ensure options is always an array
+  const safeOptions = Array.isArray(options) ? options : [];
+  
   // Handle value change without triggering form submission
   const handleValueChange = (field: any, value: string) => {
     field.onChange(value);
+  };
+  
+  // Prevent event propagation to avoid form submission
+  const preventPropagation = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
   
   return (
@@ -33,16 +42,19 @@ export function AutocompleteField({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="w-full">
           <FormLabel>{label}</FormLabel>
           {searchable ? (
             <FormControl>
-              <Combobox
-                options={options || []} // Ensure options is never undefined
-                value={field.value}
-                onChange={(value) => handleValueChange(field, value)}
-                placeholder={placeholder}
-              />
+              <div onClick={preventPropagation}>
+                <Combobox
+                  options={safeOptions}
+                  value={field.value}
+                  onChange={(value) => handleValueChange(field, value)}
+                  placeholder={placeholder}
+                  triggerClassName="w-full"
+                />
+              </div>
             </FormControl>
           ) : (
             <Select 
@@ -56,12 +68,12 @@ export function AutocompleteField({
               }}
             >
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger onClick={preventPropagation}>
                   <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {(options || []).map((option) => (
+                {safeOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>

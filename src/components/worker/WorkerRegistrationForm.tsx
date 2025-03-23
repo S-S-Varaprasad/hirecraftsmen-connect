@@ -50,17 +50,23 @@ const WorkerRegistrationForm = ({
   const safeLanguageOptions = Array.isArray(languageOptions) ? languageOptions : [];
   const safeSkillSuggestions = Array.isArray(skillSuggestions) ? skillSuggestions : [];
   
+  // Stop event propagation to prevent unwanted form submissions
   const preventDefaultSubmit = (e: React.FormEvent) => {
     if (e.target !== e.currentTarget) {
       e.stopPropagation();
     }
   };
 
+  // Properly handle form submission
+  const onFormSubmit = (data: any) => {
+    onSubmit(data);
+  };
+
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
       <div className="px-8 py-12">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">Join as a Worker</h2>
-        <form onSubmit={handleSubmit(onSubmit)} onClick={preventDefaultSubmit}>
+        <form onSubmit={handleSubmit(onFormSubmit)} onClick={preventDefaultSubmit} className="space-y-6">
           <ProfileImageUpload
             profileImagePreview={profileImagePreview}
             setProfileImagePreview={setProfileImagePreview}
@@ -85,7 +91,7 @@ const WorkerRegistrationForm = ({
 
           <Button 
             type="submit" 
-            className="w-full bg-primary hover:bg-primary/90" 
+            className="w-full bg-primary hover:bg-primary/90 mt-4" 
             disabled={isUploading}
           >
             {isUploading ? 'Creating Profile...' : 'Create Profile'}

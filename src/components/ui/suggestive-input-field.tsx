@@ -22,6 +22,12 @@ export function SuggestiveInputField({
 }: SuggestiveInputFieldProps) {
   // Ensure suggestions is always an array
   const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
+  
+  // Prevent form submission when interacting with the input
+  const preventPropagation = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   return (
     <FormField
@@ -32,25 +38,27 @@ export function SuggestiveInputField({
           <FormItem>
             {label && <FormLabel>{label}</FormLabel>}
             <FormControl>
-              <SearchInput
-                suggestions={safeSuggestions}
-                placeholder={placeholder}
-                value={field.value}
-                onChange={(e) => {
-                  if (typeof e === 'object' && e !== null && 'target' in e) {
-                    field.onChange(e.target.value);
-                  } else {
-                    field.onChange(e);
-                  }
-                }}
-                onSuggestionClick={(value) => {
-                  field.onChange(value);
-                  setTimeout(() => {
-                    field.onBlur();
-                  }, 100);
-                }}
-                className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg"
-              />
+              <div onClick={preventPropagation}>
+                <SearchInput
+                  suggestions={safeSuggestions}
+                  placeholder={placeholder}
+                  value={field.value || ''}
+                  onChange={(e) => {
+                    if (typeof e === 'object' && e !== null && 'target' in e) {
+                      field.onChange(e.target.value);
+                    } else {
+                      field.onChange(e);
+                    }
+                  }}
+                  onSuggestionClick={(value) => {
+                    field.onChange(value);
+                    setTimeout(() => {
+                      field.onBlur();
+                    }, 100);
+                  }}
+                  className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg"
+                />
+              </div>
             </FormControl>
             {description && <FormDescription>{description}</FormDescription>}
             <FormMessage />

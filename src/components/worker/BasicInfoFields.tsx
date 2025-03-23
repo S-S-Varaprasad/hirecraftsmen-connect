@@ -32,8 +32,14 @@ const BasicInfoFields = ({
   const safeLanguageOptions = Array.isArray(languageOptions) ? languageOptions : [];
   const safeSkillSuggestions = Array.isArray(skillSuggestions) ? skillSuggestions : [];
   
+  // Prevent form submission when interacting with fields
+  const preventPropagation = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
   return (
-    <>
+    <div className="space-y-4">
       <div className="mb-4">
         <Label htmlFor="name" className="text-base">Full Name</Label>
         <Input
@@ -47,7 +53,7 @@ const BasicInfoFields = ({
         {errors.name && <p className="text-red-500 text-sm mt-1">{(errors.name as any).message}</p>}
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4" onClick={preventPropagation}>
         <AutocompleteField
           name="profession"
           control={control}
@@ -58,7 +64,7 @@ const BasicInfoFields = ({
         />
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4" onClick={preventPropagation}>
         <AutocompleteField
           name="location"
           control={control}
@@ -93,7 +99,7 @@ const BasicInfoFields = ({
         />
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4" onClick={preventPropagation}>
         <SuggestiveInputField
           name="skills"
           control={control}
@@ -104,7 +110,7 @@ const BasicInfoFields = ({
         />
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4" onClick={preventPropagation}>
         <AutocompleteField
           name="languages"
           control={control}
@@ -126,7 +132,7 @@ const BasicInfoFields = ({
           rows={4}
         />
       </div>
-    </>
+    </div>
   );
 };
 
