@@ -33,19 +33,47 @@ const convertToJob = (job: any): Job => {
   };
 };
 
-export const getJobs = async () => {
-  const { data, error } = await supabase
-    .from('jobs')
-    .select('*')
-    .order('created_at', { ascending: false });
-  
-  if (error) {
-    console.error('Error fetching jobs:', error);
-    throw error;
+export const getJobs = async (): Promise<Job[]> => {
+  try {
+    // First, get list of jobs with accepted applications
+    const { data: acceptedApplicationJobs, error: appError } = await supabase
+      .from('applications')
+      .select('job_id')
+      .eq('status', 'accepted');
+    
+    if (appError) {
+      console.error('Error fetching accepted applications:', appError);
+      // Continue with the job fetch even if this fails
+    }
+    
+    // Get the job IDs that have accepted applications
+    const jobIdsWithAcceptedApplications = (acceptedApplicationJobs || []).map(app => app.job_id);
+    console.log('Jobs with accepted applications:', jobIdsWithAcceptedApplications);
+    
+    // Fetch all jobs, excluding those with accepted applications
+    let query = supabase
+      .from('jobs')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    // If we have jobs with accepted applications, filter them out
+    if (jobIdsWithAcceptedApplications.length > 0) {
+      query = query.not('id', 'in', `(${jobIdsWithAcceptedApplications.join(',')})`);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error fetching jobs:', error);
+      throw error;
+    }
+    
+    return (data || []).map(convertToJob) as Job[];
+  } catch (error) {
+    console.error('Exception in getJobs:', error);
+    // Return empty array instead of throwing to avoid cascading errors
+    return [];
   }
-  
-  // Convert data to ensure correct typing
-  return (data || []).map(convertToJob) as Job[];
 };
 
 export const getJobsBySearch = async (searchParams: {
@@ -53,38 +81,63 @@ export const getJobsBySearch = async (searchParams: {
   location?: string;
   jobTypes?: string[];
   urgency?: string[];
-}) => {
-  let query = supabase
-    .from('jobs')
-    .select('*')
-    .order('created_at', { ascending: false });
-  
-  if (searchParams.searchTerm) {
-    const term = searchParams.searchTerm.toLowerCase();
-    query = query.or(`title.ilike.%${term}%,description.ilike.%${term}%,company.ilike.%${term}%`);
+}): Promise<Job[]> => {
+  try {
+    // First, get list of jobs with accepted applications
+    const { data: acceptedApplicationJobs, error: appError } = await supabase
+      .from('applications')
+      .select('job_id')
+      .eq('status', 'accepted');
+    
+    if (appError) {
+      console.error('Error fetching accepted applications:', appError);
+      // Continue with the job fetch even if this fails
+    }
+    
+    // Get the job IDs that have accepted applications
+    const jobIdsWithAcceptedApplications = (acceptedApplicationJobs || []).map(app => app.job_id);
+    
+    // Start building the query
+    let query = supabase
+      .from('jobs')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    // If we have jobs with accepted applications, filter them out
+    if (jobIdsWithAcceptedApplications.length > 0) {
+      query = query.not('id', 'in', `(${jobIdsWithAcceptedApplications.join(',')})`);
+    }
+    
+    if (searchParams.searchTerm) {
+      const term = searchParams.searchTerm.toLowerCase();
+      query = query.or(`title.ilike.%${term}%,description.ilike.%${term}%,company.ilike.%${term}%`);
+    }
+    
+    if (searchParams.location) {
+      query = query.ilike('location', `%${searchParams.location}%`);
+    }
+    
+    if (searchParams.jobTypes && searchParams.jobTypes.length > 0) {
+      query = query.in('job_type', searchParams.jobTypes);
+    }
+    
+    if (searchParams.urgency && searchParams.urgency.length > 0) {
+      query = query.in('urgency', searchParams.urgency);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error searching jobs:', error);
+      throw error;
+    }
+    
+    return (data || []).map(convertToJob) as Job[];
+  } catch (error) {
+    console.error('Exception in getJobsBySearch:', error);
+    // Return empty array instead of throwing
+    return [];
   }
-  
-  if (searchParams.location) {
-    query = query.ilike('location', `%${searchParams.location}%`);
-  }
-  
-  if (searchParams.jobTypes && searchParams.jobTypes.length > 0) {
-    query = query.in('job_type', searchParams.jobTypes);
-  }
-  
-  if (searchParams.urgency && searchParams.urgency.length > 0) {
-    query = query.in('urgency', searchParams.urgency);
-  }
-  
-  const { data, error } = await query;
-  
-  if (error) {
-    console.error('Error searching jobs:', error);
-    throw error;
-  }
-  
-  // Convert data to ensure correct typing
-  return (data || []).map(convertToJob) as Job[];
 };
 
 export const getJobById = async (jobId: string) => {

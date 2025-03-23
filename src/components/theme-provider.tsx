@@ -29,11 +29,31 @@ export function ThemeProvider({
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
+  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  const [isInitialized, setIsInitialized] = useState(false);
 
+  // Load theme from localStorage on component mount, but only once
   useEffect(() => {
+    try {
+      const storedTheme = localStorage.getItem(storageKey) as Theme | null;
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        // If no theme is stored, use system preference
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        setTheme(prefersDark ? "dark" : "light");
+      }
+    } catch (error) {
+      console.error("Failed to get theme from localStorage:", error);
+    } finally {
+      setIsInitialized(true);
+    }
+  }, [storageKey]);
+
+  // Apply theme to document root
+  useEffect(() => {
+    if (!isInitialized) return;
+    
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
 
@@ -48,12 +68,18 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme);
-  }, [theme]);
+    
+    // Store in localStorage whenever theme changes (after initialization)
+    try {
+      localStorage.setItem(storageKey, theme);
+    } catch (error) {
+      console.error("Failed to save theme to localStorage:", error);
+    }
+  }, [theme, isInitialized, storageKey]);
 
   const value = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
       setTheme(theme);
     },
   };

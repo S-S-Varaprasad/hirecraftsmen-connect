@@ -22,6 +22,12 @@ export const useJobs = () => {
     queryKey: ['jobs'],
     queryFn: getJobs,
     staleTime: 1000 * 60, // 1 minute
+    retry: 3,
+    retryDelay: attempt => Math.min(attempt > 1 ? 2000 : 1000, 10000),
+    onError: (err: any) => {
+      console.error('Error fetching jobs:', err);
+      toast.error('Failed to load jobs. Please try again.');
+    }
   });
 
   // Query to fetch filtered jobs
@@ -34,6 +40,12 @@ export const useJobs = () => {
     queryFn: () => getJobsBySearch(filters || {}),
     enabled: !!filters,
     staleTime: 1000 * 60, // 1 minute
+    retry: 3,
+    retryDelay: attempt => Math.min(attempt > 1 ? 2000 : 1000, 10000),
+    onError: (err: any) => {
+      console.error('Error fetching filtered jobs:', err);
+      toast.error('Failed to load filtered jobs. Please try again.');
+    }
   });
 
   // Function to handle search
