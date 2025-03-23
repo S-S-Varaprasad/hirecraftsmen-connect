@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,11 +26,23 @@ const BasicInfoFields = ({
   languageOptions = [],
   skillSuggestions = []
 }: BasicInfoFieldsProps) => {
-  // Ensure all array props are valid arrays - CRITICAL for preventing undefined is not iterable errors
-  const safeProfessionOptions = Array.isArray(professionOptions) ? professionOptions : [];
-  const safeLocationOptions = Array.isArray(locationOptions) ? locationOptions : [];
-  const safeLanguageOptions = Array.isArray(languageOptions) ? languageOptions : [];
-  const safeSkillSuggestions = Array.isArray(skillSuggestions) ? skillSuggestions : [];
+  // CRITICAL: Memoize all array props to ensure they're always valid arrays
+  // This is key to fixing the "undefined is not iterable" error
+  const safeProfessionOptions = useMemo(() => 
+    Array.isArray(professionOptions) ? professionOptions : [], 
+  [professionOptions]);
+  
+  const safeLocationOptions = useMemo(() => 
+    Array.isArray(locationOptions) ? locationOptions : [], 
+  [locationOptions]);
+  
+  const safeLanguageOptions = useMemo(() => 
+    Array.isArray(languageOptions) ? languageOptions : [], 
+  [languageOptions]);
+  
+  const safeSkillSuggestions = useMemo(() => 
+    Array.isArray(skillSuggestions) ? skillSuggestions : [], 
+  [skillSuggestions]);
   
   // Prevent form submission when interacting with fields
   const preventPropagation = (e: React.MouseEvent | React.FormEvent) => {
@@ -40,8 +52,16 @@ const BasicInfoFields = ({
     }
   };
   
+  // Log validation for debugging
+  React.useEffect(() => {
+    console.log('BasicInfoFields - Arrays validation:');
+    console.log('safeProfessionOptions:', safeProfessionOptions.length);
+    console.log('safeLocationOptions:', safeLocationOptions.length);
+    console.log('safeLanguageOptions:', safeLanguageOptions.length);
+  }, [safeProfessionOptions, safeLocationOptions, safeLanguageOptions]);
+  
   return (
-    <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
+    <div className="space-y-4" onClick={preventPropagation} onMouseDown={preventPropagation}>
       <div className="mb-4">
         <Label htmlFor="name" className="text-base">Full Name</Label>
         <Input

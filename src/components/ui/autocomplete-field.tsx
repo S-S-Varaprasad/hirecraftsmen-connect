@@ -23,21 +23,23 @@ export function AutocompleteField({
   options = [],
   searchable = true,
 }: AutocompleteFieldProps) {
-  // IMPORTANT: Validate options to ensure it's always an array
-  const safeOptions = Array.isArray(options) ? options : [];
+  // CRITICAL: Always validate options and provide default value
+  const safeOptions = React.useMemo(() => {
+    return Array.isArray(options) ? options : [];
+  }, [options]);
   
-  // Safer value change handler with additional error catching
+  // Safer value change handler with error boundary
   const handleValueChange = (field: any, value: string) => {
     try {
       if (field && typeof field.onChange === 'function') {
         field.onChange(value);
       }
     } catch (error) {
-      console.error("Error in handleValueChange:", error);
+      console.error("Error in AutocompleteField handleValueChange:", error);
     }
   };
   
-  // Prevent event propagation to avoid form submission
+  // Prevent event propagation helper
   const preventPropagation = (e: React.MouseEvent | React.FormEvent) => {
     if (e) {
       e.preventDefault();

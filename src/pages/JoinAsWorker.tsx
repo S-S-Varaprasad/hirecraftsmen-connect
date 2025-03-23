@@ -22,38 +22,60 @@ const JoinAsWorker = () => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [resume, setResume] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isFormReady, setIsFormReady] = useState(false);
 
-  // Validate all arrays to ensure they're always valid - critical for the "undefined is not iterable" error
-  const safeIndianRegions = Array.isArray(allIndianRegions) ? allIndianRegions : [];
-  const safeProfessions = Array.isArray(professions) ? professions : [];
-  const safeIndianLanguages = Array.isArray(indianLanguages) ? indianLanguages : [];
-  const safeSkillSuggestions = Array.isArray(skillSuggestions) ? skillSuggestions : [];
+  // CRITICAL: Validate all arrays to ensure they're always valid 
+  // This is key to fixing the "undefined is not iterable" error
+  const safeIndianRegions = React.useMemo(() => 
+    Array.isArray(allIndianRegions) ? allIndianRegions : [], 
+  []);
+  
+  const safeProfessions = React.useMemo(() => 
+    Array.isArray(professions) ? professions : [],
+  []);
+  
+  const safeIndianLanguages = React.useMemo(() => 
+    Array.isArray(indianLanguages) ? indianLanguages : [],
+  []);
+  
+  const safeSkillSuggestions = React.useMemo(() => 
+    Array.isArray(skillSuggestions) ? skillSuggestions : [],
+  []);
 
   // Convert professions to the format required by AutocompleteField
-  const professionOptions = safeProfessions.map(profession => ({
-    value: profession,
-    label: profession,
-  }));
+  const professionOptions = React.useMemo(() => 
+    safeProfessions.map(profession => ({
+      value: profession,
+      label: profession,
+    })),
+  [safeProfessions]);
 
   // Convert regions to the format required by AutocompleteField
-  const locationOptions = safeIndianRegions.map(region => ({
-    value: region,
-    label: region,
-  }));
+  const locationOptions = React.useMemo(() => 
+    safeIndianRegions.map(region => ({
+      value: region,
+      label: region,
+    })),
+  [safeIndianRegions]);
 
   // Convert languages to the format required by AutocompleteField
-  const languageOptions = safeIndianLanguages.map(language => ({
-    value: language,
-    label: language,
-  }));
+  const languageOptions = React.useMemo(() => 
+    safeIndianLanguages.map(language => ({
+      value: language,
+      label: language,
+    })),
+  [safeIndianLanguages]);
 
   useEffect(() => {
+    // Set form as ready once all arrays are properly initialized
+    setIsFormReady(true);
+    
     // Log validation for debugging purposes
     console.log('Options validation:');
     console.log('Profession options:', professionOptions);
     console.log('Location options:', locationOptions);
     console.log('Language options:', languageOptions);
-  }, []);
+  }, [professionOptions, locationOptions, languageOptions]);
 
   const onSubmit = async (data: any) => {
     if (!user) {
@@ -104,6 +126,20 @@ const JoinAsWorker = () => {
       toast.error(error?.message || 'Failed to create worker profile');
     }
   };
+
+  if (!isFormReady) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16">
+          <div className="container mx-auto px-4 text-center">
+            Loading form...
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

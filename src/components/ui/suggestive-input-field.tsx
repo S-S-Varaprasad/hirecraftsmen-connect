@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { SearchInput } from '@/components/ui/search-input';
 
@@ -20,8 +20,10 @@ export function SuggestiveInputField({
   description,
   suggestions = [], 
 }: SuggestiveInputFieldProps) {
-  // Ensure suggestions is always a valid array
-  const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
+  // CRITICAL: Memoize the suggestions array to ensure it's always valid
+  const safeSuggestions = useMemo(() => {
+    return Array.isArray(suggestions) ? suggestions : [];
+  }, [suggestions]);
   
   // Prevent form submission when interacting with the input
   const preventPropagation = (e: React.MouseEvent | React.FormEvent) => {

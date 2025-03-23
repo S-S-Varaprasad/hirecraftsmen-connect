@@ -33,49 +33,67 @@ interface ComboboxProps {
 export function Combobox({
   placeholder = "Select option...",
   emptyMessage = "No results found.",
-  options = [],
+  options,
   value,
   onChange,
   triggerClassName,
   searchPlaceholder = "Search...",
   disabled = false,
 }: ComboboxProps) {
+  // Initialize state with controlled open state
   const [open, setOpen] = React.useState(false);
   
-  // Ensure options is always a valid array - this is crucial to prevent the undefined is not iterable error
+  // CRITICAL: Ensure options is always a valid array with defensive check
+  // This is the key fix for the "undefined is not iterable" error
   const safeOptions = Array.isArray(options) ? options : [];
+  
+  // Ref to track if component is mounted to prevent state updates after unmount
+  const isMounted = React.useRef(true);
+  React.useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
-  // Safely handle button click and prevent form submission
-  const handleTriggerClick = (e: React.MouseEvent) => {
+  // Handle button click with prevention of form submission and additional safety
+  const handleButtonClick = (e: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     
-    if (!disabled) {
+    if (!disabled && isMounted.current) {
       setOpen(!open);
     }
   };
 
-  // Safely handle option selection
-  const handleOptionSelect = (currentValue: string, optionValue: string) => {
+  // Safely handle option selection with proper error handling
+  const handleSelectOption = (currentValue: string, selectedValue: string) => {
     try {
-      if (onChange) {
-        onChange(optionValue === value ? "" : optionValue);
+      if (onChange && isMounted.current) {
+        // Only call onChange if it exists and component is still mounted
+        onChange(selectedValue === value ? "" : selectedValue);
       }
-      setOpen(false);
+      
+      if (isMounted.current) {
+        setOpen(false);
+      }
     } catch (error) {
-      console.error("Error in handleOptionSelect:", error);
-      setOpen(false);
+      console.error("Error in ComboBox selection handler:", error);
+      if (isMounted.current) {
+        setOpen(false);
+      }
     }
   };
 
-  // When PopoverContent opens/closes
+  // Handle popover open/close events safely
   const handleOpenChange = (newOpen: boolean) => {
     try {
-      setOpen(newOpen);
+      if (isMounted.current) {
+        setOpen(newOpen);
+      }
     } catch (error) {
-      console.error("Error in handleOpenChange:", error);
+      console.error("Error in ComboBox open change handler:", error);
     }
   };
 
@@ -88,9 +106,12 @@ export function Combobox({
           aria-expanded={open}
           className={cn("w-full justify-between", triggerClassName)}
           disabled={disabled}
-          onClick={handleTriggerClick}
-          onMouseDown={(e) => e.stopPropagation()}
-          type="button" // Explicitly set to prevent form submission
+          onClick={handleButtonClick}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          type="button" // Explicitly set type to prevent form submission
         >
           {value && safeOptions.length > 0
             ? safeOptions.find((option) => option.value === value)?.label || placeholder
@@ -100,8 +121,14 @@ export function Combobox({
       </PopoverTrigger>
       <PopoverContent 
         className="w-full p-0" 
-        onMouseDown={(e) => e.stopPropagation()} 
-        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }} 
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
         align="start"
         side="bottom"
         sideOffset={4}
@@ -114,9 +141,15 @@ export function Combobox({
               <CommandItem
                 key={option.value}
                 value={option.value}
-                onSelect={(currentValue) => handleOptionSelect(currentValue, option.value)}
-                onMouseDown={(e) => e.stopPropagation()}
-                onClick={(e) => e.stopPropagation()}
+                onSelect={(currentValue) => handleSelectOption(currentValue, option.value)}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
               >
                 <Check
                   className={cn(
