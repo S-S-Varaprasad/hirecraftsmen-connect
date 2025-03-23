@@ -50,6 +50,7 @@ serve(async (req: Request) => {
 
     const notificationType = isUpdate ? "job update" : "new job";
     console.log(`Notifying workers about ${notificationType}: ${jobTitle} with skills: ${skills.join(', ')}`);
+    console.log(`Category: ${category || 'None provided'}`);
     
     // Get workers with matching skills or profession
     const { data: workers, error: workersError } = await supabaseClient
@@ -68,26 +69,66 @@ serve(async (req: Request) => {
     const skillsLower = skills.map(s => s.toLowerCase());
     const matchedWorkers = [];
     
-    // Create a function to check for skill matches with better matching logic
+    // Enhanced function to check for skill matches with better matching logic
     const hasMatchingSkill = (workerSkills: string[], jobSkills: string[]) => {
       const workerSkillsLower = workerSkills.map(s => s.toLowerCase());
       
       // Check if any worker skill contains or is contained by any job skill
       for (const workerSkill of workerSkillsLower) {
         for (const jobSkill of jobSkills) {
+          const workerSkillTrimmed = workerSkill.trim();
+          const jobSkillTrimmed = jobSkill.trim();
+          
           // Check for exact match
-          if (workerSkill === jobSkill) return true;
+          if (workerSkillTrimmed === jobSkillTrimmed) {
+            console.log(`Exact skill match: ${workerSkillTrimmed} = ${jobSkillTrimmed}`);
+            return true;
+          }
           
           // Check if worker skill contains job skill or vice versa
-          if (workerSkill.includes(jobSkill) || jobSkill.includes(workerSkill)) return true;
+          if (workerSkillTrimmed.includes(jobSkillTrimmed) || jobSkillTrimmed.includes(workerSkillTrimmed)) {
+            console.log(`Partial skill match: "${workerSkillTrimmed}" includes/is included in "${jobSkillTrimmed}"`);
+            return true;
+          }
           
-          // Check for partial matches (at least 4 characters to avoid false positives)
-          if (workerSkill.length >= 4 && jobSkill.length >= 4) {
-            if (workerSkill.includes(jobSkill.substring(0, 4)) || 
-                jobSkill.includes(workerSkill.substring(0, 4))) {
+          // Check for partial matches (at least 3 characters to avoid false positives)
+          if (workerSkillTrimmed.length >= 3 && jobSkillTrimmed.length >= 3) {
+            if (workerSkillTrimmed.includes(jobSkillTrimmed.substring(0, 3)) || 
+                jobSkillTrimmed.includes(workerSkillTrimmed.substring(0, 3))) {
+              console.log(`Substring skill match: "${workerSkillTrimmed}" and "${jobSkillTrimmed}" share substrings`);
               return true;
             }
           }
+        }
+      }
+      
+      return false;
+    };
+    
+    const hasMatchingProfession = (workerProfession: string, jobCategory?: string) => {
+      if (!jobCategory) return false;
+      
+      const workerProfessionLower = workerProfession.toLowerCase().trim();
+      const jobCategoryLower = jobCategory.toLowerCase().trim();
+      
+      // Check for exact match
+      if (workerProfessionLower === jobCategoryLower) {
+        console.log(`Exact profession match: ${workerProfessionLower} = ${jobCategoryLower}`);
+        return true;
+      }
+      
+      // Check if profession contains category or vice versa
+      if (workerProfessionLower.includes(jobCategoryLower) || jobCategoryLower.includes(workerProfessionLower)) {
+        console.log(`Partial profession match: "${workerProfessionLower}" includes/is included in "${jobCategoryLower}"`);
+        return true;
+      }
+      
+      // Check for partial matches (at least 3 characters to avoid false positives)
+      if (workerProfessionLower.length >= 3 && jobCategoryLower.length >= 3) {
+        if (workerProfessionLower.includes(jobCategoryLower.substring(0, 3)) || 
+            jobCategoryLower.includes(workerProfessionLower.substring(0, 3))) {
+          console.log(`Substring profession match: "${workerProfessionLower}" and "${jobCategoryLower}" share substrings`);
+          return true;
         }
       }
       
@@ -101,15 +142,15 @@ serve(async (req: Request) => {
         continue;
       }
       
-      const matchingSkill = hasMatchingSkill(worker.skills, skillsLower);
+      const matchingSkill = hasMatchingSkill(worker.skills || [], skillsLower);
+      const matchingProfession = category ? hasMatchingProfession(worker.profession, category) : false;
       
-      // Check for matching profession if category is provided
-      const matchingProfession = category && 
-        worker.profession.toLowerCase().includes(category.toLowerCase());
+      console.log(`Checking worker ${worker.name} (ID: ${worker.id}):`);
+      console.log(`  Skills match: ${matchingSkill}`);
+      console.log(`  Profession match: ${matchingProfession}`);
       
       if (matchingSkill || matchingProfession) {
-        console.log(`Found matching worker: ${worker.name} (ID: ${worker.id})`);
-        console.log(`  Matching: ${matchingSkill ? 'Skills' : ''}${matchingSkill && matchingProfession ? ' and ' : ''}${matchingProfession ? 'Profession' : ''}`);
+        console.log(`Match found for worker: ${worker.name} (ID: ${worker.id})`);
         
         matchedWorkers.push(worker);
         

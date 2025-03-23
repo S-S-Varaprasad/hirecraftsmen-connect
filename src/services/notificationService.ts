@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Notification {
@@ -164,17 +163,16 @@ export const notifyWorkersAboutJob = async (
   try {
     console.log('Notifying workers about job:', { jobId, jobTitle, skills, category });
     
-    // Get the correct Supabase URL
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
-    // Get the correct Supabase anon key
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
+    // Get Supabase URL and anon key from client configuration
+    const supabaseUrl = supabase.supabaseUrl;
+    const supabaseAnonKey = supabase.supabaseKey;
     
     if (!supabaseUrl || !supabaseAnonKey) {
       console.error('Missing Supabase URL or anon key');
       throw new Error('Configuration error: Missing Supabase credentials');
     }
     
-    console.log('Making request to notify-workers function');
+    console.log('Making request to notify-workers function with URL:', supabaseUrl);
     
     const response = await fetch(`${supabaseUrl}/functions/v1/notify-workers`, {
       method: 'POST',

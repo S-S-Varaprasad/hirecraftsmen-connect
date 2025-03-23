@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -123,8 +124,33 @@ const PostJob = () => {
       // Send notifications to workers with matching skills
       try {
         console.log('Notifying workers about new job...');
-        // Extract category/profession from the job title if possible
-        const possibleCategory = data.title.replace(/Need a /i, '').split(' ')[0];
+        
+        // Extract category/profession from the job title
+        let possibleCategory = '';
+        
+        // Try to extract category from job title patterns like "Need a Plumber" or "Looking for Electrician"
+        const needPattern = /need\s+a\s+([a-z]+)/i;
+        const lookingPattern = /looking\s+for\s+([a-z]+)/i;
+        const needMatch = data.title.match(needPattern);
+        const lookingMatch = data.title.match(lookingPattern);
+        
+        if (needMatch && needMatch[1]) {
+          possibleCategory = needMatch[1];
+        } else if (lookingMatch && lookingMatch[1]) {
+          possibleCategory = lookingMatch[1];
+        } else {
+          // Extract first word after common prefixes or first word if no pattern matches
+          const words = data.title.split(' ');
+          if (words.length > 1) {
+            // Check for common job title patterns
+            if (words[0].toLowerCase() === 'need' || words[0].toLowerCase() === 'hiring' || 
+                words[0].toLowerCase() === 'seeking' || words[0].toLowerCase() === 'wanted') {
+              possibleCategory = words[1];
+            } else {
+              possibleCategory = words[0];
+            }
+          }
+        }
         
         console.log('Extracted possible category:', possibleCategory);
         
