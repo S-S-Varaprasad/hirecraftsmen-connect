@@ -24,9 +24,11 @@ export const useJobs = () => {
     staleTime: 1000 * 60, // 1 minute
     retry: 3,
     retryDelay: attempt => Math.min(attempt > 1 ? 2000 : 1000, 10000),
-    onError: (err: any) => {
-      console.error('Error fetching jobs:', err);
-      toast.error('Failed to load jobs. Please try again.');
+    meta: {
+      onError: (err: any) => {
+        console.error('Error fetching jobs:', err);
+        toast.error('Failed to load jobs. Please try again.');
+      }
     }
   });
 
@@ -42,9 +44,11 @@ export const useJobs = () => {
     staleTime: 1000 * 60, // 1 minute
     retry: 3,
     retryDelay: attempt => Math.min(attempt > 1 ? 2000 : 1000, 10000),
-    onError: (err: any) => {
-      console.error('Error fetching filtered jobs:', err);
-      toast.error('Failed to load filtered jobs. Please try again.');
+    meta: {
+      onError: (err: any) => {
+        console.error('Error fetching filtered jobs:', err);
+        toast.error('Failed to load filtered jobs. Please try again.');
+      }
     }
   });
 

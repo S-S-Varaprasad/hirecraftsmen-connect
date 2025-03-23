@@ -1,4 +1,3 @@
-
 // Import necessary dependencies
 import { supabase } from '@/integrations/supabase/client';
 
@@ -72,6 +71,35 @@ export const getNotifications = async (
   } catch (error) {
     console.error('Exception in getNotifications:', error);
     return [];
+  }
+};
+
+// Delete expired notifications (older than 30 days by default)
+export const deleteExpiredNotifications = async (
+  userId: string,
+  daysToKeep: number = 30
+): Promise<void> => {
+  try {
+    if (!userId) return;
+    
+    // Calculate the cutoff date (30 days ago by default)
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
+    
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', userId)
+      .lt('created_at', cutoffDate.toISOString());
+    
+    if (error) {
+      console.error('Error deleting expired notifications:', error);
+      throw error;
+    }
+    
+    console.log(`Deleted notifications older than ${daysToKeep} days for user ${userId}`);
+  } catch (error) {
+    console.error('Exception in deleteExpiredNotifications:', error);
   }
 };
 
@@ -225,6 +253,25 @@ export const notifyWorkersAboutJob = async (
   }
 };
 
+// Wrapper function to maintain compatibility with existing code in EditJob.tsx
+export const notifyWorkersAboutJobUpdate = async (
+  jobId: string,
+  jobTitle: string,
+  jobSkills: string[],
+  jobCategory?: string,
+  sendEmail: boolean = false,
+  sendSms: boolean = false
+): Promise<{ success: boolean, matched_workers: number }> => {
+  return notifyWorkersAboutJob(
+    jobId,
+    jobTitle,
+    jobSkills,
+    jobCategory || 'General',
+    sendEmail,
+    sendSms
+  );
+};
+
 export interface NotificationSettings {
   email_notifications: boolean;
   sms_notifications: boolean;
@@ -235,7 +282,7 @@ export interface NotificationSettings {
   marketing_emails: boolean;
 }
 
-// Get user notification settings
+// Get user notification settings from a separate table
 export const getUserNotificationSettings = async (userId: string): Promise<NotificationSettings | null> => {
   try {
     if (!userId) return null;

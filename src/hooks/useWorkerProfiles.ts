@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   getWorkers, 
@@ -22,26 +21,21 @@ export const useWorkerProfiles = () => {
   const { user } = useAuth();
   const { uploadFile } = useStorage();
 
-  // Change from immediate execution to a try/catch to prevent breaking the app
   const initializeBuckets = async () => {
     try {
       await ensureStorageBuckets();
     } catch (error) {
       console.error('Error ensuring storage buckets:', error);
-      // Don't throw here, let the app continue
     }
   };
   
-  // Call the function but don't await it or throw errors
   initializeBuckets();
 
-  // Fetch all workers
   const { data: workers = [], isLoading, error, refetch } = useQuery({
     queryKey: ['workers'],
     queryFn: getWorkers,
   });
 
-  // Add sample workers function
   const addSampleWorkersIfNeeded = async () => {
     try {
       if (workers.length < 3) {
@@ -60,7 +54,6 @@ export const useWorkerProfiles = () => {
     }
   };
 
-  // Force add sample workers function
   const forceSampleWorkers = async () => {
     try {
       const added = await forceAddSampleWorkers();
@@ -77,7 +70,6 @@ export const useWorkerProfiles = () => {
     }
   };
 
-  // Create a new worker profile
   const createWorkerProfile = useMutation({
     mutationFn: async (workerData: {
       name: string;
@@ -96,14 +88,12 @@ export const useWorkerProfiles = () => {
         
         console.log('Starting worker profile creation with data:', workerData);
         
-        // Upload profile image if provided
         let imageUrl = null;
         if (workerData.profileImage) {
           console.log('Uploading profile image...', workerData.profileImage);
           const fileExt = workerData.profileImage.name.split('.').pop();
           const fileName = `${user.id}-${Date.now()}.${fileExt}`;
           
-          // Use the uploadFile function from useStorage hook
           imageUrl = await uploadFile('worker-profiles', fileName, workerData.profileImage);
           
           console.log('Image upload result:', imageUrl);
@@ -113,7 +103,6 @@ export const useWorkerProfiles = () => {
           }
         }
         
-        // Upload resume if provided
         let resumeUrl = null;
         if (workerData.resume) {
           console.log('Uploading resume...');
@@ -125,10 +114,8 @@ export const useWorkerProfiles = () => {
           console.log('Resume upload result:', resumeUrl);
         }
         
-        // Parse skills from comma-separated string to array
         const skillsArray = workerData.skills.split(',').map(skill => skill.trim());
         
-        // Parse languages from comma-separated string to array
         const languagesArray = workerData.languages.split(',').map(language => language.trim());
         
         console.log('Registering worker with data:', {
@@ -139,7 +126,6 @@ export const useWorkerProfiles = () => {
           imageUrl
         });
         
-        // Register worker with the image URL
         const newWorker = await registerWorker({
           name: workerData.name,
           profession: workerData.profession,
@@ -156,7 +142,6 @@ export const useWorkerProfiles = () => {
         
         console.log('Worker registered successfully:', newWorker);
         
-        // Notify user about profile creation
         if (user.id) {
           try {
             await createNotification(
@@ -185,7 +170,6 @@ export const useWorkerProfiles = () => {
     },
   });
 
-  // Get worker profile by category
   const getWorkersByCategory = (category: string) => {
     return workers.filter(worker => 
       worker.profession.toLowerCase().includes(category.toLowerCase()) ||
@@ -193,12 +177,10 @@ export const useWorkerProfiles = () => {
     );
   };
 
-  // Get count of workers by category
   const getWorkerCountByCategory = (category: string) => {
     return getWorkersByCategory(category).length;
   };
 
-  // Update worker profile
   const updateWorkerProfile = useMutation({
     mutationFn: async ({ 
       workerId, 
@@ -218,7 +200,6 @@ export const useWorkerProfiles = () => {
     },
   });
 
-  // Deactivate worker profile
   const deactivateWorkerProfile = useMutation({
     mutationFn: async (workerId: string) => {
       return await deactivateWorker(workerId);
@@ -232,7 +213,6 @@ export const useWorkerProfiles = () => {
     },
   });
 
-  // Delete worker profile
   const deleteWorkerProfile = useMutation({
     mutationFn: async (workerId: string) => {
       return await deleteWorker(workerId);
@@ -246,7 +226,6 @@ export const useWorkerProfiles = () => {
     },
   });
 
-  // Get a single worker by ID
   const getWorker = async (id: string) => {
     try {
       const worker = await getWorkerById(id);
@@ -257,26 +236,11 @@ export const useWorkerProfiles = () => {
     }
   };
 
-  // Send notifications to matched workers about a job
-  const notifyWorkers = async (
-    jobId: string,
-    jobTitle: string,
-    skills: string[],
-    category?: string,
-    sendEmail?: boolean,
-    sendSms?: boolean,
-    employerId?: string
-  ) => {
+  const notifyWorkers = async (jobId: string, jobTitle: string, jobSkills: string[]) => {
     try {
-      const result = await notifyWorkersAboutJob(
-        jobId,
-        jobTitle,
-        skills,
-        category,
-        sendEmail,
-        sendSms,
-        employerId
-      );
+      if (!user) return;
+      
+      const result = await notifyWorkersAboutJob(jobId, jobTitle, jobSkills, 'General');
       return result;
     } catch (error) {
       console.error('Error notifying workers:', error);

@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { getJobById, updateJob } from '@/services/jobService';
 import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
-import { notifyWorkersAboutJobUpdate } from '@/services/notificationService';
+import { notifyWorkersAboutJob, notifyWorkersAboutJobUpdate } from '@/services/notificationService';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
