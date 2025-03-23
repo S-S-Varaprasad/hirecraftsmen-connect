@@ -114,9 +114,9 @@ export const useWorkerProfiles = () => {
           console.log('Resume upload result:', resumeUrl);
         }
         
-        const skillsArray = workerData.skills.split(',').map(skill => skill.trim());
+        const skillsArray = workerData.skills.split(',').map(skill => skill.trim()).filter(Boolean);
         
-        const languagesArray = workerData.languages.split(',').map(language => language.trim());
+        const languagesArray = workerData.languages.split(',').map(language => language.trim()).filter(Boolean);
         
         console.log('Registering worker with data:', {
           name: workerData.name,
@@ -168,6 +168,36 @@ export const useWorkerProfiles = () => {
     },
     onError: (error: Error) => {
       toast.error(`Failed to create worker profile: ${error.message}`);
+    },
+  });
+
+  const updateProfileImage = useMutation({
+    mutationFn: async ({ 
+      workerId, 
+      imageFile 
+    }: { 
+      workerId: string,
+      imageFile: File
+    }) => {
+      if (!user) throw new Error('You must be logged in to update your profile');
+      
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      
+      const imageUrl = await uploadFile('worker-profiles', fileName, imageFile);
+      
+      if (!imageUrl) {
+        throw new Error('Failed to upload profile image');
+      }
+      
+      return await updateWorker(workerId, { image_url: imageUrl });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workers'] });
+      toast.success('Profile image updated successfully!');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update profile image: ${error.message}`);
     },
   });
 
@@ -263,6 +293,7 @@ export const useWorkerProfiles = () => {
     notifyWorkers,
     refetch,
     addSampleWorkersIfNeeded,
-    forceSampleWorkers
+    forceSampleWorkers,
+    updateProfileImage
   };
 };

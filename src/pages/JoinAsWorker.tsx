@@ -18,6 +18,8 @@ import {
   skills as skillSuggestions,
 } from '@/utils/suggestions';
 import { useForm } from 'react-hook-form';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Camera, Upload } from 'lucide-react';
 
 const JoinAsWorker = () => {
   const navigate = useNavigate();
@@ -42,6 +44,7 @@ const JoinAsWorker = () => {
   const [resumeName, setResumeName] = useState<string | null>(null);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [resume, setResume] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Convert professions to the format required by AutocompleteField
   const professionOptions = professions.map(profession => ({
@@ -66,6 +69,18 @@ const JoinAsWorker = () => {
 
     if (file) {
       if (type === 'profileImage') {
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error('Profile image must be smaller than 5MB');
+          return;
+        }
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          toast.error('File must be an image');
+          return;
+        }
+        
         setProfileImage(file);
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -73,6 +88,19 @@ const JoinAsWorker = () => {
         };
         reader.readAsDataURL(file);
       } else if (type === 'resume') {
+        // Validate file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error('Resume must be smaller than 10MB');
+          return;
+        }
+        
+        // Validate file type
+        const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        if (!validTypes.includes(file.type)) {
+          toast.error('Resume must be a PDF or Word document');
+          return;
+        }
+        
         setResume(file);
         setResumeName(file.name);
       }
@@ -87,6 +115,8 @@ const JoinAsWorker = () => {
     }
 
     try {
+      setIsUploading(true);
+      
       const result = await createWorkerProfile.mutateAsync({
         name: data.name,
         profession: data.profession,
@@ -100,10 +130,12 @@ const JoinAsWorker = () => {
         resume: resume,
       });
 
+      setIsUploading(false);
       toast.success('Profile created successfully! Please login to access your account.');
       // Navigate to login page after creating profile
       navigate('/login');
     } catch (error: any) {
+      setIsUploading(false);
       console.error('Error creating worker profile:', error);
       toast.error(error?.message || 'Failed to create worker profile');
     }
@@ -119,6 +151,32 @@ const JoinAsWorker = () => {
             <div className="px-8 py-12">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">Join as a Worker</h2>
               <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="flex justify-center mb-6">
+                  <div className="relative group cursor-pointer">
+                    <Avatar className="w-24 h-24 border-4 border-gray-100">
+                      {profileImagePreview ? (
+                        <AvatarImage src={profileImagePreview} alt="Profile Preview" />
+                      ) : (
+                        <AvatarFallback className="bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                          <Camera className="h-8 w-8 text-gray-400" />
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Upload className="h-6 w-6 text-white" />
+                    </div>
+                    <input
+                      type="file"
+                      id="profileImage"
+                      name="profileImage"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, 'profileImage')}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                </div>
+                <p className="text-center text-sm text-gray-500 mb-6">Click the avatar to upload your profile picture</p>
+
                 <div className="mb-4">
                   <Label htmlFor="name" className="text-base">Full Name</Label>
                   <Input
@@ -213,27 +271,6 @@ const JoinAsWorker = () => {
                 </div>
 
                 <div className="mb-4">
-                  <Label htmlFor="profileImage" className="text-base">Profile Image</Label>
-                  <Input
-                    type="file"
-                    id="profileImage"
-                    name="profileImage"
-                    accept="image/*"
-                    onChange={(e) => handleFileChange(e, 'profileImage')}
-                    className="mt-1"
-                  />
-                  {profileImagePreview && (
-                    <div className="mt-2">
-                      <img
-                        src={profileImagePreview}
-                        alt="Profile Preview"
-                        className="w-20 h-20 rounded-full object-cover"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="mb-4">
                   <Label htmlFor="resume" className="text-base">Resume</Label>
                   <Input
                     type="file"
@@ -248,8 +285,8 @@ const JoinAsWorker = () => {
                   )}
                 </div>
 
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-                  Create Profile
+                <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isUploading}>
+                  {isUploading ? 'Creating Profile...' : 'Create Profile'}
                 </Button>
               </form>
               <div className="mt-6 text-center">

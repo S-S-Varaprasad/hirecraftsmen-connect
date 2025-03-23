@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 // Make sure the necessary storage buckets exist
 export const ensureStorageBuckets = async () => {
   try {
+    console.log('Ensuring storage buckets exist...');
     // Check if worker-profiles bucket exists
     const { data: buckets, error } = await supabase.storage.listBuckets();
     
@@ -20,14 +21,22 @@ export const ensureStorageBuckets = async () => {
     // Create worker-profiles bucket if it doesn't exist
     if (!workerProfilesBucket) {
       try {
+        console.log('Creating worker-profiles bucket...');
         const { error: createError } = await supabase.storage.createBucket('worker-profiles', {
           public: true,
+          fileSizeLimit: 5242880, // 5MB limit for profile images
         });
         
         if (createError) {
           console.error('Error creating worker-profiles bucket:', createError);
         } else {
           console.log('Successfully created worker-profiles bucket');
+          
+          // Set bucket to public
+          const { error: policyError } = await supabase.storage.from('worker-profiles').createSignedUrl('dummy.txt', 60);
+          if (policyError && policyError.message !== 'The resource was not found') {
+            console.error('Error setting public policy for worker-profiles bucket:', policyError);
+          }
         }
       } catch (createErr) {
         console.error('Exception when creating worker-profiles bucket:', createErr);
@@ -39,14 +48,22 @@ export const ensureStorageBuckets = async () => {
     // Create resumes bucket if it doesn't exist
     if (!resumesBucket) {
       try {
+        console.log('Creating resumes bucket...');
         const { error: createError } = await supabase.storage.createBucket('resumes', {
           public: true,
+          fileSizeLimit: 10485760, // 10MB limit for resumes
         });
         
         if (createError) {
           console.error('Error creating resumes bucket:', createError);
         } else {
           console.log('Successfully created resumes bucket');
+          
+          // Set bucket to public
+          const { error: policyError } = await supabase.storage.from('resumes').createSignedUrl('dummy.txt', 60);
+          if (policyError && policyError.message !== 'The resource was not found') {
+            console.error('Error setting public policy for resumes bucket:', policyError);
+          }
         }
       } catch (createErr) {
         console.error('Exception when creating resumes bucket:', createErr);
