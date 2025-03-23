@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -8,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { getJobById, updateJob } from '@/services/jobService';
 import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
-import { notifyWorkersAboutJob, notifyWorkersAboutJobUpdate } from '@/services/notificationService';
+import { notifyWorkersAboutJobUpdate } from '@/services/notificationService';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
