@@ -10,7 +10,7 @@ export const useJobs = () => {
   const [isSearching, setIsSearching] = useState(false);
 
   // Set up real-time updates for jobs table
-  useQueryRefresh(['jobs'], [['jobs']]);
+  useQueryRefresh(['jobs'], [['jobs'], ['applications']]);
 
   // Query to fetch all jobs
   const { 
@@ -72,6 +72,12 @@ export const useJobs = () => {
       setIsSearching(false);
     }
   };
+
+  // Listen for changes in applications table
+  useEffect(() => {
+    // Force refresh on component mount to ensure we have latest data
+    refreshJobs();
+  }, []);
 
   // Manually refresh the data
   const refreshJobs = () => {

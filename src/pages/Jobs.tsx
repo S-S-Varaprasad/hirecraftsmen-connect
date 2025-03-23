@@ -11,6 +11,7 @@ import { Canvas } from '@react-three/fiber';
 import { Stars, PerspectiveCamera } from '@react-three/drei';
 import { useMediaQuery } from '@/hooks/use-mobile';
 import { useJobs } from '@/hooks/useJobs';
+import { useTheme } from '@/components/theme-provider';
 
 // 3D floating particles background component
 const Background3D = () => {
@@ -29,11 +30,20 @@ const Background3D = () => {
 const Jobs = () => {
   const { jobs, isLoading, error, handleSearch, refreshJobs } = useJobs();
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const { theme } = useTheme();
 
   // Refresh jobs on component mount
   useEffect(() => {
     refreshJobs();
   }, []);
+
+  // Add additional effect to handle theme persistence
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark' && !root.classList.contains('dark')) {
+      root.classList.add('dark');
+    }
+  }, [theme]);
 
   if (isLoading) {
     return (
