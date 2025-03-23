@@ -3,8 +3,7 @@ import React, { useMemo } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { AutocompleteField } from '@/components/ui/autocomplete-field';
-import { SuggestiveInputField } from '@/components/ui/suggestive-input-field';
+import { ManualInputField } from '@/components/ui/manual-input-field';
 import { UseFormRegister, FieldErrors, Control } from 'react-hook-form';
 
 interface BasicInfoFieldsProps {
@@ -26,59 +25,28 @@ const BasicInfoFields = ({
   languageOptions = [],
   skillSuggestions = []
 }: BasicInfoFieldsProps) => {
-  // CRITICAL: Memoize all array props to ensure they're always valid arrays
-  // This is key to fixing the "undefined is not iterable" error
-  const safeProfessionOptions = useMemo(() => {
-    if (!Array.isArray(professionOptions)) {
-      console.error("professionOptions is not an array in BasicInfoFields:", professionOptions);
-      return [];
-    }
-    return professionOptions;
+  // Extract suggestion values from option objects
+  const professionSuggestions = useMemo(() => {
+    if (!Array.isArray(professionOptions)) return [];
+    return professionOptions.map(option => option.label || option.value);
   }, [professionOptions]);
   
-  const safeLocationOptions = useMemo(() => {
-    if (!Array.isArray(locationOptions)) {
-      console.error("locationOptions is not an array in BasicInfoFields:", locationOptions);
-      return [];
-    }
-    return locationOptions;
+  const locationSuggestions = useMemo(() => {
+    if (!Array.isArray(locationOptions)) return [];
+    return locationOptions.map(option => option.label || option.value);
   }, [locationOptions]);
   
-  const safeLanguageOptions = useMemo(() => {
-    if (!Array.isArray(languageOptions)) {
-      console.error("languageOptions is not an array in BasicInfoFields:", languageOptions);
-      return [];
-    }
-    return languageOptions;
+  const languageSuggestions = useMemo(() => {
+    if (!Array.isArray(languageOptions)) return [];
+    return languageOptions.map(option => option.label || option.value);
   }, [languageOptions]);
   
   const safeSkillSuggestions = useMemo(() => {
-    if (!Array.isArray(skillSuggestions)) {
-      console.error("skillSuggestions is not an array in BasicInfoFields:", skillSuggestions);
-      return [];
-    }
-    return skillSuggestions;
+    return Array.isArray(skillSuggestions) ? skillSuggestions : [];
   }, [skillSuggestions]);
   
-  // Prevent form submission when interacting with fields
-  const preventPropagation = (e: React.MouseEvent | React.FormEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  };
-  
-  // Log validation for debugging
-  React.useEffect(() => {
-    console.log('BasicInfoFields - Arrays validation:');
-    console.log('safeProfessionOptions:', safeProfessionOptions?.length);
-    console.log('safeLocationOptions:', safeLocationOptions?.length);
-    console.log('safeLanguageOptions:', safeLanguageOptions?.length);
-    console.log('safeSkillSuggestions:', safeSkillSuggestions?.length);
-  }, [safeProfessionOptions, safeLocationOptions, safeLanguageOptions, safeSkillSuggestions]);
-  
   return (
-    <div className="space-y-4" onClick={preventPropagation} onMouseDown={preventPropagation}>
+    <div className="space-y-4">
       <div className="mb-4">
         <Label htmlFor="name" className="text-base">Full Name</Label>
         <Input
@@ -92,31 +60,27 @@ const BasicInfoFields = ({
         {errors.name && <p className="text-red-500 text-sm mt-1">{(errors.name as any).message}</p>}
       </div>
 
-      <div className="mb-4 autocomplete-field-wrapper" 
-        onClick={preventPropagation} 
-        onMouseDown={preventPropagation}
-      >
-        <AutocompleteField
+      <div className="mb-4">
+        <ManualInputField
           name="profession"
           control={control}
           label="Profession"
-          placeholder="e.g., Electrician, Plumber"
-          options={safeProfessionOptions}
-          description="Select your profession from the list or type to search"
+          placeholder="Type your profession and press Enter"
+          suggestions={professionSuggestions}
+          description="Select your profession or add a custom one"
+          helperText="For example: Electrician, Plumber, Carpenter"
         />
       </div>
 
-      <div className="mb-4 autocomplete-field-wrapper" 
-        onClick={preventPropagation} 
-        onMouseDown={preventPropagation}
-      >
-        <AutocompleteField
+      <div className="mb-4">
+        <ManualInputField
           name="location"
           control={control}
           label="Location"
-          placeholder="Your City, State"
-          options={safeLocationOptions}
-          description="Select your location from the list or type to search"
+          placeholder="Type your location and press Enter"
+          suggestions={locationSuggestions}
+          description="Select your location or add a custom one"
+          helperText="For example: Mumbai, Delhi, Bangalore"
         />
       </div>
 
@@ -130,6 +94,7 @@ const BasicInfoFields = ({
           className="mt-1"
           required
         />
+        {errors.experience && <p className="text-red-500 text-sm mt-1">{(errors.experience as any).message}</p>}
       </div>
 
       <div className="mb-4">
@@ -142,34 +107,30 @@ const BasicInfoFields = ({
           className="mt-1"
           required
         />
+        {errors.hourlyRate && <p className="text-red-500 text-sm mt-1">{(errors.hourlyRate as any).message}</p>}
       </div>
 
-      <div className="mb-4 suggestive-field-wrapper" 
-        onClick={preventPropagation} 
-        onMouseDown={preventPropagation}
-      >
-        <SuggestiveInputField
+      <div className="mb-4">
+        <ManualInputField
           name="skills"
           control={control}
           label="Skills"
-          placeholder="e.g., Wiring, Plumbing, Carpentry"
+          placeholder="Type a skill and press Enter"
           suggestions={safeSkillSuggestions}
-          description="List your skills, separated by commas"
+          description="Add your skills one by one"
+          helperText="For example: Wiring, Plumbing, Carpentry"
         />
       </div>
 
-      <div className="mb-4 autocomplete-field-wrapper" 
-        onClick={preventPropagation} 
-        onMouseDown={preventPropagation}
-      >
-        <AutocompleteField
+      <div className="mb-4">
+        <ManualInputField
           name="languages"
           control={control}
           label="Languages"
-          placeholder="English, Hindi, Tamil"
-          options={safeLanguageOptions}
-          description="Select languages you speak"
-          searchable={true}
+          placeholder="Type a language and press Enter"
+          suggestions={languageSuggestions}
+          description="Add languages you speak"
+          helperText="For example: English, Hindi, Tamil"
         />
       </div>
 

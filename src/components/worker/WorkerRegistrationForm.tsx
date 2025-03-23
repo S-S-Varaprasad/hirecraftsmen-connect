@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -46,57 +46,7 @@ const WorkerRegistrationForm = ({
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [resumeName, setResumeName] = useState<string | null>(null);
   
-  // CRITICAL: Ensure all array props are valid arrays with useMemo
-  const safeProfessionOptions = useMemo(() => {
-    if (!Array.isArray(professionOptions)) {
-      console.error("Invalid professionOptions:", professionOptions);
-      return [];
-    }
-    return professionOptions;
-  }, [professionOptions]);
-  
-  const safeLocationOptions = useMemo(() => {
-    if (!Array.isArray(locationOptions)) {
-      console.error("Invalid locationOptions:", locationOptions);
-      return [];
-    }
-    return locationOptions;
-  }, [locationOptions]);
-  
-  const safeLanguageOptions = useMemo(() => {
-    if (!Array.isArray(languageOptions)) {
-      console.error("Invalid languageOptions:", languageOptions);
-      return [];
-    }
-    return languageOptions;
-  }, [languageOptions]);
-  
-  const safeSkillSuggestions = useMemo(() => {
-    if (!Array.isArray(skillSuggestions)) {
-      console.error("Invalid skillSuggestions:", skillSuggestions);
-      return [];
-    }
-    return skillSuggestions;
-  }, [skillSuggestions]);
-  
-  // Log all props for debugging
-  React.useEffect(() => {
-    console.log("WorkerRegistrationForm props check:");
-    console.log("professionOptions:", professionOptions?.length);
-    console.log("locationOptions:", locationOptions?.length);
-    console.log("languageOptions:", languageOptions?.length);
-    console.log("skillSuggestions:", skillSuggestions?.length);
-  }, [professionOptions, locationOptions, languageOptions, skillSuggestions]);
-  
-  // Stop event propagation to prevent unwanted form submissions
-  const preventDefaultSubmit = (e: React.FormEvent) => {
-    // Only prevent propagation for child events, not the form submission itself
-    if (e.target !== e.currentTarget) {
-      e.stopPropagation();
-    }
-  };
-
-  // Properly handle form submission with error handling
+  // Safely handle form submission with error handling
   const onFormSubmit = (data: any) => {
     try {
       // Validate data before submission
@@ -126,8 +76,6 @@ const WorkerRegistrationForm = ({
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">Join as a Worker</h2>
         <form 
           onSubmit={handleSubmit(onFormSubmit)} 
-          onClick={preventDefaultSubmit}
-          onMouseDown={preventDefaultSubmit}
           className="space-y-6"
         >
           <ProfileImageUpload
@@ -140,10 +88,10 @@ const WorkerRegistrationForm = ({
             register={register}
             errors={errors}
             control={control}
-            professionOptions={safeProfessionOptions}
-            locationOptions={safeLocationOptions}
-            languageOptions={safeLanguageOptions}
-            skillSuggestions={safeSkillSuggestions}
+            professionOptions={professionOptions}
+            locationOptions={locationOptions}
+            languageOptions={languageOptions}
+            skillSuggestions={skillSuggestions}
           />
           
           <ResumeUpload

@@ -16,20 +16,6 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
-        
-        // New standardized variants based on our color palette
-        blue: "border-transparent bg-app-blue text-white",
-        orange: "border-transparent bg-app-orange text-white",
-        yellow: "border-transparent bg-app-yellow text-app-charcoal",
-        teal: "border-transparent bg-app-teal text-white",
-        red: "border-transparent bg-app-red text-white",
-        
-        // Subtle variants
-        "blue-subtle": "bg-app-blue/10 text-app-blue border-app-blue/20",
-        "orange-subtle": "bg-app-orange/10 text-app-orange border-app-orange/20",
-        "yellow-subtle": "bg-app-yellow/10 text-app-charcoal border-app-yellow/20",
-        "teal-subtle": "bg-app-teal/10 text-app-teal border-app-teal/20",
-        "red-subtle": "bg-app-red/10 text-app-red border-app-red/20",
       },
     },
     defaultVariants: {
