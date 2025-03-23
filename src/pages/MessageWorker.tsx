@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -14,7 +14,6 @@ import { useAuth } from '@/context/AuthContext';
 import { Worker } from '@/services/workerService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { createNotification } from '@/services/notificationService';
 
 interface Message {
   id: string;
@@ -35,6 +34,8 @@ const MessageWorker = () => {
   const [worker, setWorker] = useState<Worker | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [subscription, setSubscription] = useState<any>(null);
 
   useEffect(() => {
     const fetchWorker = async () => {
@@ -58,13 +59,113 @@ const MessageWorker = () => {
     fetchWorker();
   }, [workerId, getWorker, user, navigate]);
 
+  // Fetch existing messages
   useEffect(() => {
     if (!user || !workerId || !worker?.user_id) return;
 
-    // Since there's no actual messages table yet, we'll just use an empty array
-    // In a real implementation, you would fetch from a messages table
-    setMessages([]);
+    const fetchMessages = async () => {
+      try {
+        // Get messages where current user is sender or receiver and worker is the other party
+        const { data, error } = await supabase
+          .from('direct_messages')
+          .select('*')
+          .or(`and(sender_id.eq.${user.id},receiver_id.eq.${worker.user_id}),and(sender_id.eq.${worker.user_id},receiver_id.eq.${user.id})`)
+          .order('created_at', { ascending: true });
+
+        if (error) {
+          throw error;
+        }
+
+        if (data) {
+          setMessages(data);
+        }
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        toast.error("Failed to load message history");
+      }
+    };
+
+    fetchMessages();
+    subscribeToMessages();
+
+    return () => {
+      if (subscription) {
+        supabase.removeChannel(subscription);
+      }
+    };
   }, [user, workerId, worker?.user_id]);
+
+  // Subscribe to real-time updates for new messages
+  const subscribeToMessages = async () => {
+    if (!user || !worker?.user_id) return;
+
+    try {
+      const channel = supabase
+        .channel('direct_messages_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'direct_messages',
+            filter: `or(and(sender_id=eq.${user.id},receiver_id=eq.${worker.user_id}),and(sender_id=eq.${worker.user_id},receiver_id=eq.${user.id}))`,
+          },
+          (payload) => {
+            // Add the new message to state
+            setMessages((current) => [...current, payload.new as Message]);
+          }
+        )
+        .subscribe();
+
+      setSubscription(channel);
+    } catch (error) {
+      console.error("Error subscribing to messages:", error);
+    }
+  };
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Mark received messages as read
+  useEffect(() => {
+    const markMessagesAsRead = async () => {
+      if (!user || !worker?.user_id || messages.length === 0) return;
+
+      try {
+        // Find unread messages sent by the worker (received by current user)
+        const unreadMessages = messages.filter(
+          msg => msg.sender_id === worker.user_id && msg.receiver_id === user.id && !msg.is_read
+        );
+
+        if (unreadMessages.length === 0) return;
+
+        // Update the is_read status for these messages
+        const { error } = await supabase
+          .from('direct_messages')
+          .update({ is_read: true })
+          .in('id', unreadMessages.map(msg => msg.id));
+
+        if (error) {
+          throw error;
+        }
+
+        // Update local state
+        setMessages(currentMessages => 
+          currentMessages.map(msg => 
+            unreadMessages.some(um => um.id === msg.id) 
+              ? { ...msg, is_read: true } 
+              : msg
+          )
+        );
+      } catch (error) {
+        console.error("Error marking messages as read:", error);
+      }
+    };
+
+    markMessagesAsRead();
+  }, [messages, user, worker?.user_id]);
 
   const handleSendMessage = async () => {
     if (!user || !worker || !worker.user_id || !newMessage.trim()) {
@@ -75,37 +176,33 @@ const MessageWorker = () => {
     try {
       setSending(true);
       
-      // Send a notification to the worker since we don't have an actual messages table
+      // Insert message to direct_messages table
       const { data, error } = await supabase
-        .from('notifications')
-        .insert([
-          {
-            user_id: worker.user_id,
-            message: `New message from ${user.email || user.id}: ${newMessage.substring(0, 30)}${newMessage.length > 30 ? '...' : ''}`,
-            type: 'message',
-            related_id: user.id
-          }
-        ])
+        .from('direct_messages')
+        .insert({
+          sender_id: user.id,
+          receiver_id: worker.user_id,
+          content: newMessage,
+          is_read: false
+        })
         .select();
 
       if (error) {
-        console.error("Error sending notification:", error);
         throw error;
       }
 
-      // For user experience, we'll simulate adding the message to the UI
-      const newMsg: Message = {
-        id: Date.now().toString(), // Temporary ID
-        sender_id: user.id,
-        receiver_id: worker.user_id,
-        content: newMessage,
-        created_at: new Date().toISOString(),
-        is_read: false
-      };
+      // Create notification for the worker
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: worker.user_id,
+          message: `New message from ${user.email || user.id}: ${newMessage.substring(0, 30)}${newMessage.length > 30 ? '...' : ''}`,
+          type: 'message',
+          related_id: user.id
+        });
       
-      setMessages(prev => [...prev, newMsg]);
-      toast.success("Message sent successfully");
       setNewMessage('');
+      toast.success("Message sent");
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to send message");
@@ -168,7 +265,7 @@ const MessageWorker = () => {
               </div>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
-              <div className="space-y-4">
+              <div className="space-y-4 h-[400px] overflow-y-auto pr-2">
                 {messages.length > 0 ? (
                   <div className="space-y-4">
                     {messages.map((message) => (
@@ -192,6 +289,7 @@ const MessageWorker = () => {
                         </div>
                       </div>
                     ))}
+                    <div ref={messagesEndRef} />
                   </div>
                 ) : (
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -206,6 +304,12 @@ const MessageWorker = () => {
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   className="resize-none"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
                 />
                 <Button 
                   variant="default" 
