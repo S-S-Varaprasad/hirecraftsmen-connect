@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -21,9 +22,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Briefcase, Building, Mail, MapPin, Send, User } from 'lucide-react';
+import { ArrowLeft, Briefcase, Building, Mail, MapPin, Send, User, AlertTriangle, FileQuestion } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
 
 // Form validation schema
 const formSchema = z.object({
@@ -38,8 +40,9 @@ type FormValues = z.infer<typeof formSchema>;
 const ContactEmployer = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const [jobDetails, setJobDetails] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -57,35 +60,53 @@ const ContactEmployer = () => {
   // Fetch job details when component mounts
   useEffect(() => {
     const fetchJobDetails = async () => {
-      if (!jobId) return;
+      if (!jobId) {
+        setError('No job ID provided');
+        setIsLoading(false);
+        return;
+      }
       
       setIsLoading(true);
+      setError(null);
+      
       try {
+        console.log('Fetching job details for ID:', jobId);
         const job = await getJobById(jobId);
+        console.log('Job details received:', job);
         setJobDetails(job);
         
         // Pre-fill subject with job title
-        form.setValue('subject', `Regarding job: ${job.title}`);
+        if (job && job.title) {
+          form.setValue('subject', `Regarding job: ${job.title}`);
+        }
         
         // Pre-fill user data if logged in
         if (user) {
-          const { data } = await supabase
-            .from('workers')
-            .select('name')
-            .eq('user_id', user.id)
-            .single();
+          try {
+            const { data } = await supabase
+              .from('workers')
+              .select('name')
+              .eq('user_id', user.id)
+              .single();
+              
+            if (data) {
+              form.setValue('name', data.name);
+            } else {
+              form.setValue('name', user.user_metadata?.name || '');
+            }
             
-          if (data) {
-            form.setValue('name', data.name);
-          } else {
+            form.setValue('email', user.email || '');
+          } catch (e) {
+            console.error('Error fetching worker data:', e);
+            // Still set available user data even if worker fetch fails
             form.setValue('name', user.user_metadata?.name || '');
+            form.setValue('email', user.email || '');
           }
-          
-          form.setValue('email', user.email || '');
         }
-      } catch (error) {
+      } catch (err: any) {
+        console.error('Error fetching job details:', err);
+        setError(err.message || 'Failed to load job details');
         toast.error('Failed to load job details');
-        console.error('Error fetching job details:', error);
       } finally {
         setIsLoading(false);
       }
@@ -175,9 +196,29 @@ const ContactEmployer = () => {
                   <div className="flex justify-center py-8">
                     <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
                   </div>
+                ) : error ? (
+                  <div className="text-center py-6">
+                    <AlertTriangle className="h-10 w-10 text-destructive mx-auto mb-3" />
+                    <p className="text-destructive">{error}</p>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => window.location.reload()} 
+                      className="mt-4"
+                    >
+                      Try Again
+                    </Button>
+                  </div>
                 ) : !jobDetails ? (
                   <div className="text-center py-6">
+                    <FileQuestion className="h-10 w-10 text-gray-400 mx-auto mb-3" />
                     <p className="text-destructive">Job not found</p>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => navigate('/jobs')} 
+                      className="mt-4"
+                    >
+                      Browse Jobs
+                    </Button>
                   </div>
                 ) : (
                   <>
@@ -196,7 +237,7 @@ const ContactEmployer = () => {
                       
                       <div className="flex items-center text-muted-foreground">
                         <Briefcase className="h-4 w-4 mr-2 flex-shrink-0" />
-                        <span>₹{jobDetails.budget || 'Budget not specified'}</span>
+                        <span>₹{jobDetails.budget || jobDetails.rate || 'Budget not specified'}</span>
                       </div>
                     </div>
                     
@@ -249,13 +290,28 @@ const ContactEmployer = () => {
                   <div className="flex justify-center py-8">
                     <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
                   </div>
+                ) : error ? (
+                  <div className="text-center py-8">
+                    <AlertTriangle className="h-10 w-10 text-destructive mx-auto mb-3" />
+                    <p className="text-destructive mb-4">{error}</p>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => window.location.reload()} 
+                      className="mr-3"
+                    >
+                      Try Again
+                    </Button>
+                    <Button asChild>
+                      <Link to="/jobs">Browse Jobs</Link>
+                    </Button>
+                  </div>
                 ) : !jobDetails ? (
                   <div className="text-center py-8">
-                    <p className="text-red-500">Job not found or error loading details.</p>
+                    <FileQuestion className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+                    <p className="text-destructive mb-4">Job not found or error loading details.</p>
                     <Button 
                       variant="outline" 
                       onClick={() => navigate('/jobs')} 
-                      className="mt-4"
                     >
                       Browse Jobs
                     </Button>
