@@ -92,11 +92,39 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
       if (notification.type === 'application' || notification.type === 'new_application') {
         navigate(`/jobs/${notification.related_id}`);
       } else if (notification.type === 'job_accepted' || notification.type === 'job_application' || notification.type === 'job_completed') {
-        navigate(`/job-history`);
+        navigate(`/worker-job-history`);
       } else if (notification.type === 'new_job' || notification.type === 'job_updated') {
         navigate(`/jobs/${notification.related_id}`);
       } else if (notification.type === 'message') {
-        navigate(`/messages/${notification.related_id}`);
+        if (notification.category === 'message_to_worker') {
+          navigate(`/message-worker/${notification.related_id}`);
+        } else if (notification.category === 'message_from_worker') {
+          navigate(`/messages/${notification.related_id}`);
+        } else {
+          navigate(`/messages`);
+        }
+      } else if (notification.type === 'system') {
+        if (notification.category === 'job') {
+          navigate(`/jobs`);
+        } else if (notification.category === 'worker') {
+          navigate(`/workers`);
+        } else if (notification.category === 'profile') {
+          navigate(`/profile`);
+        } else {
+          navigate(`/`);
+        }
+      } else {
+        navigate(`/`);
+      }
+    } else {
+      if (notification.category === 'job') {
+        navigate(`/jobs`);
+      } else if (notification.category === 'message') {
+        navigate(`/messages`);
+      } else if (notification.category === 'application') {
+        navigate(`/worker-job-history`);
+      } else {
+        navigate(`/`);
       }
     }
     

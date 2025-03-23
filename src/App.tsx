@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -34,6 +33,8 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
+import Messages from './pages/Messages';
+import MessageDetail from './pages/MessageDetail';
 
 function App() {
   const [queryClient] = useState(() => new QueryClient({
@@ -46,7 +47,6 @@ function App() {
     },
   }));
 
-  // Check and apply saved theme preference on application load
   useEffect(() => {
     const savedTheme = localStorage.getItem('hire-ease-ui-theme');
     if (savedTheme === 'dark') {
@@ -54,7 +54,6 @@ function App() {
     } else if (savedTheme === 'light') {
       document.documentElement.classList.remove('dark');
     } else {
-      // Set default theme based on system preference
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.documentElement.classList.add('dark');
         localStorage.setItem('hire-ease-ui-theme', 'dark');
@@ -94,6 +93,8 @@ function App() {
             <Route path="/deactivate-worker/:workerId" element={<DeactivateWorker />} />
             <Route path="/message-worker/:workerId" element={<MessageWorker />} />
             <Route path="/notification-settings" element={<NotificationSettings />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/messages/:messageId" element={<MessageDetail />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/settings" element={<Settings />} />
