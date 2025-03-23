@@ -86,20 +86,11 @@ export function SuggestiveInputField({
   description,
   suggestions = [],
 }: SuggestiveInputFieldProps) {
-  const [selectedValue, setSelectedValue] = React.useState<string>("");
-  const [isJustSelected, setIsJustSelected] = React.useState<boolean>(false);
-
   return (
     <FormField
       control={control}
       name={name}
       render={({ field }) => {
-        React.useEffect(() => {
-          if (field.value) {
-            setSelectedValue(field.value);
-          }
-        }, [field.value]);
-
         return (
           <FormItem>
             {label && <FormLabel>{label}</FormLabel>}
@@ -111,20 +102,14 @@ export function SuggestiveInputField({
                 onChange={(e) => {
                   if (typeof e === 'object' && e !== null && 'target' in e) {
                     field.onChange(e.target.value);
-                    setIsJustSelected(false);
                   } else {
                     field.onChange(e);
-                    setIsJustSelected(false);
                   }
                 }}
                 onSuggestionClick={(value) => {
-                  setSelectedValue(value);
                   field.onChange(value);
-                  setIsJustSelected(true);
-                  
                   setTimeout(() => {
                     field.onBlur();
-                    setTimeout(() => setIsJustSelected(false), 1000);
                   }, 100);
                 }}
                 className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg"

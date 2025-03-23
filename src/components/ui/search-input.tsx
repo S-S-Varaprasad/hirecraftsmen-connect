@@ -29,6 +29,7 @@ export function SearchInput({
   const [open, setOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState(props.value?.toString() || "")
   const [filteredSuggestions, setFilteredSuggestions] = React.useState<string[]>([])
+  const [highlightedIndex, setHighlightedIndex] = React.useState(-1)
   const inputRef = React.useRef<HTMLInputElement>(null)
   const suggestionsRef = React.useRef<HTMLDivElement>(null)
 
@@ -47,6 +48,7 @@ export function SearchInput({
         )
         setFilteredSuggestions(filtered.slice(0, 8)) // Limit to 8 suggestions
         setOpen(filtered.length > 0)
+        setHighlightedIndex(-1) // Reset highlighted index when suggestions change
       } else {
         setFilteredSuggestions([])
         setOpen(false)
@@ -74,6 +76,35 @@ export function SearchInput({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!open) return;
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightedIndex(prev => 
+          prev < filteredSuggestions.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightedIndex(prev => 
+          prev > 0 ? prev - 1 : filteredSuggestions.length - 1
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (highlightedIndex >= 0 && highlightedIndex < filteredSuggestions.length) {
+          handleSuggestionClick(filteredSuggestions[highlightedIndex]);
+        }
+        break;
+      case 'Escape':
+        setOpen(false);
+        break;
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -126,11 +157,13 @@ export function SearchInput({
           )}
           value={inputValue}
           onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           onFocus={() => {
             if (filteredSuggestions.length > 0 && inputValue.trim()) {
               setOpen(true)
             }
           }}
+          aria-expanded={open}
         />
       </div>
 
@@ -152,7 +185,10 @@ export function SearchInput({
                     onMouseDown={(e) => {
                       e.preventDefault(); // Prevent blur before click
                     }}
-                    className="cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                    className={cn(
+                      "cursor-pointer hover:bg-accent hover:text-accent-foreground",
+                      index === highlightedIndex && "bg-accent text-accent-foreground"
+                    )}
                   >
                     {suggestion}
                   </CommandItem>

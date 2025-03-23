@@ -67,6 +67,7 @@ const HeroSection = () => {
                     suggestions={serviceSearchTerms}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onSuggestionClick={(value) => setSearchQuery(value)}
                     className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                     icon={<Search className="h-5 w-5 text-gray-400" />}
                   />
@@ -78,6 +79,7 @@ const HeroSection = () => {
                     suggestions={popularLocations}
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
+                    onSuggestionClick={(value) => setLocation(value)}
                     className="w-full md:w-40 lg:w-56 border-0 focus-visible:ring-0 focus-visible:ring-offset-0" 
                     icon={<MapPin className="h-5 w-5 text-gray-400" />}
                   />
