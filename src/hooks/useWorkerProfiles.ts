@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   getWorkers, 
@@ -144,11 +145,12 @@ export const useWorkerProfiles = () => {
         
         if (user.id) {
           try {
-            await createNotification(
-              user.id,
-              `Your worker profile has been created successfully!`,
-              'profile_created'
-            );
+            await createNotification({
+              user_id: user.id,
+              message: `Your worker profile has been created successfully!`,
+              type: 'profile_created',
+              is_read: false
+            });
             console.log('Profile creation notification sent');
           } catch (notifyError) {
             console.error('Error sending notification:', notifyError);
@@ -240,7 +242,7 @@ export const useWorkerProfiles = () => {
     try {
       if (!user) return;
       
-      const result = await notifyWorkersAboutJob(jobId, jobTitle, jobSkills, 'General');
+      const result = await notifyWorkersAboutJob(jobId, jobTitle, jobSkills);
       return result;
     } catch (error) {
       console.error('Error notifying workers:', error);
