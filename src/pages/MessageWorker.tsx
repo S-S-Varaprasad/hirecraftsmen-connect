@@ -15,13 +15,18 @@ import { Worker } from '@/services/workerService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// Define a type that matches the messages table structure in Supabase
 interface Message {
   id: string;
-  sender_id: string;
-  receiver_id: string;
-  content: string;
-  created_at: string;
-  is_read: boolean;
+  sender_id: string | null;
+  recipient_id: string | null;
+  subject: string;
+  message: string;
+  created_at: string | null;
+  is_read: boolean | null;
+  sender_name: string;
+  sender_email: string;
+  job_id: string | null;
 }
 
 const MessageWorker = () => {
@@ -65,11 +70,11 @@ const MessageWorker = () => {
 
     const fetchMessages = async () => {
       try {
-        // Get messages where current user is sender or receiver and worker is the other party
+        // Get messages where current user is sender or recipient and worker is the other party
         const { data, error } = await supabase
-          .from('direct_messages')
+          .from('messages')
           .select('*')
-          .or(`and(sender_id.eq.${user.id},receiver_id.eq.${worker.user_id}),and(sender_id.eq.${worker.user_id},receiver_id.eq.${user.id})`)
+          .or(`and(sender_id.eq.${user.id},recipient_id.eq.${worker.user_id}),and(sender_id.eq.${worker.user_id},recipient_id.eq.${user.id})`)
           .order('created_at', { ascending: true });
 
         if (error) {
@@ -101,14 +106,14 @@ const MessageWorker = () => {
 
     try {
       const channel = supabase
-        .channel('direct_messages_changes')
+        .channel('messages_changes')
         .on(
           'postgres_changes',
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'direct_messages',
-            filter: `or(and(sender_id=eq.${user.id},receiver_id=eq.${worker.user_id}),and(sender_id=eq.${worker.user_id},receiver_id=eq.${user.id}))`,
+            table: 'messages',
+            filter: `or(and(sender_id=eq.${user.id},recipient_id=eq.${worker.user_id}),and(sender_id=eq.${worker.user_id},recipient_id=eq.${user.id}))`,
           },
           (payload) => {
             // Add the new message to state
@@ -136,14 +141,14 @@ const MessageWorker = () => {
       try {
         // Find unread messages sent by the worker (received by current user)
         const unreadMessages = messages.filter(
-          msg => msg.sender_id === worker.user_id && msg.receiver_id === user.id && !msg.is_read
+          msg => msg.sender_id === worker.user_id && msg.recipient_id === user.id && !msg.is_read
         );
 
         if (unreadMessages.length === 0) return;
 
         // Update the is_read status for these messages
         const { error } = await supabase
-          .from('direct_messages')
+          .from('messages')
           .update({ is_read: true })
           .in('id', unreadMessages.map(msg => msg.id));
 
@@ -176,13 +181,16 @@ const MessageWorker = () => {
     try {
       setSending(true);
       
-      // Insert message to direct_messages table
+      // Insert message to messages table
       const { data, error } = await supabase
-        .from('direct_messages')
+        .from('messages')
         .insert({
           sender_id: user.id,
-          receiver_id: worker.user_id,
-          content: newMessage,
+          recipient_id: worker.user_id,
+          subject: `Message from ${user.email || user.id}`,
+          message: newMessage,
+          sender_name: user.email || 'User',  // Using email as name if no profile name
+          sender_email: user.email || '',
           is_read: false
         })
         .select();
@@ -282,9 +290,9 @@ const MessageWorker = () => {
                               : 'bg-gray-200 dark:bg-gray-700 dark:text-white'
                           }`}
                         >
-                          <p>{message.content}</p>
+                          <p>{message.message}</p>
                           <p className="text-xs opacity-70 mt-1">
-                            {new Date(message.created_at).toLocaleTimeString()}
+                            {message.created_at ? new Date(message.created_at).toLocaleTimeString() : 'Just now'}
                           </p>
                         </div>
                       </div>
