@@ -33,13 +33,15 @@ const BasicInfoFields = ({
   const safeSkillSuggestions = Array.isArray(skillSuggestions) ? skillSuggestions : [];
   
   // Prevent form submission when interacting with fields
-  const preventPropagation = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const preventPropagation = (e: React.MouseEvent | React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   };
   
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
       <div className="mb-4">
         <Label htmlFor="name" className="text-base">Full Name</Label>
         <Input
@@ -53,7 +55,10 @@ const BasicInfoFields = ({
         {errors.name && <p className="text-red-500 text-sm mt-1">{(errors.name as any).message}</p>}
       </div>
 
-      <div className="mb-4" onClick={preventPropagation}>
+      <div className="mb-4 autocomplete-field-wrapper" 
+        onClick={preventPropagation} 
+        onMouseDown={preventPropagation}
+      >
         <AutocompleteField
           name="profession"
           control={control}
@@ -64,7 +69,10 @@ const BasicInfoFields = ({
         />
       </div>
 
-      <div className="mb-4" onClick={preventPropagation}>
+      <div className="mb-4 autocomplete-field-wrapper" 
+        onClick={preventPropagation} 
+        onMouseDown={preventPropagation}
+      >
         <AutocompleteField
           name="location"
           control={control}
@@ -99,7 +107,10 @@ const BasicInfoFields = ({
         />
       </div>
 
-      <div className="mb-4" onClick={preventPropagation}>
+      <div className="mb-4 suggestive-field-wrapper" 
+        onClick={preventPropagation} 
+        onMouseDown={preventPropagation}
+      >
         <SuggestiveInputField
           name="skills"
           control={control}
@@ -110,7 +121,10 @@ const BasicInfoFields = ({
         />
       </div>
 
-      <div className="mb-4" onClick={preventPropagation}>
+      <div className="mb-4 autocomplete-field-wrapper" 
+        onClick={preventPropagation} 
+        onMouseDown={preventPropagation}
+      >
         <AutocompleteField
           name="languages"
           control={control}

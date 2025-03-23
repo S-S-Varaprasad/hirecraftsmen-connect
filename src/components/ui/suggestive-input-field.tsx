@@ -18,15 +18,17 @@ export function SuggestiveInputField({
   label,
   placeholder,
   description,
-  suggestions = [], // Ensure suggestions has a default empty array
+  suggestions = [], 
 }: SuggestiveInputFieldProps) {
-  // Ensure suggestions is always an array
+  // Ensure suggestions is always a valid array
   const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
   
   // Prevent form submission when interacting with the input
-  const preventPropagation = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const preventPropagation = (e: React.MouseEvent | React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   };
 
   return (
@@ -34,26 +36,37 @@ export function SuggestiveInputField({
       control={control}
       name={name}
       render={({ field }) => {
+        // Ensure field.value is a string
+        const safeValue = field.value || '';
+        
         return (
           <FormItem>
             {label && <FormLabel>{label}</FormLabel>}
             <FormControl>
-              <div onClick={preventPropagation}>
+              <div 
+                onClick={preventPropagation} 
+                onMouseDown={preventPropagation}
+                className="form-control-wrapper"
+              >
                 <SearchInput
                   suggestions={safeSuggestions}
                   placeholder={placeholder}
-                  value={field.value || ''}
+                  value={safeValue}
                   onChange={(e) => {
                     if (typeof e === 'object' && e !== null && 'target' in e) {
-                      field.onChange(e.target.value);
-                    } else {
+                      field.onChange(e.target.value || '');
+                    } else if (typeof e === 'string') {
                       field.onChange(e);
+                    } else {
+                      field.onChange('');
                     }
                   }}
                   onSuggestionClick={(value) => {
-                    field.onChange(value);
+                    field.onChange(value || '');
                     setTimeout(() => {
-                      field.onBlur();
+                      if (typeof field.onBlur === 'function') {
+                        field.onBlur();
+                      }
                     }, 100);
                   }}
                   className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg"

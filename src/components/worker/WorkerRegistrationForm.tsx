@@ -52,6 +52,7 @@ const WorkerRegistrationForm = ({
   
   // Stop event propagation to prevent unwanted form submissions
   const preventDefaultSubmit = (e: React.FormEvent) => {
+    // Only prevent propagation for child events, not the form submission itself
     if (e.target !== e.currentTarget) {
       e.stopPropagation();
     }
@@ -66,7 +67,12 @@ const WorkerRegistrationForm = ({
     <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
       <div className="px-8 py-12">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">Join as a Worker</h2>
-        <form onSubmit={handleSubmit(onFormSubmit)} onClick={preventDefaultSubmit} className="space-y-6">
+        <form 
+          onSubmit={handleSubmit(onFormSubmit)} 
+          onClick={preventDefaultSubmit}
+          onMouseDown={preventDefaultSubmit}
+          className="space-y-6"
+        >
           <ProfileImageUpload
             profileImagePreview={profileImagePreview}
             setProfileImagePreview={setProfileImagePreview}

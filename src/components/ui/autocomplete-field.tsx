@@ -20,21 +20,25 @@ export function AutocompleteField({
   label,
   placeholder,
   description,
-  options = [], // Ensure options has a default empty array
+  options,
   searchable = true,
 }: AutocompleteFieldProps) {
-  // Ensure options is always an array
+  // Validate options to ensure it's always an array
   const safeOptions = Array.isArray(options) ? options : [];
   
-  // Handle value change without triggering form submission
+  // Safer value change handler to prevent form submission
   const handleValueChange = (field: any, value: string) => {
-    field.onChange(value);
+    if (field && typeof field.onChange === 'function') {
+      field.onChange(value);
+    }
   };
   
   // Prevent event propagation to avoid form submission
   const preventPropagation = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   };
   
   return (
@@ -46,10 +50,14 @@ export function AutocompleteField({
           <FormLabel>{label}</FormLabel>
           {searchable ? (
             <FormControl>
-              <div onClick={preventPropagation}>
+              <div 
+                onClick={preventPropagation}
+                onMouseDown={preventPropagation}
+                className="form-control-wrapper"
+              >
                 <Combobox
                   options={safeOptions}
-                  value={field.value}
+                  value={field.value || ''}
                   onChange={(value) => handleValueChange(field, value)}
                   placeholder={placeholder}
                   triggerClassName="w-full"
@@ -58,21 +66,25 @@ export function AutocompleteField({
             </FormControl>
           ) : (
             <Select 
-              onValueChange={field.onChange} 
-              defaultValue={field.value}
+              onValueChange={(value) => handleValueChange(field, value)} 
+              defaultValue={field.value || ''}
               onOpenChange={(open) => {
-                // Prevent event propagation when opening/closing the select
+                // Prevent form submission when opening/closing the select
                 if (open) {
-                  setTimeout(() => field.onBlur(), 100);
+                  setTimeout(() => {
+                    if (field && typeof field.onBlur === 'function') {
+                      field.onBlur();
+                    }
+                  }, 100);
                 }
               }}
             >
               <FormControl>
-                <SelectTrigger onClick={preventPropagation}>
+                <SelectTrigger onClick={preventPropagation} onMouseDown={preventPropagation}>
                   <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
+              <SelectContent onClick={preventPropagation} onMouseDown={preventPropagation}>
                 {safeOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
