@@ -162,11 +162,25 @@ export const notifyWorkersAboutJob = async (
   sendSms: boolean = false
 ) => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-workers`, {
+    console.log('Notifying workers about job:', { jobId, jobTitle, skills, category });
+    
+    // Get the correct Supabase URL
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
+    // Get the correct Supabase anon key
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Missing Supabase URL or anon key');
+      throw new Error('Configuration error: Missing Supabase credentials');
+    }
+    
+    console.log('Making request to notify-workers function');
+    
+    const response = await fetch(`${supabaseUrl}/functions/v1/notify-workers`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        'Authorization': `Bearer ${supabaseAnonKey}`
       },
       body: JSON.stringify({
         jobId,
@@ -179,10 +193,13 @@ export const notifyWorkersAboutJob = async (
     });
     
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response from notify-workers:', response.status, errorText);
       throw new Error(`Error notifying workers: ${response.statusText}`);
     }
     
     const result = await response.json();
+    console.log('Worker notification result:', result);
     return result;
   } catch (error) {
     console.error('Error notifying workers about job:', error);

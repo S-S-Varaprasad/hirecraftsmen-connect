@@ -36,7 +36,10 @@ serve(async (req: Request) => {
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get request body
-    const { jobId, jobTitle, skills, category, sendEmail, sendSms, employerId, isUpdate } = await req.json() as NotifyWorkersRequest;
+    const requestBody = await req.json();
+    console.log("Received request body:", JSON.stringify(requestBody));
+    
+    const { jobId, jobTitle, skills, category, sendEmail, sendSms, employerId, isUpdate } = requestBody as NotifyWorkersRequest;
 
     if (!jobId || !jobTitle || !skills || skills.length === 0) {
       return new Response(
@@ -59,24 +62,55 @@ serve(async (req: Request) => {
       throw workersError;
     }
 
+    console.log(`Found ${workers.length} available workers`);
+    
     const notifications = [];
     const skillsLower = skills.map(s => s.toLowerCase());
     const matchedWorkers = [];
     
+    // Create a function to check for skill matches with better matching logic
+    const hasMatchingSkill = (workerSkills: string[], jobSkills: string[]) => {
+      const workerSkillsLower = workerSkills.map(s => s.toLowerCase());
+      
+      // Check if any worker skill contains or is contained by any job skill
+      for (const workerSkill of workerSkillsLower) {
+        for (const jobSkill of jobSkills) {
+          // Check for exact match
+          if (workerSkill === jobSkill) return true;
+          
+          // Check if worker skill contains job skill or vice versa
+          if (workerSkill.includes(jobSkill) || jobSkill.includes(workerSkill)) return true;
+          
+          // Check for partial matches (at least 4 characters to avoid false positives)
+          if (workerSkill.length >= 4 && jobSkill.length >= 4) {
+            if (workerSkill.includes(jobSkill.substring(0, 4)) || 
+                jobSkill.includes(workerSkill.substring(0, 4))) {
+              return true;
+            }
+          }
+        }
+      }
+      
+      return false;
+    };
+    
     // Filter workers with matching skills and send notifications
     for (const worker of workers) {
-      if (!worker.user_id) continue;
+      if (!worker.user_id) {
+        console.log(`Skipping worker ${worker.id} - no user_id`);
+        continue;
+      }
       
-      const workerSkillsLower = worker.skills.map((s: string) => s.toLowerCase());
-      const hasMatchingSkill = workerSkillsLower.some((skill: string) => 
-        skillsLower.some(jobSkill => skill.includes(jobSkill) || jobSkill.includes(skill))
-      );
+      const matchingSkill = hasMatchingSkill(worker.skills, skillsLower);
       
+      // Check for matching profession if category is provided
       const matchingProfession = category && 
         worker.profession.toLowerCase().includes(category.toLowerCase());
       
-      if (hasMatchingSkill || matchingProfession) {
+      if (matchingSkill || matchingProfession) {
         console.log(`Found matching worker: ${worker.name} (ID: ${worker.id})`);
+        console.log(`  Matching: ${matchingSkill ? 'Skills' : ''}${matchingSkill && matchingProfession ? ' and ' : ''}${matchingProfession ? 'Profession' : ''}`);
+        
         matchedWorkers.push(worker);
         
         try {
@@ -145,6 +179,8 @@ serve(async (req: Request) => {
         } catch (error) {
           console.error(`Error in notification process for worker ${worker.id}:`, error);
         }
+      } else {
+        console.log(`Worker ${worker.name} (ID: ${worker.id}) does not match job requirements`);
       }
     }
 

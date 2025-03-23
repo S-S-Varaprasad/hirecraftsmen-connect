@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -127,6 +126,8 @@ const PostJob = () => {
         // Extract category/profession from the job title if possible
         const possibleCategory = data.title.replace(/Need a /i, '').split(' ')[0];
         
+        console.log('Extracted possible category:', possibleCategory);
+        
         await notifyWorkersAboutJob(
           newJob.id, 
           newJob.title, 
@@ -136,6 +137,7 @@ const PostJob = () => {
           false  // Don't send SMS
         );
         console.log('Worker notifications sent successfully');
+        toast.success('Job posted and notifications sent to matching workers');
       } catch (notifyError) {
         console.error('Error notifying workers:', notifyError);
         // Don't fail the job creation if notifications fail
