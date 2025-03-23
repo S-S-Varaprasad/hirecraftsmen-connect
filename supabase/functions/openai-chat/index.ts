@@ -39,7 +39,17 @@ serve(async (req: Request) => {
       let enhancedSystemPrompt = systemPrompt;
       
       if (contextData) {
-        if (contextData.title && contextData.company) {
+        // Prioritize job role information
+        const jobRole = contextData.jobRole || extractJobRoleFromTitle(contextData.title);
+        
+        if (jobRole) {
+          enhancedSystemPrompt += ` The context is about a ${jobRole} position`;
+          if (contextData.company) {
+            enhancedSystemPrompt += ` at ${contextData.company}.`;
+          } else {
+            enhancedSystemPrompt += `.`;
+          }
+        } else if (contextData.title && contextData.company) {
           enhancedSystemPrompt += ` The context is about a job position for ${contextData.title} at ${contextData.company}.`;
         }
         
@@ -88,18 +98,15 @@ serve(async (req: Request) => {
       
       // Return a generic response based on the prompt type and context
       let fallbackResponse = "";
+      const jobRole = contextData.jobRole || extractJobRoleFromTitle(contextData.title) || "position";
+      const company = contextData?.company || "company";
+      
       if (prompt.includes("subject line")) {
-        const jobTitle = contextData?.title || "position";
-        const company = contextData?.company || "";
-        fallbackResponse = `Interested in your ${jobTitle} ${company ? 'at ' + company : 'posting'}`;
-      } else if (prompt.includes("message to send to an employer")) {
-        const jobTitle = contextData?.title || "position";
-        const company = contextData?.company || "company";
-        const skills = contextData?.skills ? ` I have experience with ${contextData.skills.join(', ')}, which align with your requirements.` : "";
-        
-        fallbackResponse = `Hello,\n\nI'm writing to express my interest in the ${jobTitle} at ${company} you've posted. My experience and skills align well with the requirements you've outlined, and I'm excited about the opportunity to contribute to your team.${skills}\n\nI'd appreciate the chance to discuss this position further and learn more about your specific needs. Please let me know if you require any additional information from me.\n\nThank you for your consideration.\n\nBest regards`;
+        fallbackResponse = `Experienced ${jobRole} interested in your position at ${company}`;
+      } else if (prompt.includes("message") || prompt.includes("professional message")) {
+        fallbackResponse = `Hello,\n\nI'm writing to express my interest in the ${jobRole} position at ${company}. I have experience and skills in ${jobRole} work, including all the typical responsibilities this role requires.\n\nI'm reliable, punctual, and take pride in quality workmanship. I would appreciate the opportunity to discuss how my specific ${jobRole} skills can benefit your project or team.\n\nThank you for your consideration.\n\nBest regards`;
       } else {
-        fallbackResponse = "Sorry, I couldn't generate a specific response at this time.";
+        fallbackResponse = `Information related to the ${jobRole} position at ${company}.`;
       }
       
       return new Response(
@@ -120,3 +127,24 @@ serve(async (req: Request) => {
     );
   }
 });
+
+// Helper function to extract job role from title
+function extractJobRoleFromTitle(title: string | undefined): string | undefined {
+  if (!title) return undefined;
+  
+  const commonRoles = [
+    "Carpenter", "Plumber", "Electrician", "Painter", "Mason", 
+    "Mechanic", "Driver", "Chef", "Cleaner", "Security Guard", 
+    "Gardener", "Tailor", "Construction Worker", "Welder", 
+    "HVAC Technician", "Roofer", "Landscaper", "Handyman"
+  ];
+  
+  const lowerTitle = title.toLowerCase();
+  for (const role of commonRoles) {
+    if (lowerTitle.includes(role.toLowerCase())) {
+      return role;
+    }
+  }
+  
+  return undefined;
+}

@@ -150,6 +150,23 @@ const ContactEmployer = () => {
   const getEnhancedContextData = () => {
     const enhancedData = { ...jobDetails };
     
+    if (jobDetails?.title) {
+      const commonRoles = [
+        "Carpenter", "Plumber", "Electrician", "Painter", "Mason", 
+        "Mechanic", "Driver", "Chef", "Cleaner", "Security Guard", 
+        "Gardener", "Tailor", "Construction Worker", "Welder", 
+        "HVAC Technician", "Roofer", "Landscaper", "Handyman"
+      ];
+      
+      const lowerTitle = jobDetails.title.toLowerCase();
+      for (const role of commonRoles) {
+        if (lowerTitle.includes(role.toLowerCase())) {
+          enhancedData.jobRole = role;
+          break;
+        }
+      }
+    }
+    
     if (workerProfile) {
       enhancedData.workerName = workerProfile.name;
       enhancedData.profession = workerProfile.profession;
@@ -172,6 +189,13 @@ const ContactEmployer = () => {
       console.log('Submitting contact form:', data);
       console.log('Job details for message:', jobDetails);
       
+      if (!jobDetails.employer_id) {
+        console.error('Employer ID is missing from job details');
+        toast.error('Cannot send message: employer ID is missing');
+        setIsSending(false);
+        return;
+      }
+      
       const { error: messageError } = await supabase
         .from('messages')
         .insert({
@@ -180,7 +204,7 @@ const ContactEmployer = () => {
           sender_email: data.email,
           subject: data.subject,
           message: data.message,
-          recipient_id: jobDetails.employer_id || null,
+          recipient_id: jobDetails.employer_id,
           sender_id: user?.id || null,
         });
         
@@ -189,23 +213,21 @@ const ContactEmployer = () => {
         throw messageError;
       }
       
-      if (jobDetails.employer_id) {
-        const { error: notificationError } = await supabase
-          .from('notifications')
-          .insert({
-            user_id: jobDetails.employer_id,
-            message: `New message regarding "${jobDetails.title}" from ${data.name}`,
-            type: 'contact',
-            related_id: jobId,
-            is_read: false
-          });
+      const { error: notificationError } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: jobDetails.employer_id,
+          message: `New message regarding "${jobDetails.title}" from ${data.name}`,
+          type: 'contact',
+          related_id: jobId,
+          is_read: false
+        });
           
-        if (notificationError) {
-          console.error('Error creating notification:', notificationError);
-        }
+      if (notificationError) {
+        console.error('Error creating notification:', notificationError);
       }
 
-      toast.success('Message sent successfully!');
+      toast.success('Message sent successfully to employer!');
       navigate(`/jobs/${jobId}`);
     } catch (error: any) {
       console.error('Error sending message:', error);
