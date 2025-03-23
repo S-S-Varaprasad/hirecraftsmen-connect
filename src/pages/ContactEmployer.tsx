@@ -331,38 +331,37 @@ const ContactEmployer = () => {
                           </FormItem>
                         )}
                       />
+                      
+                      <div className="flex justify-end pt-4">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          className="mr-3 bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
+                          onClick={() => navigate(-1)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          type="submit"
+                          disabled={isLoading || isSending}
+                          className="bg-app-blue hover:bg-app-blue/90 text-white gap-2"
+                        >
+                          {isSending ? (
+                            <>
+                              <div className="animate-spin h-4 w-4 border-2 border-b-transparent rounded-full"></div>
+                              Sending...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="h-4 w-4" /> Send Message
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </form>
                   </Form>
                 )}
               </CardContent>
-              
-              <CardFooter className="flex justify-end pt-4 pb-6">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="mr-3 bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
-                  onClick={() => navigate(-1)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit"
-                  onClick={form.handleSubmit(onSubmit)}
-                  disabled={isLoading || isSending}
-                  className="bg-app-blue hover:bg-app-blue/90 text-white gap-2"
-                >
-                  {isSending ? (
-                    <>
-                      <div className="animate-spin h-4 w-4 border-2 border-b-transparent rounded-full"></div>
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4" /> Send Message
-                    </>
-                  )}
-                </Button>
-              </CardFooter>
             </Card>
           </div>
         </div>
