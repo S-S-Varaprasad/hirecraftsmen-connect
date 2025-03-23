@@ -1,0 +1,59 @@
+
+import React from 'react';
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { SearchInput } from '@/components/ui/search-input';
+
+interface SuggestiveInputFieldProps {
+  name: string;
+  control: any;
+  label: string;
+  placeholder?: string;
+  description?: string;
+  suggestions?: string[];
+}
+
+export function SuggestiveInputField({
+  name,
+  control,
+  label,
+  placeholder,
+  description,
+  suggestions = [],
+}: SuggestiveInputFieldProps) {
+  return (
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => {
+        return (
+          <FormItem>
+            {label && <FormLabel>{label}</FormLabel>}
+            <FormControl>
+              <SearchInput
+                suggestions={suggestions}
+                placeholder={placeholder}
+                value={field.value}
+                onChange={(e) => {
+                  if (typeof e === 'object' && e !== null && 'target' in e) {
+                    field.onChange(e.target.value);
+                  } else {
+                    field.onChange(e);
+                  }
+                }}
+                onSuggestionClick={(value) => {
+                  field.onChange(value);
+                  setTimeout(() => {
+                    field.onBlur();
+                  }, 100);
+                }}
+                className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg"
+              />
+            </FormControl>
+            {description && <FormDescription>{description}</FormDescription>}
+            <FormMessage />
+          </FormItem>
+        );
+      }}
+    />
+  );
+}
