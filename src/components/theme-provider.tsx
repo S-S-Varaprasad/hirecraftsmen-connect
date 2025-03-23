@@ -39,16 +39,18 @@ export function ThemeProvider({
       if (storedTheme) {
         setTheme(storedTheme);
       } else {
-        // If no theme is stored, use system preference
+        // If no theme is stored, use system preference or fallback to light theme
         const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        setTheme(prefersDark ? "dark" : "light");
+        const systemTheme = prefersDark ? "dark" : "light";
+        setTheme(systemTheme);
+        localStorage.setItem(storageKey, systemTheme);
       }
     } catch (error) {
       console.error("Failed to get theme from localStorage:", error);
     } finally {
       setIsInitialized(true);
     }
-  }, [storageKey]);
+  }, [storageKey, defaultTheme]);
 
   // Apply theme to document root
   useEffect(() => {
@@ -64,6 +66,13 @@ export function ThemeProvider({
         : "light";
 
       root.classList.add(systemTheme);
+      
+      // Store the resolved system theme for persistence
+      try {
+        localStorage.setItem(storageKey, systemTheme);
+      } catch (error) {
+        console.error("Failed to save system theme to localStorage:", error);
+      }
       return;
     }
 
@@ -76,6 +85,24 @@ export function ThemeProvider({
       console.error("Failed to save theme to localStorage:", error);
     }
   }, [theme, isInitialized, storageKey]);
+
+  // Listen for system theme changes
+  useEffect(() => {
+    if (theme !== "system") return;
+    
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    
+    const handleChange = () => {
+      if (theme === "system") {
+        const newTheme = mediaQuery.matches ? "dark" : "light";
+        document.documentElement.classList.remove("light", "dark");
+        document.documentElement.classList.add(newTheme);
+      }
+    };
+    
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [theme]);
 
   const value = {
     theme,
