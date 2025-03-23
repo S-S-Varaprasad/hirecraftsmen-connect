@@ -45,6 +45,8 @@ const BasicInfoFields = ({
     return Array.isArray(skillSuggestions) ? skillSuggestions : [];
   }, [skillSuggestions]);
   
+  console.log('Location suggestions count:', locationSuggestions.length);
+
   return (
     <div className="space-y-4">
       <div className="mb-4">

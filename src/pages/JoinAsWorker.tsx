@@ -22,23 +22,61 @@ const JoinAsWorker = () => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [resume, setResume] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Convert arrays to the format required by inputs
-  // With proper fallbacks if they're undefined
-  const professionOptions = (professions || []).map(profession => ({
-    value: profession,
-    label: profession,
-  }));
+  // Process location options with useMemo to prevent unnecessary recalculations
+  const locationOptions = React.useMemo(() => {
+    // Make sure we have valid data before mapping
+    if (!Array.isArray(allIndianRegions) || allIndianRegions.length === 0) {
+      console.warn('allIndianRegions is not a valid array');
+      return [];
+    }
+    
+    return allIndianRegions.map(region => ({
+      value: region,
+      label: region,
+    }));
+  }, []);
 
-  const locationOptions = (allIndianRegions || []).map(region => ({
-    value: region,
-    label: region,
-  }));
+  // Convert arrays to the format required by inputs with proper fallbacks
+  const professionOptions = React.useMemo(() => {
+    if (!Array.isArray(professions) || professions.length === 0) {
+      console.warn('professions is not a valid array');
+      return [];
+    }
+    
+    return professions.map(profession => ({
+      value: profession,
+      label: profession,
+    }));
+  }, []);
 
-  const languageOptions = (indianLanguages || []).map(language => ({
-    value: language,
-    label: language,
-  }));
+  const languageOptions = React.useMemo(() => {
+    if (!Array.isArray(indianLanguages) || indianLanguages.length === 0) {
+      console.warn('indianLanguages is not a valid array');
+      return [];
+    }
+    
+    return indianLanguages.map(language => ({
+      value: language,
+      label: language,
+    }));
+  }, []);
+  
+  // Make sure skillSuggestions is a valid array
+  const safeSkillSuggestions = React.useMemo(() => {
+    return Array.isArray(skillSuggestions) ? skillSuggestions : [];
+  }, []);
+
+  // Simulate loading to ensure all data is prepared before rendering the form
+  useEffect(() => {
+    // Short timeout to ensure data is processed
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const onSubmit = async (data: any) => {
     if (!user) {
@@ -84,16 +122,22 @@ const JoinAsWorker = () => {
 
       <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16">
         <div className="container mx-auto px-4">
-          <WorkerRegistrationForm
-            onSubmit={onSubmit}
-            isUploading={isUploading}
-            professionOptions={professionOptions}
-            locationOptions={locationOptions}
-            languageOptions={languageOptions}
-            skillSuggestions={skillSuggestions || []}
-            setProfileImage={setProfileImage}
-            setResume={setResume}
-          />
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <WorkerRegistrationForm
+              onSubmit={onSubmit}
+              isUploading={isUploading}
+              professionOptions={professionOptions}
+              locationOptions={locationOptions}
+              languageOptions={languageOptions}
+              skillSuggestions={safeSkillSuggestions}
+              setProfileImage={setProfileImage}
+              setResume={setResume}
+            />
+          )}
         </div>
       </main>
 
