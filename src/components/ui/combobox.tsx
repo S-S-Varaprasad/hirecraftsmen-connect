@@ -40,62 +40,73 @@ export function Combobox({
   searchPlaceholder = "Search...",
   disabled = false,
 }: ComboboxProps) {
+  // Use useRef to track mounted state
+  const mounted = React.useRef(true);
+  
   // Initialize state with controlled open state
   const [open, setOpen] = React.useState(false);
   
-  // CRITICAL: Ensure options is always a valid array with defensive check
-  // This is the key fix for the "undefined is not iterable" error
-  const safeOptions = Array.isArray(options) ? options : [];
+  // CRITICAL FIX: Always ensure options is a valid array with defensive check
+  // This prevents the "undefined is not iterable" error
+  const safeOptions = React.useMemo(() => {
+    return Array.isArray(options) ? options : [];
+  }, [options]);
   
-  // Ref to track if component is mounted to prevent state updates after unmount
-  const isMounted = React.useRef(true);
+  // Clean up when component unmounts
   React.useEffect(() => {
     return () => {
-      isMounted.current = false;
+      mounted.current = false;
     };
   }, []);
 
-  // Handle button click with prevention of form submission and additional safety
+  // Safely handle button click with error prevention
   const handleButtonClick = (e: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    if (!disabled && isMounted.current) {
-      setOpen(!open);
+    try {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      if (!disabled && mounted.current) {
+        setOpen(!open);
+      }
+    } catch (error) {
+      console.error("Error in Combobox handleButtonClick:", error);
     }
   };
 
-  // Safely handle option selection with proper error handling
+  // Safely handle option selection
   const handleSelectOption = (currentValue: string, selectedValue: string) => {
     try {
-      if (onChange && isMounted.current) {
+      if (onChange && mounted.current) {
         // Only call onChange if it exists and component is still mounted
-        onChange(selectedValue === value ? "" : selectedValue);
+        onChange(currentValue === value ? "" : selectedValue);
       }
       
-      if (isMounted.current) {
+      if (mounted.current) {
         setOpen(false);
       }
     } catch (error) {
-      console.error("Error in ComboBox selection handler:", error);
-      if (isMounted.current) {
-        setOpen(false);
-      }
+      console.error("Error in Combobox handleSelectOption:", error);
     }
   };
 
-  // Handle popover open/close events safely
+  // Safely handle popover state changes
   const handleOpenChange = (newOpen: boolean) => {
     try {
-      if (isMounted.current) {
+      if (mounted.current) {
         setOpen(newOpen);
       }
     } catch (error) {
-      console.error("Error in ComboBox open change handler:", error);
+      console.error("Error in Combobox handleOpenChange:", error);
     }
   };
+
+  // Don't render if options is not valid (should never happen now with safeOptions)
+  if (!Array.isArray(safeOptions)) {
+    console.error("Invalid options prop provided to Combobox:", options);
+    return null;
+  }
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>

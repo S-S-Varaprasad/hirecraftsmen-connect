@@ -22,8 +22,22 @@ export function SuggestiveInputField({
 }: SuggestiveInputFieldProps) {
   // CRITICAL: Memoize the suggestions array to ensure it's always valid
   const safeSuggestions = useMemo(() => {
-    return Array.isArray(suggestions) ? suggestions : [];
+    if (!Array.isArray(suggestions)) {
+      console.error("suggestions is not an array in SuggestiveInputField:", suggestions);
+      return [];
+    }
+    return suggestions;
   }, [suggestions]);
+  
+  // Ref to track if component is mounted
+  const isMounted = React.useRef(true);
+  
+  // Clean up on unmount
+  React.useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   
   // Prevent form submission when interacting with the input
   const preventPropagation = (e: React.MouseEvent | React.FormEvent) => {
@@ -32,6 +46,11 @@ export function SuggestiveInputField({
       e.stopPropagation();
     }
   };
+
+  // Log validation for debugging
+  React.useEffect(() => {
+    console.log(`SuggestiveInputField (${name}) - safeSuggestions:`, safeSuggestions?.length);
+  }, [name, safeSuggestions]);
 
   return (
     <FormField
@@ -57,11 +76,17 @@ export function SuggestiveInputField({
                   onChange={(e) => {
                     try {
                       if (typeof e === 'object' && e !== null && 'target' in e) {
-                        field.onChange(e.target.value || '');
+                        if (isMounted.current) {
+                          field.onChange(e.target.value || '');
+                        }
                       } else if (typeof e === 'string') {
-                        field.onChange(e);
+                        if (isMounted.current) {
+                          field.onChange(e);
+                        }
                       } else {
-                        field.onChange('');
+                        if (isMounted.current) {
+                          field.onChange('');
+                        }
                       }
                     } catch (error) {
                       console.error("Error in onChange handler:", error);
@@ -69,12 +94,14 @@ export function SuggestiveInputField({
                   }}
                   onSuggestionClick={(value) => {
                     try {
-                      field.onChange(value || '');
-                      setTimeout(() => {
-                        if (typeof field.onBlur === 'function') {
-                          field.onBlur();
-                        }
-                      }, 100);
+                      if (isMounted.current) {
+                        field.onChange(value || '');
+                        setTimeout(() => {
+                          if (typeof field.onBlur === 'function' && isMounted.current) {
+                            field.onBlur();
+                          }
+                        }, 100);
+                      }
                     } catch (error) {
                       console.error("Error in onSuggestionClick:", error);
                     }

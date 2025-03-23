@@ -28,21 +28,37 @@ const BasicInfoFields = ({
 }: BasicInfoFieldsProps) => {
   // CRITICAL: Memoize all array props to ensure they're always valid arrays
   // This is key to fixing the "undefined is not iterable" error
-  const safeProfessionOptions = useMemo(() => 
-    Array.isArray(professionOptions) ? professionOptions : [], 
-  [professionOptions]);
+  const safeProfessionOptions = useMemo(() => {
+    if (!Array.isArray(professionOptions)) {
+      console.error("professionOptions is not an array in BasicInfoFields:", professionOptions);
+      return [];
+    }
+    return professionOptions;
+  }, [professionOptions]);
   
-  const safeLocationOptions = useMemo(() => 
-    Array.isArray(locationOptions) ? locationOptions : [], 
-  [locationOptions]);
+  const safeLocationOptions = useMemo(() => {
+    if (!Array.isArray(locationOptions)) {
+      console.error("locationOptions is not an array in BasicInfoFields:", locationOptions);
+      return [];
+    }
+    return locationOptions;
+  }, [locationOptions]);
   
-  const safeLanguageOptions = useMemo(() => 
-    Array.isArray(languageOptions) ? languageOptions : [], 
-  [languageOptions]);
+  const safeLanguageOptions = useMemo(() => {
+    if (!Array.isArray(languageOptions)) {
+      console.error("languageOptions is not an array in BasicInfoFields:", languageOptions);
+      return [];
+    }
+    return languageOptions;
+  }, [languageOptions]);
   
-  const safeSkillSuggestions = useMemo(() => 
-    Array.isArray(skillSuggestions) ? skillSuggestions : [], 
-  [skillSuggestions]);
+  const safeSkillSuggestions = useMemo(() => {
+    if (!Array.isArray(skillSuggestions)) {
+      console.error("skillSuggestions is not an array in BasicInfoFields:", skillSuggestions);
+      return [];
+    }
+    return skillSuggestions;
+  }, [skillSuggestions]);
   
   // Prevent form submission when interacting with fields
   const preventPropagation = (e: React.MouseEvent | React.FormEvent) => {
@@ -55,10 +71,11 @@ const BasicInfoFields = ({
   // Log validation for debugging
   React.useEffect(() => {
     console.log('BasicInfoFields - Arrays validation:');
-    console.log('safeProfessionOptions:', safeProfessionOptions.length);
-    console.log('safeLocationOptions:', safeLocationOptions.length);
-    console.log('safeLanguageOptions:', safeLanguageOptions.length);
-  }, [safeProfessionOptions, safeLocationOptions, safeLanguageOptions]);
+    console.log('safeProfessionOptions:', safeProfessionOptions?.length);
+    console.log('safeLocationOptions:', safeLocationOptions?.length);
+    console.log('safeLanguageOptions:', safeLanguageOptions?.length);
+    console.log('safeSkillSuggestions:', safeSkillSuggestions?.length);
+  }, [safeProfessionOptions, safeLocationOptions, safeLanguageOptions, safeSkillSuggestions]);
   
   return (
     <div className="space-y-4" onClick={preventPropagation} onMouseDown={preventPropagation}>

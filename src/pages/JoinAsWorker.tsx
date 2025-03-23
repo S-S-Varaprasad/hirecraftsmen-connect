@@ -23,6 +23,16 @@ const JoinAsWorker = () => {
   const [resume, setResume] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isFormReady, setIsFormReady] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  // Log all data sources to help debugging
+  useEffect(() => {
+    console.log("Data sources initial check:");
+    console.log("allIndianRegions:", allIndianRegions);
+    console.log("professions:", professions);
+    console.log("indianLanguages:", indianLanguages);
+    console.log("skillSuggestions:", skillSuggestions);
+  }, []);
 
   // CRITICAL: Validate all arrays to ensure they're always valid 
   // This is key to fixing the "undefined is not iterable" error
@@ -43,38 +53,59 @@ const JoinAsWorker = () => {
   []);
 
   // Convert professions to the format required by AutocompleteField
-  const professionOptions = React.useMemo(() => 
-    safeProfessions.map(profession => ({
+  // Added fallback to empty array to fix "undefined is not iterable" error
+  const professionOptions = React.useMemo(() => {
+    if (!Array.isArray(safeProfessions)) {
+      console.error("professions is not an array:", safeProfessions);
+      return [];
+    }
+    return safeProfessions.map(profession => ({
       value: profession,
       label: profession,
-    })),
-  [safeProfessions]);
+    }));
+  }, [safeProfessions]);
 
   // Convert regions to the format required by AutocompleteField
-  const locationOptions = React.useMemo(() => 
-    safeIndianRegions.map(region => ({
+  // Added fallback to empty array to fix "undefined is not iterable" error
+  const locationOptions = React.useMemo(() => {
+    if (!Array.isArray(safeIndianRegions)) {
+      console.error("allIndianRegions is not an array:", safeIndianRegions);
+      return [];
+    }
+    return safeIndianRegions.map(region => ({
       value: region,
       label: region,
-    })),
-  [safeIndianRegions]);
+    }));
+  }, [safeIndianRegions]);
 
   // Convert languages to the format required by AutocompleteField
-  const languageOptions = React.useMemo(() => 
-    safeIndianLanguages.map(language => ({
+  // Added fallback to empty array to fix "undefined is not iterable" error
+  const languageOptions = React.useMemo(() => {
+    if (!Array.isArray(safeIndianLanguages)) {
+      console.error("indianLanguages is not an array:", safeIndianLanguages);
+      return [];
+    }
+    return safeIndianLanguages.map(language => ({
       value: language,
       label: language,
-    })),
-  [safeIndianLanguages]);
+    }));
+  }, [safeIndianLanguages]);
 
   useEffect(() => {
-    // Set form as ready once all arrays are properly initialized
-    setIsFormReady(true);
+    // Add a delay to ensure all arrays are properly initialized
+    const timer = setTimeout(() => {
+      // Set form as ready once all arrays are properly initialized
+      setIsFormReady(true);
+      setIsInitializing(false);
+      
+      // Log validation for debugging purposes
+      console.log('Options validation (processed):');
+      console.log('Profession options:', professionOptions);
+      console.log('Location options:', locationOptions);
+      console.log('Language options:', languageOptions);
+    }, 500);
     
-    // Log validation for debugging purposes
-    console.log('Options validation:');
-    console.log('Profession options:', professionOptions);
-    console.log('Location options:', locationOptions);
-    console.log('Language options:', languageOptions);
+    return () => clearTimeout(timer);
   }, [professionOptions, locationOptions, languageOptions]);
 
   const onSubmit = async (data: any) => {
@@ -127,13 +158,55 @@ const JoinAsWorker = () => {
     }
   };
 
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16">
+          <div className="container mx-auto px-4 text-center">
+            <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-r-transparent border-primary align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
+              <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
+            </div>
+            <p className="mt-4 text-lg">Initializing form...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (!isFormReady) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16">
           <div className="container mx-auto px-4 text-center">
-            Loading form...
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-app-orange mx-auto"></div>
+            <p className="mt-4">Loading form...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Double-check that all options arrays are valid before rendering the form
+  if (!Array.isArray(professionOptions) || !Array.isArray(locationOptions) || !Array.isArray(languageOptions)) {
+    console.error("Critical error: Options arrays are not valid", {
+      professionOptions,
+      locationOptions,
+      languageOptions
+    });
+    
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow bg-orange-50/40 dark:bg-gray-900 pt-32 pb-16">
+          <div className="container mx-auto px-4 text-center">
+            <div className="p-6 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <h3 className="text-xl font-semibold text-red-600 dark:text-red-400">Error Loading Form</h3>
+              <p className="mt-2">There was an error initializing the form data. Please try refreshing the page.</p>
+            </div>
           </div>
         </main>
         <Footer />

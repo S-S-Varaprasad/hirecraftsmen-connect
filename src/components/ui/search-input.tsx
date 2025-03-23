@@ -20,8 +20,24 @@ export function SearchInput({
   icon,
   ...props
 }: SearchInputProps) {
-  // Ensure suggestions is always an array
-  const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
+  // CRITICAL: Ensure suggestions is always an array to prevent "undefined is not iterable" error
+  const safeSuggestions = React.useMemo(() => {
+    if (!Array.isArray(suggestions)) {
+      console.error("suggestions is not an array in SearchInput:", suggestions);
+      return [];
+    }
+    return suggestions;
+  }, [suggestions]);
+  
+  // Ref to track if component is mounted
+  const isMounted = React.useRef(true);
+  
+  // Clean up on unmount
+  React.useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   
   const {
     open,
@@ -39,7 +55,12 @@ export function SearchInput({
     value: props.value as string | number, // Cast to fix type error
     onChange: props.onChange,
     onSuggestionClick
-  })
+  });
+
+  // Log validation for debugging
+  React.useEffect(() => {
+    console.log('SearchInput - safeSuggestions:', safeSuggestions?.length);
+  }, [safeSuggestions]);
 
   return (
     <div className="relative w-full">
@@ -58,7 +79,9 @@ export function SearchInput({
           onKeyDown={handleKeyDown}
           onFocus={() => {
             if (filteredSuggestions.length > 0 && inputValue.trim()) {
-              setOpen(true)
+              if (isMounted.current) {
+                setOpen(true);
+              }
             }
           }}
           aria-expanded={open}

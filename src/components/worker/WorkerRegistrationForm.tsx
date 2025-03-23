@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -28,6 +28,7 @@ const WorkerRegistrationForm = ({
   setProfileImage,
   setResume
 }: WorkerRegistrationFormProps) => {
+  // Initialize the form with react-hook-form
   const { register, handleSubmit, control, formState: { errors } } = useForm({
     defaultValues: {
       name: '',
@@ -45,11 +46,47 @@ const WorkerRegistrationForm = ({
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [resumeName, setResumeName] = useState<string | null>(null);
   
-  // Ensure all array props are valid arrays
-  const safeProfessionOptions = Array.isArray(professionOptions) ? professionOptions : [];
-  const safeLocationOptions = Array.isArray(locationOptions) ? locationOptions : [];
-  const safeLanguageOptions = Array.isArray(languageOptions) ? languageOptions : [];
-  const safeSkillSuggestions = Array.isArray(skillSuggestions) ? skillSuggestions : [];
+  // CRITICAL: Ensure all array props are valid arrays with useMemo
+  const safeProfessionOptions = useMemo(() => {
+    if (!Array.isArray(professionOptions)) {
+      console.error("Invalid professionOptions:", professionOptions);
+      return [];
+    }
+    return professionOptions;
+  }, [professionOptions]);
+  
+  const safeLocationOptions = useMemo(() => {
+    if (!Array.isArray(locationOptions)) {
+      console.error("Invalid locationOptions:", locationOptions);
+      return [];
+    }
+    return locationOptions;
+  }, [locationOptions]);
+  
+  const safeLanguageOptions = useMemo(() => {
+    if (!Array.isArray(languageOptions)) {
+      console.error("Invalid languageOptions:", languageOptions);
+      return [];
+    }
+    return languageOptions;
+  }, [languageOptions]);
+  
+  const safeSkillSuggestions = useMemo(() => {
+    if (!Array.isArray(skillSuggestions)) {
+      console.error("Invalid skillSuggestions:", skillSuggestions);
+      return [];
+    }
+    return skillSuggestions;
+  }, [skillSuggestions]);
+  
+  // Log all props for debugging
+  React.useEffect(() => {
+    console.log("WorkerRegistrationForm props check:");
+    console.log("professionOptions:", professionOptions?.length);
+    console.log("locationOptions:", locationOptions?.length);
+    console.log("languageOptions:", languageOptions?.length);
+    console.log("skillSuggestions:", skillSuggestions?.length);
+  }, [professionOptions, locationOptions, languageOptions, skillSuggestions]);
   
   // Stop event propagation to prevent unwanted form submissions
   const preventDefaultSubmit = (e: React.FormEvent) => {
@@ -76,6 +113,7 @@ const WorkerRegistrationForm = ({
         about: data.about || '',
       };
       
+      console.log("Form submitted with data:", validData);
       onSubmit(validData);
     } catch (error) {
       console.error("Error in form submission:", error);

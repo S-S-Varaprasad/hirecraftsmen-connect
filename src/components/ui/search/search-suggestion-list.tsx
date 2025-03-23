@@ -24,11 +24,17 @@ export function SearchSuggestionList({
   onSuggestionClick,
   className
 }: SearchSuggestionListProps) {
-  // Safety check to ensure suggestions is an array
-  const safeSuggestions = Array.isArray(suggestions) ? suggestions : []
+  // CRITICAL: Safety check to ensure suggestions is an array to fix "undefined is not iterable" error
+  const safeSuggestions = React.useMemo(() => {
+    if (!Array.isArray(suggestions)) {
+      console.error("suggestions is not an array in SearchSuggestionList:", suggestions);
+      return [];
+    }
+    return suggestions;
+  }, [suggestions]);
   
   if (!open || safeSuggestions.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -47,7 +53,12 @@ export function SearchSuggestionList({
                   key={index}
                   onSelect={() => onSuggestionClick(suggestion)}
                   onMouseDown={(e) => {
-                    e.preventDefault() // Prevent blur before click
+                    e.preventDefault(); // Prevent blur before click
+                    e.stopPropagation(); // Prevent unwanted form submission
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault(); // Prevent default behavior
+                    e.stopPropagation(); // Prevent unwanted form submission
                   }}
                   className={cn(
                     "cursor-pointer hover:bg-accent hover:text-accent-foreground",
@@ -64,5 +75,5 @@ export function SearchSuggestionList({
         </CommandList>
       </Command>
     </div>
-  )
+  );
 }

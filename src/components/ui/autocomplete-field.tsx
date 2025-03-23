@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Combobox } from '@/components/ui/combobox';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
@@ -24,9 +24,19 @@ export function AutocompleteField({
   searchable = true,
 }: AutocompleteFieldProps) {
   // CRITICAL: Always validate options and provide default value
-  const safeOptions = React.useMemo(() => {
+  const safeOptions = useMemo(() => {
     return Array.isArray(options) ? options : [];
   }, [options]);
+  
+  // Ref to track if component is mounted for safe state updates
+  const isMounted = React.useRef(true);
+  
+  // Clean up on unmount
+  React.useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   
   // Safer value change handler with error boundary
   const handleValueChange = (field: any, value: string) => {
@@ -46,6 +56,10 @@ export function AutocompleteField({
       e.stopPropagation();
     }
   };
+  
+  if (safeOptions.length === 0) {
+    console.warn(`AutocompleteField: No options provided for field "${name}"`);
+  }
   
   return (
     <FormField
@@ -83,7 +97,7 @@ export function AutocompleteField({
                   if (open) {
                     setTimeout(() => {
                       try {
-                        if (field && typeof field.onBlur === 'function') {
+                        if (field && typeof field.onBlur === 'function' && isMounted.current) {
                           field.onBlur();
                         }
                       } catch (error) {
