@@ -3,7 +3,8 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { AutocompleteField, SuggestiveInputField } from '@/components/ui/form-field';
+import { AutocompleteField } from '@/components/ui/autocomplete-field';
+import { SuggestiveInputField } from '@/components/ui/suggestive-input-field';
 import { UseFormRegister, FieldErrors, Control } from 'react-hook-form';
 
 interface BasicInfoFieldsProps {
@@ -20,11 +21,17 @@ const BasicInfoFields = ({
   register,
   errors,
   control,
-  professionOptions,
-  locationOptions,
-  languageOptions,
-  skillSuggestions
+  professionOptions = [],
+  locationOptions = [],
+  languageOptions = [],
+  skillSuggestions = []
 }: BasicInfoFieldsProps) => {
+  // Ensure all array props are valid arrays
+  const safeProfessionOptions = Array.isArray(professionOptions) ? professionOptions : [];
+  const safeLocationOptions = Array.isArray(locationOptions) ? locationOptions : [];
+  const safeLanguageOptions = Array.isArray(languageOptions) ? languageOptions : [];
+  const safeSkillSuggestions = Array.isArray(skillSuggestions) ? skillSuggestions : [];
+  
   return (
     <>
       <div className="mb-4">
@@ -46,7 +53,7 @@ const BasicInfoFields = ({
           control={control}
           label="Profession"
           placeholder="e.g., Electrician, Plumber"
-          options={professionOptions}
+          options={safeProfessionOptions}
           description="Select your profession from the list or type to search"
         />
       </div>
@@ -57,7 +64,7 @@ const BasicInfoFields = ({
           control={control}
           label="Location"
           placeholder="Your City, State"
-          options={locationOptions}
+          options={safeLocationOptions}
           description="Select your location from the list or type to search"
         />
       </div>
@@ -92,7 +99,7 @@ const BasicInfoFields = ({
           control={control}
           label="Skills"
           placeholder="e.g., Wiring, Plumbing, Carpentry"
-          suggestions={skillSuggestions}
+          suggestions={safeSkillSuggestions}
           description="List your skills, separated by commas"
         />
       </div>
@@ -103,7 +110,7 @@ const BasicInfoFields = ({
           control={control}
           label="Languages"
           placeholder="English, Hindi, Tamil"
-          options={languageOptions}
+          options={safeLanguageOptions}
           description="Select languages you speak"
           searchable={true}
         />

@@ -21,10 +21,10 @@ interface WorkerRegistrationFormProps {
 const WorkerRegistrationForm = ({
   onSubmit,
   isUploading,
-  professionOptions,
-  locationOptions,
-  languageOptions,
-  skillSuggestions,
+  professionOptions = [],
+  locationOptions = [],
+  languageOptions = [],
+  skillSuggestions = [],
   setProfileImage,
   setResume
 }: WorkerRegistrationFormProps) => {
@@ -43,6 +43,12 @@ const WorkerRegistrationForm = ({
 
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [resumeName, setResumeName] = useState<string | null>(null);
+  
+  // Ensure all array props are valid arrays
+  const safeProfessionOptions = Array.isArray(professionOptions) ? professionOptions : [];
+  const safeLocationOptions = Array.isArray(locationOptions) ? locationOptions : [];
+  const safeLanguageOptions = Array.isArray(languageOptions) ? languageOptions : [];
+  const safeSkillSuggestions = Array.isArray(skillSuggestions) ? skillSuggestions : [];
   
   const preventDefaultSubmit = (e: React.FormEvent) => {
     if (e.target !== e.currentTarget) {
@@ -65,10 +71,10 @@ const WorkerRegistrationForm = ({
             register={register}
             errors={errors}
             control={control}
-            professionOptions={professionOptions}
-            locationOptions={locationOptions}
-            languageOptions={languageOptions}
-            skillSuggestions={skillSuggestions}
+            professionOptions={safeProfessionOptions}
+            locationOptions={safeLocationOptions}
+            languageOptions={safeLanguageOptions}
+            skillSuggestions={safeSkillSuggestions}
           />
           
           <ResumeUpload

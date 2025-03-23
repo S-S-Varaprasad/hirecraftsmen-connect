@@ -23,20 +23,26 @@ const JoinAsWorker = () => {
   const [resume, setResume] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Ensure all arrays are valid before mapping
+  const safeIndianRegions = Array.isArray(allIndianRegions) ? allIndianRegions : [];
+  const safeProfessions = Array.isArray(professions) ? professions : [];
+  const safeIndianLanguages = Array.isArray(indianLanguages) ? indianLanguages : [];
+  const safeSkillSuggestions = Array.isArray(skillSuggestions) ? skillSuggestions : [];
+
   // Convert professions to the format required by AutocompleteField
-  const professionOptions = professions.map(profession => ({
+  const professionOptions = safeProfessions.map(profession => ({
     value: profession,
     label: profession,
   }));
 
   // Convert regions to the format required by AutocompleteField
-  const locationOptions = allIndianRegions.map(region => ({
+  const locationOptions = safeIndianRegions.map(region => ({
     value: region,
     label: region,
   }));
 
   // Convert languages to the format required by AutocompleteField
-  const languageOptions = indianLanguages.map(language => ({
+  const languageOptions = safeIndianLanguages.map(language => ({
     value: language,
     label: language,
   }));
@@ -88,7 +94,7 @@ const JoinAsWorker = () => {
             professionOptions={professionOptions}
             locationOptions={locationOptions}
             languageOptions={languageOptions}
-            skillSuggestions={skillSuggestions}
+            skillSuggestions={safeSkillSuggestions}
             setProfileImage={setProfileImage}
             setResume={setResume}
           />
