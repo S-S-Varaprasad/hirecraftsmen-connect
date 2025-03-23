@@ -11,6 +11,7 @@ export interface Notification {
   priority?: 'low' | 'medium' | 'high';
   category?: 'job' | 'message' | 'application' | 'system';
   expires_at?: string;
+  additional_data?: string | null;
 }
 
 export const getNotifications = async (userId: string, options?: {
@@ -53,7 +54,7 @@ export const getNotifications = async (userId: string, options?: {
     throw error;
   }
   
-  return data || [] as Notification[];
+  return data as Notification[];
 };
 
 export const getUnreadNotificationsCount = async (userId: string, options?: { type?: string; category?: string }) => {

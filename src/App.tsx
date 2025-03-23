@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@/components/theme-provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ToastContainer, Toast } from '@/components/ui/sonner';
+import { Toaster } from 'sonner';
 import { AuthProvider } from '@/context/AuthContext';
 
 import Index from './pages/Index';
@@ -27,7 +28,6 @@ import ContactWorker from './pages/ContactWorker';
 import ContactEmployer from './pages/ContactEmployer';
 import DeleteWorker from './pages/DeleteWorker';
 import DeactivateWorker from './pages/DeactivateWorker';
-import ContactWorker from './pages/ContactWorker';
 import MessageWorker from './pages/MessageWorker';
 
 // Update the routes to include NotificationSettings page
@@ -79,7 +79,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
-        <ToastContainer />
+        <Toaster />
       </QueryClientProvider>
     </ThemeProvider>
   );
