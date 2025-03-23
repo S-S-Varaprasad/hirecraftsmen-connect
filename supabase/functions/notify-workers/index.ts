@@ -52,7 +52,7 @@ serve(async (req: Request) => {
     console.log(`Notifying workers about ${notificationType}: ${jobTitle} with skills: ${skills.join(', ')}`);
     console.log(`Category: ${category || 'None provided'}`);
     
-    // Get workers with matching skills or profession
+    // Get all available workers
     const { data: workers, error: workersError } = await supabaseClient
       .from('workers')
       .select('id, user_id, skills, profession, name, languages')
@@ -71,7 +71,14 @@ serve(async (req: Request) => {
     
     // Enhanced function to check for skill matches with better matching logic
     const hasMatchingSkill = (workerSkills: string[], jobSkills: string[]) => {
+      if (!workerSkills || workerSkills.length === 0) {
+        console.log('Worker has no skills defined');
+        return false;
+      }
+      
       const workerSkillsLower = workerSkills.map(s => s.toLowerCase());
+      
+      console.log(`Comparing worker skills: [${workerSkillsLower.join(', ')}] with job skills: [${jobSkills.join(', ')}]`);
       
       // Check if any worker skill contains or is contained by any job skill
       for (const workerSkill of workerSkillsLower) {
@@ -106,7 +113,11 @@ serve(async (req: Request) => {
     };
     
     const hasMatchingProfession = (workerProfession: string, jobCategory?: string) => {
-      if (!jobCategory) return false;
+      if (!jobCategory || !workerProfession) {
+        return false;
+      }
+      
+      console.log(`Comparing worker profession: "${workerProfession}" with job category: "${jobCategory}"`);
       
       const workerProfessionLower = workerProfession.toLowerCase().trim();
       const jobCategoryLower = jobCategory.toLowerCase().trim();
@@ -145,12 +156,12 @@ serve(async (req: Request) => {
       const matchingSkill = hasMatchingSkill(worker.skills || [], skillsLower);
       const matchingProfession = category ? hasMatchingProfession(worker.profession, category) : false;
       
-      console.log(`Checking worker ${worker.name} (ID: ${worker.id}):`);
+      console.log(`Checking worker ${worker.name || worker.id}:`);
       console.log(`  Skills match: ${matchingSkill}`);
       console.log(`  Profession match: ${matchingProfession}`);
       
       if (matchingSkill || matchingProfession) {
-        console.log(`Match found for worker: ${worker.name} (ID: ${worker.id})`);
+        console.log(`Match found for worker: ${worker.name || worker.id} (ID: ${worker.id})`);
         
         matchedWorkers.push(worker);
         
@@ -221,34 +232,7 @@ serve(async (req: Request) => {
           console.error(`Error in notification process for worker ${worker.id}:`, error);
         }
       } else {
-        console.log(`Worker ${worker.name} (ID: ${worker.id}) does not match job requirements`);
-      }
-    }
-
-    // If employerId is provided, notify the employer about new applications
-    if (employerId) {
-      try {
-        const { data: employerNotification, error: employerNotifyError } = await supabaseClient
-          .from("notifications")
-          .insert([
-            {
-              user_id: employerId,
-              message: `A worker has applied to your job: ${jobTitle}`,
-              type: 'new_application',
-              related_id: jobId,
-            },
-          ])
-          .select()
-          .single();
-
-        if (employerNotifyError) {
-          console.error(`Error creating notification for employer ${employerId}:`, employerNotifyError);
-        } else {
-          console.log(`Created notification for employer ${employerId}:`, employerNotification);
-          notifications.push(employerNotification);
-        }
-      } catch (error) {
-        console.error(`Error in employer notification process:`, error);
+        console.log(`Worker ${worker.name || worker.id} (ID: ${worker.id}) does not match job requirements`);
       }
     }
 

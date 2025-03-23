@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { getIndianWorkers } from '@/utils/workerFilters';
 
@@ -204,11 +203,25 @@ export const notifyWorkersAboutJob = async (
   employerId?: string
 ) => {
   try {
-    const response = await fetch(`${process.env.SUPABASE_URL}/functions/v1/notify-workers`, {
+    // Get Supabase URL and anon key from environment
+    const SUPABASE_URL = "https://myrztsvambwrkusxxatm.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15cnp0c3ZhbWJ3cmt1c3h4YXRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwMjExMjMsImV4cCI6MjA1NzU5NzEyM30.e4ZArV9YTi84rsQu9hXqVVlGAVCPu2e88_rrng49Yes";
+    
+    console.log(`Calling notify-workers edge function with parameters:`, {
+      jobId,
+      jobTitle,
+      skills,
+      category,
+      sendEmail,
+      sendSms,
+      employerId
+    });
+
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/notify-workers`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
       },
       body: JSON.stringify({
         jobId,
@@ -222,11 +235,14 @@ export const notifyWorkersAboutJob = async (
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to notify workers');
+      const errorData = await response.text();
+      console.error('Error from notify-workers function:', errorData);
+      throw new Error(`Failed to notify workers: ${response.statusText}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    console.log('Notify workers result:', result);
+    return result;
   } catch (error) {
     console.error('Error notifying workers:', error);
     throw error;

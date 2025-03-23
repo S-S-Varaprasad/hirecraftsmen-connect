@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -125,19 +124,39 @@ const PostJob = () => {
       try {
         console.log('Notifying workers about new job...');
         
-        // Extract category/profession from the job title
+        // Extract category/profession from the job title with improved logic
         let possibleCategory = '';
         
-        // Try to extract category from job title patterns like "Need a Plumber" or "Looking for Electrician"
+        // Try to extract category using different patterns
+        // Pattern 1: "Need a Plumber" format
         const needPattern = /need\s+a\s+([a-z]+)/i;
-        const lookingPattern = /looking\s+for\s+([a-z]+)/i;
         const needMatch = data.title.match(needPattern);
+        
+        // Pattern 2: "Looking for Electrician" format
+        const lookingPattern = /looking\s+for\s+([a-z]+)/i;
         const lookingMatch = data.title.match(lookingPattern);
+        
+        // Pattern 3: "Hiring Carpenter" format
+        const hiringPattern = /hiring\s+([a-z]+)/i;
+        const hiringMatch = data.title.match(hiringPattern);
+        
+        // Pattern 4: Check for profession names directly in the title
+        const professionMatch = professions.find(profession => 
+          data.title.toLowerCase().includes(profession.toLowerCase())
+        );
         
         if (needMatch && needMatch[1]) {
           possibleCategory = needMatch[1];
+          console.log(`Extracted category using 'need a' pattern: ${possibleCategory}`);
         } else if (lookingMatch && lookingMatch[1]) {
           possibleCategory = lookingMatch[1];
+          console.log(`Extracted category using 'looking for' pattern: ${possibleCategory}`);
+        } else if (hiringMatch && hiringMatch[1]) {
+          possibleCategory = hiringMatch[1];
+          console.log(`Extracted category using 'hiring' pattern: ${possibleCategory}`);
+        } else if (professionMatch) {
+          possibleCategory = professionMatch;
+          console.log(`Extracted category by matching profession: ${possibleCategory}`);
         } else {
           // Extract first word after common prefixes or first word if no pattern matches
           const words = data.title.split(' ');
@@ -149,12 +168,13 @@ const PostJob = () => {
             } else {
               possibleCategory = words[0];
             }
+            console.log(`Extracted possible category from words: ${possibleCategory}`);
           }
         }
         
         console.log('Extracted possible category:', possibleCategory);
         
-        await notifyWorkersAboutJob(
+        const result = await notifyWorkersAboutJob(
           newJob.id, 
           newJob.title, 
           skillsArray,
@@ -162,8 +182,15 @@ const PostJob = () => {
           true, // Send email
           false  // Don't send SMS
         );
-        console.log('Worker notifications sent successfully');
-        toast.success('Job posted and notifications sent to matching workers');
+        
+        console.log('Worker notifications sent successfully:', result);
+        
+        if (result && result.matched_workers > 0) {
+          toast.success(`Job posted and notifications sent to ${result.matched_workers} matching workers`);
+        } else {
+          toast.success('Job posted successfully');
+          toast.info('No matching workers found for notifications');
+        }
       } catch (notifyError) {
         console.error('Error notifying workers:', notifyError);
         // Don't fail the job creation if notifications fail
@@ -171,7 +198,6 @@ const PostJob = () => {
       }
       
       setIsSuccess(true);
-      toast.success('Job posted successfully!');
       
       form.reset();
       
