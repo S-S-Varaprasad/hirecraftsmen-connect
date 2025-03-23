@@ -100,15 +100,18 @@ const BasicInfoFields = ({
       </div>
 
       <div className="mb-4">
-        <Label htmlFor="hourlyRate" className="text-base">Hourly Rate</Label>
-        <Input
-          type="text"
-          id="hourlyRate"
-          {...register("hourlyRate", { required: "Hourly rate is required" })}
-          placeholder="e.g., $25/hr, $40/hr"
-          className="mt-1"
-          required
-        />
+        <Label htmlFor="hourlyRate" className="text-base">Hourly Rate (₹)</Label>
+        <div className="relative">
+          <span className="absolute left-3 top-2 text-gray-500">₹</span>
+          <Input
+            type="text"
+            id="hourlyRate"
+            {...register("hourlyRate", { required: "Hourly rate is required" })}
+            placeholder="e.g., 500, 1000"
+            className="pl-7 mt-1"
+            required
+          />
+        </div>
         {errors.hourlyRate && <p className="text-red-500 text-sm mt-1">{(errors.hourlyRate as any).message}</p>}
       </div>
 

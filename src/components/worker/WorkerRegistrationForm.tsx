@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import BasicInfoFields from './BasicInfoFields';
 import ProfileImageUpload from './ProfileImageUpload';
-import ResumeUpload from './ResumeUpload';
 
 interface WorkerRegistrationFormProps {
   onSubmit: (data: any) => void;
@@ -44,20 +43,24 @@ const WorkerRegistrationForm = ({
   });
 
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
-  const [resumeName, setResumeName] = useState<string | null>(null);
   
   // Safely handle form submission with error handling
   const onFormSubmit = (data: any) => {
     try {
+      // Add ₹ symbol to hourly rate if not present
+      const hourlyRate = data.hourlyRate.startsWith('₹') 
+        ? data.hourlyRate 
+        : `₹${data.hourlyRate}`;
+
       // Validate data before submission
       const validData = {
         ...data,
+        hourlyRate,
         // Ensure no undefined values
         name: data.name || '',
         profession: data.profession || '',
         location: data.location || '',
         experience: data.experience || '',
-        hourlyRate: data.hourlyRate || '',
         skills: data.skills || '',
         languages: data.languages || '',
         about: data.about || '',
@@ -94,12 +97,6 @@ const WorkerRegistrationForm = ({
             skillSuggestions={skillSuggestions}
           />
           
-          <ResumeUpload
-            resumeName={resumeName}
-            setResumeName={setResumeName}
-            setResume={setResume}
-          />
-
           <Button 
             type="submit" 
             className="w-full bg-primary hover:bg-primary/90 mt-4" 

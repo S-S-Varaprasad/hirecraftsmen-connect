@@ -20,7 +20,6 @@ const JoinAsWorker = () => {
   const { createWorkerProfile } = useWorkerProfiles();
 
   const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [resume, setResume] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -101,7 +100,7 @@ const JoinAsWorker = () => {
         languages: data.languages || '',
         about: data.about || '',
         profileImage: profileImage,
-        resume: resume,
+        resume: null, // Always pass null as we've removed resume upload
       });
 
       setIsUploading(false);
@@ -135,7 +134,7 @@ const JoinAsWorker = () => {
               languageOptions={languageOptions}
               skillSuggestions={safeSkillSuggestions}
               setProfileImage={setProfileImage}
-              setResume={setResume}
+              setResume={() => {}} // Keep the prop but make it a no-op function
             />
           )}
         </div>

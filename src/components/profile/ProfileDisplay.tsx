@@ -15,6 +15,18 @@ interface ProfileDisplayProps {
 const ProfileDisplay = ({ worker, onEdit }: ProfileDisplayProps) => {
   const navigate = useNavigate();
 
+  // Format hourly rate to show Indian Rupee symbol
+  const formattedHourlyRate = () => {
+    if (!worker.hourly_rate) return '₹0';
+    
+    // If already has ₹ symbol, return as is
+    if (worker.hourly_rate.includes('₹')) return worker.hourly_rate;
+    
+    // If has $ or other currency symbols, replace with ₹
+    const cleanedRate = worker.hourly_rate.replace(/[$€£]/g, '').trim();
+    return `₹${cleanedRate}`;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-start">
@@ -64,7 +76,7 @@ const ProfileDisplay = ({ worker, onEdit }: ProfileDisplayProps) => {
           <h3 className="text-sm font-medium text-gray-500">Hourly Rate</h3>
           <div className="mt-1 flex items-center">
             <DollarSign className="w-4 h-4 mr-1 text-gray-500" />
-            <span>{worker.hourly_rate}</span>
+            <span>{formattedHourlyRate()}</span>
           </div>
         </div>
         <div>

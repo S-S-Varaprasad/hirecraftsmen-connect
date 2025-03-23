@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Worker } from '@/services/workerService';
 import { z } from 'zod';
@@ -50,6 +49,13 @@ const ProfileEditForm = ({
   onImageRemove,
   uploading
 }: ProfileEditFormProps) => {
+  const formatHourlyRate = (rate: string) => {
+    if (!rate) return '';
+    
+    const cleanedRate = rate.replace(/[₹$€£]/g, '').trim();
+    return cleanedRate;
+  };
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -57,7 +63,7 @@ const ProfileEditForm = ({
       profession: worker.profession,
       location: worker.location,
       experience: worker.experience,
-      hourly_rate: worker.hourly_rate,
+      hourly_rate: formatHourlyRate(worker.hourly_rate),
       about: worker.about || '',
       skills: worker.skills.join(', '),
       languages: worker.languages.join(', '),
@@ -65,9 +71,20 @@ const ProfileEditForm = ({
     }
   });
 
+  const handleSubmit = async (data: ProfileFormValues) => {
+    const formattedData = {
+      ...data,
+      hourly_rate: data.hourly_rate.startsWith('₹') 
+        ? data.hourly_rate 
+        : `₹${data.hourly_rate}`
+    };
+    
+    await onSubmit(formattedData);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <ProfileImageUpload 
           worker={worker} 
           isEditing={true} 
@@ -138,9 +155,12 @@ const ProfileEditForm = ({
             name="hourly_rate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Hourly Rate</FormLabel>
+                <FormLabel>Hourly Rate (₹)</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-gray-500">₹</span>
+                    <Input {...field} className="pl-7" placeholder="500" />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
