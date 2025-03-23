@@ -44,10 +44,9 @@ const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
   const itemContext = React.useContext(FormItemContext)
   const formContext = useFormContext()
-  
-  // Gracefully handle the case when used outside a FormProvider
+
+  // Handle case when used outside of FormProvider
   if (!formContext) {
-    console.warn("useFormField was used outside of a FormProvider context. Make sure your components are wrapped in a <Form> component.");
     return {
       id: itemContext?.id || "",
       name: fieldContext?.name || "",
@@ -58,6 +57,7 @@ const useFormField = () => {
     }
   }
 
+  // Only destructure after checking formContext is not null
   const { getFieldState, formState } = formContext
   
   if (!fieldContext) {
