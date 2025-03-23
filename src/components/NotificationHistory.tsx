@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Notification, useNotifications } from '@/hooks/useNotifications';
+import { useNotifications, Notification } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { 
   Dialog, DialogContent, DialogDescription, 
@@ -34,7 +34,6 @@ interface NotificationHistoryProps {
   onClose?: () => void;
 }
 
-// All notification types - changed empty string to "all" for these filter options
 const NOTIFICATION_TYPES = [
   { value: 'all', label: 'All Types' },
   { value: 'application', label: 'Applications' },
@@ -46,7 +45,6 @@ const NOTIFICATION_TYPES = [
   { value: 'system', label: 'System' }
 ];
 
-// All notification categories - changed empty string to "all" for these filter options
 const NOTIFICATION_CATEGORIES = [
   { value: 'all', label: 'All Categories' },
   { value: 'job', label: 'Jobs' },
@@ -76,13 +74,11 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showFilterMenu, setShowFilterMenu] = useState(false);
 
-  // Handler when notification is scrolled to detect infinite scroll
   const handleScroll = () => {
     if (!scrollAreaRef.current || loading || !hasMore) return;
     
     const { scrollTop, scrollHeight, clientHeight } = scrollAreaRef.current;
     
-    // Load more when scrolling to the bottom
     if (scrollTop + clientHeight >= scrollHeight - 50) {
       loadMore();
     }
@@ -92,7 +88,6 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
     markAsRead(notification.id);
     
     if (notification.related_id) {
-      // Navigate based on notification type
       if (notification.type === 'application' || notification.type === 'new_application') {
         navigate(`/jobs/${notification.related_id}`);
       } else if (notification.type === 'job_accepted' || notification.type === 'job_application' || notification.type === 'job_completed') {
@@ -125,7 +120,6 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
     }
   };
 
-  // Apply filter - Updated to handle "all" value instead of empty string
   const applyFilter = (type: string, value: string | boolean) => {
     if (type === 'type') {
       updateFilters({ type: value === 'all' ? undefined : value as string });
@@ -136,7 +130,6 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
     }
   };
 
-  // Get notification icon based on type
   const getNotificationIcon = (type: string, priority?: string) => {
     const baseClass = priority === 'high' 
       ? "h-4 w-4 text-red-500" 
@@ -179,7 +172,6 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
             )}
           </div>
           <div className="flex items-center gap-1">
-            {/* Filter button */}
             <DropdownMenu open={showFilterMenu} onOpenChange={setShowFilterMenu}>
               <DropdownMenuTrigger asChild>
                 <Button 
@@ -239,7 +231,6 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
                         if (checked) {
                           applyFilter('read', false);
                         } else {
-                          // Remove the isRead filter
                           updateFilters({ isRead: undefined });
                         }
                       }}
@@ -259,7 +250,6 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            {/* Mark all as read button */}
             {unreadCount > 0 && (
               <Button 
                 variant="ghost" 
@@ -272,7 +262,6 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
               </Button>
             )}
             
-            {/* Settings button */}
             <Button 
               variant="ghost" 
               size="sm" 
@@ -387,7 +376,6 @@ export const NotificationHistory = ({ onClose }: NotificationHistoryProps) => {
         </CardContent>
       </Card>
 
-      {/* Delete notification confirmation dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

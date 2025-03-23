@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import { 
   getNotifications, 
   getUnreadNotificationCount, 
-  Notification, 
   markNotificationAsRead, 
   markAllNotificationsAsRead, 
   deleteNotification,
@@ -15,6 +14,9 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { useQueryRefresh } from './useQueryRefresh';
 
+// Re-export the Notification type from the service
+export type { Notification } from '@/services/notificationService';
+
 interface UseNotificationsOptions {
   limit?: number;
   type?: string;
@@ -23,11 +25,24 @@ interface UseNotificationsOptions {
   refreshInterval?: number;
 }
 
+interface NotificationFilter {
+  type?: string;
+  category?: string;
+  isRead?: boolean;
+}
+
 export const useNotifications = (options: UseNotificationsOptions = {}) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isLoadingAction, setIsLoadingAction] = useState(false);
   const [playSound, setPlaySound] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    // Get saved preference from localStorage
+    const savedPreference = localStorage.getItem('notification-sound-enabled');
+    return savedPreference !== null ? savedPreference === 'true' : true;
+  });
+  const [filter, setFilter] = useState<NotificationFilter>({});
+  const [hasMore, setHasMore] = useState(true);
   
   // Set up real-time updates for notifications table
   useQueryRefresh(['notifications'], [['notifications'], ['unreadCount']]);
@@ -78,18 +93,27 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
     }
   }, [user, refetch, refetchUnreadCount]);
   
+  // Toggle notification sound setting
+  const toggleSound = useCallback(() => {
+    setSoundEnabled(prev => {
+      const newValue = !prev;
+      localStorage.setItem('notification-sound-enabled', String(newValue));
+      return newValue;
+    });
+  }, []);
+  
   // Play notification sound when unread count increases
   useEffect(() => {
-    if (playSound && unreadCount > 0) {
+    if (playSound && soundEnabled && unreadCount > 0) {
       const audio = new Audio('/sounds/notification.mp3');
       audio.play();
       setPlaySound(false);
     }
-  }, [unreadCount, playSound]);
+  }, [unreadCount, playSound, soundEnabled]);
   
   // Mark a notification as read
   const markAsRead = useCallback(async (notificationId: string) => {
-    if (!user) return;
+    if (!user) return false;
     
     setIsLoadingAction(true);
     try {
@@ -111,7 +135,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
   
   // Mark all notifications as read
   const markAllAsRead = useCallback(async (options?: { type?: string; category?: string }) => {
-    if (!user) return;
+    if (!user) return false;
     
     setIsLoadingAction(true);
     try {
@@ -135,7 +159,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
   
   // Remove a notification
   const removeNotification = useCallback(async (notificationId: string) => {
-    if (!user) return;
+    if (!user) return false;
     
     setIsLoadingAction(true);
     try {
@@ -159,7 +183,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
   
   // Toggle read status of a notification
   const toggleReadStatus = useCallback(async (notificationId: string, currentReadStatus: boolean) => {
-    if (!user) return;
+    if (!user) return false;
     
     setIsLoadingAction(true);
     try {
@@ -180,6 +204,28 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
     }
   }, [user, queryClient]);
   
+  // Update filters for notifications
+  const updateFilters = useCallback((newFilters: Partial<NotificationFilter>) => {
+    setFilter(prevFilters => ({
+      ...prevFilters,
+      ...newFilters
+    }));
+  }, []);
+  
+  // Reset all filters
+  const resetFilters = useCallback(() => {
+    setFilter({});
+  }, []);
+  
+  // Load more notifications for infinite scroll
+  const loadMore = useCallback(() => {
+    if (!user || !hasMore) return;
+    
+    console.log('Loading more notifications...');
+    // Implementation for loading more notifications would go here
+    // This is a placeholder as the actual implementation depends on your pagination strategy
+  }, [user, hasMore]);
+  
   // Filter notifications by type
   const filterByType = useCallback((type: string) => {
     return notifications.filter(notification => notification.type === type);
@@ -197,7 +243,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
   
   // Group notifications by date
   const groupByDate = useCallback(() => {
-    const groups: { [key: string]: Notification[] } = {};
+    const groups: { [key: string]: any[] } = {};
     
     notifications.forEach(notification => {
       const date = new Date(notification.created_at).toLocaleDateString();
@@ -238,6 +284,7 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
     notifications: notificationsWithReadStatus,
     unreadCount,
     isLoading: isLoading || isLoadingUnreadCount || isLoadingAction,
+    loading: isLoading || isLoadingUnreadCount || isLoadingAction, // Alias for isLoading for backward compatibility
     isFetching,
     error,
     refreshNotifications,
@@ -249,5 +296,13 @@ export const useNotifications = (options: UseNotificationsOptions = {}) => {
     filterByCategory,
     filterByPriority,
     groupByDate,
+    // Add the missing properties
+    soundEnabled,
+    toggleSound,
+    hasMore,
+    filter,
+    updateFilters,
+    resetFilters,
+    loadMore
   };
 };

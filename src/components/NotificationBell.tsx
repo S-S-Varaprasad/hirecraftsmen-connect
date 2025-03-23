@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Bell, BellOff, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,10 +16,8 @@ export const NotificationBell = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const navigate = useNavigate();
 
-  // Animation effect when new notification comes in
   useEffect(() => {
     if (unreadCount > 0) {
-      // Trigger vibration if supported by the browser and device
       if ('vibrate' in navigator) {
         try {
           navigator.vibrate(200);
@@ -81,7 +78,6 @@ export const NotificationBell = () => {
         </PopoverContent>
       </Popover>
 
-      {/* Settings button */}
       <Button 
         variant="ghost" 
         size="icon" 
