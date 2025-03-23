@@ -20,6 +20,9 @@ export function SearchInput({
   icon,
   ...props
 }: SearchInputProps) {
+  // Ensure suggestions is always an array
+  const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
+  
   const {
     open,
     inputValue,
@@ -32,8 +35,8 @@ export function SearchInput({
     handleSuggestionClick,
     setOpen
   } = useSearchInput({
-    suggestions,
-    value: props.value,
+    suggestions: safeSuggestions,
+    value: props.value as string | number, // Cast to fix type error
     onChange: props.onChange,
     onSuggestionClick
   })

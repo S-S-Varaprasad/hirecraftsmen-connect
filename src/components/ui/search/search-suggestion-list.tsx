@@ -40,23 +40,27 @@ export function SearchSuggestionList({
     >
       <Command>
         <CommandList>
-          <CommandGroup>
-            {safeSuggestions.map((suggestion, index) => (
-              <CommandItem
-                key={index}
-                onSelect={() => onSuggestionClick(suggestion)}
-                onMouseDown={(e) => {
-                  e.preventDefault() // Prevent blur before click
-                }}
-                className={cn(
-                  "cursor-pointer hover:bg-accent hover:text-accent-foreground",
-                  index === highlightedIndex && "bg-accent text-accent-foreground"
-                )}
-              >
-                {suggestion}
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          {safeSuggestions.length > 0 ? (
+            <CommandGroup>
+              {safeSuggestions.map((suggestion, index) => (
+                <CommandItem
+                  key={index}
+                  onSelect={() => onSuggestionClick(suggestion)}
+                  onMouseDown={(e) => {
+                    e.preventDefault() // Prevent blur before click
+                  }}
+                  className={cn(
+                    "cursor-pointer hover:bg-accent hover:text-accent-foreground",
+                    index === highlightedIndex && "bg-accent text-accent-foreground"
+                  )}
+                >
+                  {suggestion}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          ) : (
+            <CommandEmpty>No suggestions found</CommandEmpty>
+          )}
         </CommandList>
       </Command>
     </div>
