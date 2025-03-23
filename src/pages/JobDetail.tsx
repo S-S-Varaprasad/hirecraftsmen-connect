@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
@@ -184,7 +185,7 @@ const JobDetail = () => {
                 <CardFooter className="bg-gray-50 dark:bg-gray-800 flex flex-col sm:flex-row justify-between gap-4">
                   <div className="flex gap-4">
                     <Button asChild variant="outline">
-                      <Link to={`/contact-employer/${job.id}`}>
+                      <Link to={`/contact-employer/${jobId}`}>
                         <Mail className="mr-2 h-4 w-4" /> Contact Employer
                       </Link>
                     </Button>
@@ -195,7 +196,7 @@ const JobDetail = () => {
                     </Button>
                   </div>
                   <Button asChild>
-                    <Link to={`/apply-now/${job.id}`}>
+                    <Link to={`/apply-now/${jobId}`}>
                       <SendHorizonal className="mr-2 h-4 w-4" /> Apply Now
                     </Link>
                   </Button>

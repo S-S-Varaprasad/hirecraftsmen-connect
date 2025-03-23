@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Job {
@@ -59,6 +60,12 @@ export const getJobs = async (): Promise<Job[]> => {
 
 export const getJobById = async (id: string): Promise<Job | null> => {
   try {
+    if (!id) {
+      console.error('No job ID provided to getJobById');
+      return null;
+    }
+    
+    console.log('Fetching job with ID in service:', id);
     const { data, error } = await supabase
       .from('jobs')
       .select('*')

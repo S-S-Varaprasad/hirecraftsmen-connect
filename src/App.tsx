@@ -75,7 +75,6 @@ function App() {
             <Route path="/workers/:workerId" element={<WorkerDetail />} />
             <Route path="/workers/category/:category" element={<WorkersByCategory />} />
             <Route path="/jobs" element={<Jobs />} />
-            {/* Fix: Change jobId param name to match what's used in JobDetail component */}
             <Route path="/jobs/:jobId" element={<JobDetail />} />
             <Route path="/post-job" element={<PostJob />} />
             <Route path="/apply-now/:jobId" element={<ApplyNow />} />
@@ -90,7 +89,7 @@ function App() {
             <Route path="/edit-job/:jobId" element={<EditJob />} />
             <Route path="/worker-job-history" element={<WorkerJobHistory />} />
             <Route path="/contact-worker/:workerId" element={<ContactWorker />} />
-            <Route path="/contact-employer/:employerId" element={<ContactEmployer />} />
+            <Route path="/contact-employer/:jobId" element={<ContactEmployer />} />
             <Route path="/delete-worker/:workerId" element={<DeleteWorker />} />
             <Route path="/deactivate-worker/:workerId" element={<DeactivateWorker />} />
             <Route path="/message-worker/:workerId" element={<MessageWorker />} />
