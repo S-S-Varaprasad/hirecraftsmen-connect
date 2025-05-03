@@ -19,7 +19,7 @@ const FloatingParticles = () => {
   return <Stars radius={50} depth={50} count={500} factor={4} saturation={0} fade speed={1} />;
 };
 
-const WorkerGrid: React.FC<WorkerGridProps> = ({ workers, regionFilter = 'all' }) => {
+const WorkerGrid: React.FC<WorkerGridProps> = ({ workers = [], regionFilter = 'all' }) => {
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
@@ -28,15 +28,37 @@ const WorkerGrid: React.FC<WorkerGridProps> = ({ workers, regionFilter = 'all' }
   useQueryRefresh(['workers'], [['workers']]);
 
   useEffect(() => {
+    // Safely handle workers array
+    if (!Array.isArray(workers)) {
+      console.error("Workers is not an array:", workers);
+      setFilteredWorkers([]);
+      return;
+    }
+
     // Filter workers based on regionFilter
-    if (regionFilter === 'india' || regionFilter === 'all') {
-      setFilteredWorkers(getIndianWorkers(workers));
-    } else {
-      // For future filters
-      setFilteredWorkers(workers);
+    try {
+      if (regionFilter === 'india' || regionFilter === 'all') {
+        const indianWorkers = getIndianWorkers(workers);
+        console.log("Filtered Indian workers:", indianWorkers.length);
+        setFilteredWorkers(indianWorkers);
+      } else {
+        // For future filters
+        setFilteredWorkers(workers);
+      }
+    } catch (error) {
+      console.error("Error filtering workers:", error);
+      setFilteredWorkers([]);
     }
   }, [workers, regionFilter]);
   
+  if (!workers || workers.length === 0) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-gray-600 dark:text-gray-400">No workers available. Add some workers to get started.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="relative">
       {!isMobile && (
@@ -62,7 +84,7 @@ const WorkerGrid: React.FC<WorkerGridProps> = ({ workers, regionFilter = 'all' }
         >
           {filteredWorkers.map((worker, index) => (
             <motion.div
-              key={worker.id}
+              key={worker.id || index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ 
@@ -75,16 +97,16 @@ const WorkerGrid: React.FC<WorkerGridProps> = ({ workers, regionFilter = 'all' }
             >
               <ProfileCard 
                 id={worker.id} 
-                name={worker.name}
-                profession={worker.profession}
-                location={worker.location}
+                name={worker.name || 'Unknown Worker'}
+                profession={worker.profession || 'Professional'}
+                location={worker.location || 'Location not specified'}
                 rating={worker.rating || 4.5}
-                experience={worker.experience}
-                hourlyRate={worker.hourly_rate}
-                skills={worker.skills}
-                isAvailable={worker.is_available}
+                experience={worker.experience || 'Not specified'}
+                hourlyRate={worker.hourly_rate || '₹0'}
+                skills={Array.isArray(worker.skills) ? worker.skills : []}
+                isAvailable={!!worker.is_available}
                 imageUrl={worker.image_url || '/placeholder.svg'}
-                userId={worker.user_id}
+                userId={worker.user_id || ''}
                 className={`three-d-card ${hoverIndex === index ? 'shadow-xl' : ''}`}
               />
             </motion.div>
