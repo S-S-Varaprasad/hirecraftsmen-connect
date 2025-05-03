@@ -10,7 +10,7 @@ const NoWorkersFound: React.FC = () => {
       </div>
       <h3 className="text-xl font-semibold mb-2">No workers found</h3>
       <p className="text-gray-600 dark:text-gray-400">
-        Try adjusting your search filters or criteria
+        Try adding some sample workers or adjusting your search filters
       </p>
     </div>
   );

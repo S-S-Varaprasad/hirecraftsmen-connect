@@ -14,13 +14,15 @@ import ErrorState from '@/components/workers/ErrorState';
 import WorkersHeader from '@/components/workers/WorkersHeader';
 import { applyFilters, WorkerFilters, getIndianWorkers } from '@/utils/workerFilters';
 import { useWorkerProfiles } from '@/hooks/useWorkerProfiles';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 
 const Workers = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const initialSearch = searchParams.get('search') || '';
   const initialLocation = searchParams.get('location') || '';
-  const { addSampleWorkersIfNeeded } = useWorkerProfiles();
+  const { addSampleWorkersIfNeeded, forceSampleWorkers } = useWorkerProfiles();
 
   // Query to fetch all workers
   const { data: workersData = [], isLoading: isLoadingWorkers, error, refetch } = useQuery({
@@ -32,11 +34,12 @@ const Workers = () => {
   
   const [filteredWorkers, setFilteredWorkers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [addingSamples, setAddingSamples] = useState(false);
 
   useEffect(() => {
-    if (workersData) {
-      console.log('Workers data received:', workersData);
-      
+    console.log('Workers data received:', workersData);
+    
+    if (Array.isArray(workersData)) {
       // Check if we have any workers, if not add sample workers
       if (workersData.length === 0) {
         addSampleWorkersIfNeeded().then((added) => {
@@ -48,6 +51,7 @@ const Workers = () => {
       
       // Get only Indian workers
       const indianWorkers = getIndianWorkers(workersData);
+      console.log('Filtered Indian workers:', indianWorkers);
       
       // Apply initial filters from URL if they exist
       if (initialSearch || initialLocation) {
@@ -58,6 +62,7 @@ const Workers = () => {
         };
         
         const results = applyFilters(workersData, filters);
+        console.log('Applied filters, results:', results);
         
         setFilteredWorkers(results);
         if (results.length > 0) {
@@ -69,6 +74,9 @@ const Workers = () => {
       } else {
         setFilteredWorkers(indianWorkers);
       }
+    } else {
+      console.error('Workers data is not an array:', workersData);
+      setFilteredWorkers([]);
     }
   }, [workersData, initialSearch, initialLocation, addSampleWorkersIfNeeded, refetch]);
 
@@ -80,7 +88,15 @@ const Workers = () => {
     
     // Apply filters
     setTimeout(() => {
+      if (!Array.isArray(workersData)) {
+        console.error('Workers data is not an array when filtering:', workersData);
+        setFilteredWorkers([]);
+        setIsLoading(false);
+        return;
+      }
+      
       const results = applyFilters(workersData, allFilters);
+      console.log('Search results:', results);
       
       setFilteredWorkers(results);
       setIsLoading(false);
@@ -93,6 +109,19 @@ const Workers = () => {
   const handleRefresh = () => {
     setIsLoading(true);
     refetch().finally(() => setIsLoading(false));
+  };
+
+  const handleAddSampleWorkers = async () => {
+    setAddingSamples(true);
+    try {
+      await forceSampleWorkers();
+      refetch();
+    } catch (error) {
+      console.error("Error adding sample workers:", error);
+      toast.error("Failed to add sample workers");
+    } finally {
+      setAddingSamples(false);
+    }
   };
 
   return (
@@ -111,15 +140,22 @@ const Workers = () => {
                 initialLocation={initialLocation}
               />
             </div>
-            <button 
-              onClick={handleRefresh}
-              className="mt-4 md:mt-0 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors flex items-center"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              {isLoading ? 'Refreshing...' : 'Refresh Workers'}
-            </button>
+            <div className="mt-4 md:mt-0 flex space-x-2">
+              <Button 
+                onClick={handleAddSampleWorkers}
+                disabled={addingSamples}
+                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+              >
+                {addingSamples ? 'Adding...' : 'Add Sample Workers'}
+              </Button>
+              <Button 
+                onClick={handleRefresh}
+                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors flex items-center"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                {isLoading ? 'Refreshing...' : 'Refresh Workers'}
+              </Button>
+            </div>
           </div>
           
           {isLoading || isLoadingWorkers ? (
@@ -127,26 +163,27 @@ const Workers = () => {
           ) : error ? (
             <div className="text-center py-10">
               <ErrorState message="Error loading workers. Please try refreshing the page." />
-              <button 
+              <Button 
                 onClick={handleRefresh}
                 className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
               >
                 Try Again
-              </button>
+              </Button>
             </div>
           ) : (
             <>
-              {filteredWorkers.length > 0 ? (
+              {Array.isArray(workersData) && workersData.length > 0 ? (
                 <WorkerGrid workers={filteredWorkers} />
               ) : (
                 <div className="text-center py-10">
                   <NoWorkersFound />
-                  <button 
-                    onClick={() => addSampleWorkersIfNeeded().then(() => refetch())}
+                  <Button 
+                    onClick={handleAddSampleWorkers}
+                    disabled={addingSamples}
                     className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
                   >
-                    Add Sample Workers
-                  </button>
+                    {addingSamples ? 'Adding...' : 'Add Sample Workers'}
+                  </Button>
                 </div>
               )}
             </>

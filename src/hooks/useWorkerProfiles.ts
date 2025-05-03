@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   getWorkers, 
@@ -38,7 +39,9 @@ export const useWorkerProfiles = () => {
 
   const addSampleWorkersIfNeeded = async () => {
     try {
-      if (workers.length < 3) {
+      console.log("Checking if sample workers should be added, current count:", workers?.length || 0);
+      if (!Array.isArray(workers) || workers.length < 3) {
+        console.log("Adding sample workers");
         const added = await addSampleWorkers();
         if (added) {
           toast.success('Sample workers added successfully');
@@ -56,6 +59,7 @@ export const useWorkerProfiles = () => {
 
   const forceSampleWorkers = async () => {
     try {
+      console.log("Force adding sample workers");
       const added = await forceAddSampleWorkers();
       if (added) {
         toast.success('Sample workers force-added successfully');

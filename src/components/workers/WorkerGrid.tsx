@@ -28,6 +28,8 @@ const WorkerGrid: React.FC<WorkerGridProps> = ({ workers = [], regionFilter = 'a
   useQueryRefresh(['workers'], [['workers']]);
 
   useEffect(() => {
+    console.log("WorkerGrid received workers:", workers);
+    
     // Safely handle workers array
     if (!Array.isArray(workers)) {
       console.error("Workers is not an array:", workers);
@@ -55,6 +57,17 @@ const WorkerGrid: React.FC<WorkerGridProps> = ({ workers = [], regionFilter = 'a
     return (
       <div className="text-center py-10">
         <p className="text-gray-600 dark:text-gray-400">No workers available. Add some workers to get started.</p>
+      </div>
+    );
+  }
+
+  // If we have workers but none are filtered (likely due to Indian filter)
+  if (workers.length > 0 && filteredWorkers.length === 0) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-gray-600 dark:text-gray-400">
+          No workers match the current filters. Try adjusting your filter criteria.
+        </p>
       </div>
     );
   }
